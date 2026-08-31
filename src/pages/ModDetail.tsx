@@ -86,7 +86,7 @@ export default function ModDetail() {
             ratio="h-full"
             className="h-full"
             eager
-            imgClassName="opacity-25"
+            imgClassName="opacity-15 blur-[2px]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/88 to-ink-950/55" />
         </div>

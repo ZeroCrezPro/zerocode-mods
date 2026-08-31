@@ -170,7 +170,7 @@ export default function Home() {
 
       <Hero />
 
-      <div className="zc-container -mt-8 sm:-mt-10">
+      <div className="zc-container relative z-10 -mt-8 sm:-mt-10">
         <Stats />
       </div>
 

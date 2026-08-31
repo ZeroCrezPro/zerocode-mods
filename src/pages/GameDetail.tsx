@@ -61,7 +61,7 @@ export default function GameDetail() {
             ratio="h-full"
             className="h-full"
             eager
-            imgClassName="opacity-25 blur-[1px]"
+            imgClassName="opacity-15 blur-[2px]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/85 to-ink-950/60" />
         </div>
