@@ -28,7 +28,24 @@ jobs:
       - name: Build
         run: npm run build
 
+      # A deploy csak akkor fut, ha be vannak állítva a Cloudflare secretek.
+      # Enélkül a build és a típusellenőrzés attól még lefut (hasznos CI),
+      # a workflow pedig nem jelez hibát.
+      - name: Cloudflare secretek ellenőrzése
+        id: cf
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$CF_TOKEN" ] && [ -n "$CF_ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Nincs CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secret, a deploy kimarad."
+          fi
+
       - name: Publikálás Cloudflare Pages-re
+        if: steps.cf.outputs.ready == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
