@@ -16,7 +16,6 @@ export function allRoutes(): string[] {
     '/kapcsolat',
     '/jogi-informaciok',
     '/adatvedelem',
-    '/404',
     ...mods.map((m) => `/modok/${m.slug}`),
     ...games.map((g) => `/jatekok/${g.slug}`),
   ]
@@ -47,7 +46,6 @@ export function render(url: string): { html: string; head: string } {
 export function renderSitemap(): string {
   const base = site.url.replace(/\/$/, '')
   const entries = allRoutes()
-    .filter((r) => r !== '/404')
     .map((r) => {
       const priority = r === '/' ? '1.0' : r.startsWith('/modok/') ? '0.9' : '0.7'
       return `  <url>\n    <loc>${base}${r === '/' ? '/' : r}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${priority}</priority>\n  </url>`

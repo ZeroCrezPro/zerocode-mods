@@ -33,8 +33,11 @@ for (const route of routes) {
   const { html, head } = render(route)
   const page = template.replace('<!--app-head-->', head).replace('<!--app-html-->', html)
 
+  // Lapos fájlnév (pl. dist/modok.html), NEM dist/modok/index.html:
+  // így a Cloudflare Pages a /modok címet perjel nélkül szolgálja ki, és nem
+  // irányít át /modok/ alakra - a canonical URL-ek így pontosan egyeznek.
   const outFile =
-    route === '/' ? path.join(distDir, 'index.html') : path.join(distDir, route, 'index.html')
+    route === '/' ? path.join(distDir, 'index.html') : path.join(distDir, `${route}.html`)
 
   await fs.mkdir(path.dirname(outFile), { recursive: true })
   await fs.writeFile(outFile, page, 'utf8')
