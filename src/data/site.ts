@@ -14,7 +14,7 @@ export const site = {
   url: 'https://zerocode-mods.pages.dev',
 
   /** GitHub felhasználónév - ez adja a letöltési linkek alapját is. */
-  githubUser: 'ZeroCrez',
+  githubUser: 'ZeroCrezPro',
   /** A weboldal forráskódjának repója. */
   githubRepo: 'zerocode-mods',
   /**

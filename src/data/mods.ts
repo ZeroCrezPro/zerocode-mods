@@ -209,7 +209,7 @@ export const mods: Mod[] = [
     externalLinks: [
       {
         label: 'Hibabejelentés (GitHub Issues)',
-        url: 'https://github.com/ZeroCrez/zerocode-mods-releases/issues',
+        url: 'https://github.com/ZeroCrezPro/zerocode-mods-releases/issues',
       },
     ],
   },
