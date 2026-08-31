@@ -1,0 +1,152 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink-950: #08080a;
+  --color-ink-900: #0d0d10;
+  --color-ink-850: #121216;
+  --color-ink-800: #17171c;
+  --color-ink-700: #1f1f26;
+  --color-ink-600: #2a2a33;
+  --color-ink-500: #3a3a45;
+
+  --color-ash-400: #8b8b96;
+  --color-ash-300: #a8a8b3;
+  --color-ash-200: #c9c9d1;
+  --color-ash-100: #f2f2f4;
+
+  --color-blood-700: #8e1219;
+  --color-blood-600: #b3161f;
+  --color-blood-500: #d61f27;
+  --color-blood-400: #ec3a41;
+  --color-blood-300: #f4676d;
+
+  --font-sans: 'Segoe UI', Inter, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'SF Mono', monospace;
+
+  --radius-card: 4px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-ink-700);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-ink-950);
+    color: var(--color-ash-100);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-blood-400);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--color-blood-600);
+    color: #fff;
+  }
+
+  /* egyedi görgetősáv */
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-ink-900);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-ink-600);
+    border: 2px solid var(--color-ink-900);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-blood-700);
+  }
+}
+
+@layer components {
+  .zc-container {
+    width: 100%;
+    max-width: 1240px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .zc-container {
+      padding-inline: 1.75rem;
+    }
+  }
+
+  /* finom rácsháttér a hero és a szekciófejek mögé */
+  .zc-grid-bg {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .zc-diag {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(214, 31, 39, 0.12) 0px,
+      rgba(214, 31, 39, 0.12) 1px,
+      transparent 1px,
+      transparent 7px
+    );
+  }
+
+  .zc-clip {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  }
+
+  .zc-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+}

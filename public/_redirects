@@ -1,0 +1,12 @@
+# Angol nyelvű útvonalak a magyar megfelelőre
+/games        /jatekok            301
+/games/*      /jatekok/:splat     301
+/mods         /modok              301
+/mods/*       /modok/:splat       301
+/latest       /legujabb           301
+/about        /nevjegy            301
+
+# Megjegyzés: nincs szükség "/* /index.html 200" SPA-szabályra, mert a build
+# minden útvonalhoz kész HTML fájlt gyárt (lásd scripts/prerender.mjs).
+# Az ismeretlen címeket a Cloudflare Pages a 404.html fájllal szolgálja ki,
+# így a keresők is valódi 404-es státuszt kapnak.

@@ -1,0 +1,44 @@
+# függőségek
+node_modules/
+.pnp/
+.pnp.js
+
+# build kimenet
+dist/
+dist-ssr/
+.vite/
+*.local
+
+# környezeti változók / titkos kulcsok
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# Cloudflare / Wrangler
+.wrangler/
+wrangler.toml.local
+
+# szerkesztő
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# naplók
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# nagy modfájlok - ezek GitHub Releases-be valók, NEM a repóba
+*.zip
+*.7z
+*.rar
+*.exe
+*.msi
+*.iso
