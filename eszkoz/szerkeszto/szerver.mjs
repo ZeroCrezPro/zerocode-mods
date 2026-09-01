@@ -398,7 +398,10 @@ const szerver = http.createServer(async (req, res) => {
 
   // Csak a saját gépről, csak a saját kulccsal.
   const kulcs = url.searchParams.get('k') ?? req.headers['x-zc-kulcs']
-  const nyilvanos = ut === '/' || ut.startsWith('/ui/') || ut === '/favicon.svg'
+  // A képeket az <img> elemek kulcs nélkül kérik le, ezért ezek nyilvánosak.
+  // (A kiszolgáló csak a 127.0.0.1 címen hallgat, tehát nem hagyja el a gépet.)
+  const nyilvanos =
+    ut === '/' || ut.startsWith('/ui/') || ut.startsWith('/images/') || ut === '/favicon.svg'
   if (!nyilvanos && kulcs !== KULCS) {
     return valasz(res, 403, MIME['.txt'], 'Érvénytelen kulcs')
   }

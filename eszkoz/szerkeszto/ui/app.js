@@ -110,6 +110,38 @@ function slugbol(szoveg) {
 
 const maiDatum = () => new Date().toISOString().slice(0, 10)
 
+/** Fájlméret olvasható alakban. */
+function meretSzoveg(bajt) {
+  if (!bajt && bajt !== 0) return ''
+  if (bajt < 1024) return bajt + ' B'
+  if (bajt < 1024 * 1024) return Math.round(bajt / 1024) + ' kB'
+  return (bajt / (1024 * 1024)).toFixed(1) + ' MB'
+}
+
+/** E fölött a méret fölött már érdemes kisebbre menteni a képet. */
+const NAGY_KEP = 600 * 1024
+
+/** Egy kép csempéje a Képek lapon és a képválasztóban. */
+function kepCsempe(k, kattintasra) {
+  const nagy = k.meret > NAGY_KEP
+  const felirat = el('small', {}, [
+    el('span', { class: 'kepnev', text: k.nev }),
+    el('span', {
+      class: nagy ? 'kepmeret nagy' : 'kepmeret',
+      title: nagy
+        ? 'Ez a kép nagy: lassítja az oldal betöltését. Érdemes 300 kB alá menteni (WEBP vagy JPG).'
+        : '',
+      text: meretSzoveg(k.meret),
+    }),
+  ])
+
+  const tartalom = [el('img', { src: k.utvonal, alt: '', loading: 'lazy' }), felirat]
+
+  return kattintasra
+    ? el('button', { type: 'button', class: 'kepgomb', onClick: () => kattintasra(k) }, tartalom)
+    : el('div', { class: 'kepgomb' }, tartalom)
+}
+
 /* ================================================================== */
 /* Mezőleírások                                                        */
 /* ================================================================== */
@@ -1340,14 +1372,7 @@ function lapKepek() {
       )
     }
 
-    for (const k of sajat) {
-      racs.append(
-        el('div', { class: 'kepgomb' }, [
-          el('img', { src: k.utvonal, alt: k.nev, loading: 'lazy' }),
-          el('small', { text: k.nev }),
-        ]),
-      )
-    }
+    for (const k of sajat) racs.append(kepCsempe(k))
 
     lap.append(
       el('section', { class: 'panel' }, [
@@ -1638,18 +1663,10 @@ async function kepValaszto(mappa, kivalasztva) {
     }
     for (const k of sajat) {
       racs.append(
-        el(
-          'button',
-          {
-            type: 'button',
-            class: 'kepgomb',
-            onClick: () => {
-              kivalasztva(k.utvonal)
-              ablak.hidden = true
-            },
-          },
-          [el('img', { src: k.utvonal, alt: '', loading: 'lazy' }), el('small', { text: k.nev })],
-        ),
+        kepCsempe(k, (kep) => {
+          kivalasztva(kep.utvonal)
+          ablak.hidden = true
+        }),
       )
     }
   }

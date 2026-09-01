@@ -844,13 +844,31 @@ textarea.hibas {
 }
 
 .kepgomb small {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
   padding: 6px 7px;
   font-size: 10px;
   color: var(--ash-400);
+}
+
+.kepnev {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.kepmeret {
+  flex-shrink: 0;
+  font-family: var(--mono);
+}
+
+/* A túl nagy képek lassítják az oldalt - ezt jelezzük. */
+.kepmeret.nagy {
+  color: var(--sarga);
+  font-weight: 700;
 }
 
 .kep-elonezet {
