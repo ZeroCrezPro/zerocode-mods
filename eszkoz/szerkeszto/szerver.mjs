@@ -200,18 +200,25 @@ function naploz(tipus, szoveg) {
   }
 }
 
-function parancs(program, argumentumok, cimke) {
+/**
+ * Windowson a .cmd/.bat fájlok (npm, npx) csak shellen keresztül indíthatók.
+ * Minden más programot (git) shell nélkül indítunk, különben a szóközt
+ * tartalmazó argumentumok - például a mentési üzenet - szétesnének.
+ */
+const shellKell = (program) => /\.(cmd|bat)$/i.test(program)
+
+function parancs(program, argumentumok, cimke, { halkan = false } = {}) {
   return new Promise((kesz, hiba) => {
-    naploz('lepes', cimke)
+    if (!halkan) naploz('lepes', cimke)
     const gyerek = spawn(program, argumentumok, {
       cwd: projekt,
-      shell: process.platform === 'win32',
+      shell: shellKell(program),
       windowsHide: true,
       env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' },
     })
     const sor = (adat) => {
       for (const s of adat.toString('utf8').split(/\r?\n/)) {
-        if (s.trim()) naploz('sor', s)
+        if (s.trim() && !halkan) naploz('sor', s)
       }
     }
     gyerek.stdout.on('data', sor)
@@ -224,7 +231,17 @@ function parancs(program, argumentumok, cimke) {
   })
 }
 
-/** Parancs, aminek a hibája nem állítja meg a folyamatot (pl. üres commit). */
+/** Igaz, ha a parancs 0-val tért vissza. Semmit nem ír a naplóba. */
+async function parancsSikeres(program, argumentumok) {
+  try {
+    await parancs(program, argumentumok, '', { halkan: true })
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** Parancs, aminek a hibája nem állítja meg a folyamatot (pl. nincs mit feltölteni). */
 async function parancsEngedekeny(program, argumentumok, cimke) {
   try {
     await parancs(program, argumentumok, cimke)
@@ -250,15 +267,30 @@ async function muveletFuttat(nev, uzenet) {
     } else if (nev === 'frissites') {
       await parancs(npm, ['run', 'build'], '1/4 - Weboldal építése')
 
-      await parancsEngedekeny('git', ['add', '-A'], '2/4 - Változások összegyűjtése')
-      const voltValtozas = await parancsEngedekeny(
-        'git',
-        ['-c', 'core.autocrlf=false', 'commit', '-m', uzenet || 'Tartalom frissítése a szerkesztőből'],
-        '2/4 - Mentés a verziókövetőbe',
-      )
-      if (!voltValtozas) {
-        naploz('sor', 'Nem volt új változás a verziókövetőben - a publikálás ettől még lefut.')
+      naploz('lepes', '2/4 - Változások mentése')
+      await parancs('git', ['add', '-A'], 'Változások összegyűjtése', { halkan: true })
+
+      // A "git diff --cached --quiet" 0-val tér vissza, ha nincs mit menteni.
+      const vanMitMenteni = !(await parancsSikeres('git', ['diff', '--cached', '--quiet']))
+
+      if (vanMitMenteni) {
+        await parancs(
+          'git',
+          [
+            '-c',
+            'core.autocrlf=false',
+            'commit',
+            '-m',
+            (uzenet || '').trim() || 'Tartalom frissítése a szerkesztőből',
+          ],
+          'Mentés a verziókövetőbe',
+          { halkan: true },
+        )
+        naploz('sor', 'A változások elmentve.')
+      } else {
+        naploz('sor', 'Nincs új változás - a publikálás ettől még lefut.')
       }
+
       await parancsEngedekeny('git', ['push', 'origin', 'main'], '3/4 - Feltöltés GitHubra')
 
       await parancs(
