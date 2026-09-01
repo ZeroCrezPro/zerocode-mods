@@ -197,7 +197,7 @@ export default function ModDetail() {
       {/* ---------- Diavetítő a letöltés gomb és a leírás között ---------- */}
       {mod.slideshow && mod.slideshow.length > 0 && (
         <div className="zc-container pt-8 sm:pt-10">
-          <Diavetites kepek={mod.slideshow} />
+          <Diavetites kepek={mod.slideshow} nev={mod.name} />
         </div>
       )}
 

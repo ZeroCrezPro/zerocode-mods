@@ -275,6 +275,9 @@ Kézzel, fájlból:
 A mod adatlapján a letöltés gomb és a leírás között megjelenik egy diavetítő: egy nagy
 kép, két oldalán nyíllal, alatta ponttal minden képhez. Ez a mod gyors bemutatására való.
 
+Csak a képet kell megadni – se cím, se felirat. A képleírás (amit a képernyőolvasó
+felolvas és a kereső lát) magától elkészül a mod nevéből.
+
 A képeket a szerkesztőben a **Képek** panelben, a borító / banner / ikon alatt, a
 **Lapozható képek** résznél lehet megadni – a lentebbi Képernyőképek galériától
 függetlenül. Így külön válogathatod, mi kerüljön rögtön a látogató szeme elé, és mi

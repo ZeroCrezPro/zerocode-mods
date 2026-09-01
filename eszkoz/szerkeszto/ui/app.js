@@ -430,22 +430,10 @@ const MOD_SZAKASZOK = [
       {
         k: 'slideshow',
         cim: 'Lapozható képek (diavetítő a letöltés gomb alatt)',
-        tipus: 'blokkok',
+        tipus: 'kepLista',
+        mappa: 'screenshots',
         teljes: true,
-        cimke: 'Kép',
-        cimMezo: 'caption',
-        sugo: 'Ezek a képek a mod adatlapján, a letöltés gomb és a leírás között jelennek meg, két oldalt nyilakkal lapozva. Egynél több képnél jelennek meg a nyilak.',
-        mezok: [
-          { k: 'src', cim: 'Kép', tipus: 'kep', mappa: 'screenshots', teljes: true },
-          {
-            k: 'alt',
-            cim: 'Képleírás (ALT)',
-            tipus: 'szoveg',
-            teljes: true,
-            sugo: 'Kötelező: ezt olvassa fel a képernyőolvasó, és ezt látja a kereső.',
-          },
-          { k: 'caption', cim: 'Felirat a kép alatt', tipus: 'szoveg', teljes: true },
-        ],
+        sugo: 'Ezek a képek a mod adatlapján, a letöltés gomb és a leírás között jelennek meg, két oldalt nyilakkal lapozva. Egynél több képnél jelennek meg a nyilak. Csak a képet kell megadni - a képleírás magától elkészül a mod nevéből.',
       },
     ],
   },
@@ -985,6 +973,100 @@ function mezoRajz(objektum, mezo) {
             onClick: (e) => githubMeret(objektum, e.target),
           }),
         ]),
+      )
+
+      return mezoBurok(mezo, doboz)
+    }
+
+    case 'kepLista': {
+      // Egyszerű képsor: csak képek, felirat és képleírás nélkül.
+      if (!Array.isArray(objektum[mezo.k])) objektum[mezo.k] = []
+      const tomb = objektum[mezo.k]
+      const doboz = el('div', {})
+
+      if (tomb.length === 0) {
+        doboz.append(
+          el('p', { class: 'sugo', style: 'margin:0 0 10px', text: 'Még nincs kép hozzáadva.' }),
+        )
+      }
+
+      const sor = el('div', { class: 'keplista' })
+      tomb.forEach((ut, i) => {
+        const mozgat = (irany) => {
+          const cel = i + irany
+          if (cel < 0 || cel >= tomb.length) return
+          ;[tomb[i], tomb[cel]] = [tomb[cel], tomb[i]]
+          jelolValtozas()
+          ujraRajzol()
+        }
+
+        const kep = el('img', { src: ut, alt: '' })
+        kep.addEventListener('error', () => {
+          kep.replaceWith(el('span', { class: 'keplista-hianyzik', text: 'nincs meg' }))
+        })
+
+        sor.append(
+          el('div', { class: 'keplista-elem' }, [
+            el('span', { class: 'keplista-sorszam', text: String(i + 1) }),
+            kep,
+            el('span', { class: 'keplista-nev', title: ut, text: ut.split('/').pop() }),
+            el('div', { class: 'keplista-gombok' }, [
+              el('button', {
+                type: 'button',
+                class: 'gomb gomb-halvany gomb-apro',
+                text: '↑',
+                'aria-label': 'Előrébb',
+                disabled: i === 0,
+                onClick: () => mozgat(-1),
+              }),
+              el('button', {
+                type: 'button',
+                class: 'gomb gomb-halvany gomb-apro',
+                text: '↓',
+                'aria-label': 'Hátrébb',
+                disabled: i === tomb.length - 1,
+                onClick: () => mozgat(1),
+              }),
+              el('button', {
+                type: 'button',
+                class: 'gomb gomb-masodlagos gomb-apro',
+                text: 'Csere',
+                onClick: () =>
+                  kepValaszto(mezo.mappa ?? 'screenshots', (uj) => {
+                    tomb[i] = uj
+                    jelolValtozas()
+                    ujraRajzol()
+                  }),
+              }),
+              el('button', {
+                type: 'button',
+                class: 'gomb gomb-veszely gomb-apro',
+                text: 'Törlés',
+                onClick: () => {
+                  tomb.splice(i, 1)
+                  jelolValtozas()
+                  ujraRajzol()
+                },
+              }),
+            ]),
+          ]),
+        )
+      })
+      doboz.append(sor)
+
+      doboz.append(
+        el('button', {
+          type: 'button',
+          class: 'gomb gomb-elsodleges gomb-apro',
+          style: 'margin-top:10px',
+          text: '+ Kép hozzáadása',
+          onClick: () =>
+            kepValaszto(mezo.mappa ?? 'screenshots', (uj) => {
+              tomb.push(uj)
+              jelolValtozas()
+              ujraRajzol()
+            }),
+        }),
       )
 
       return mezoBurok(mezo, doboz)

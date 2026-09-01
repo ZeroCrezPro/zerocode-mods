@@ -115,8 +115,8 @@ export interface Mod {
   requirements: Requirement[]
   installationSteps: InstallStep[]
   compatibility: Compatibility[]
-  /** Diavetítő a letöltés gomb alatt - a mod gyors bemutatása */
-  slideshow?: Screenshot[]
+  /** Diavetítő a letöltés gomb alatt: csak képútvonalak, a felirat magától készül */
+  slideshow?: string[]
   screenshots: Screenshot[]
   /** Verziók - a legfrissebb kerüljön elsőnek */
   versions: ModVersion[]
