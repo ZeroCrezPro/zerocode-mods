@@ -42,3 +42,11 @@ export const changeClass: Record<ChangeKind, string> = {
   modositva: 'border-amber-500/40 bg-amber-500/10 text-amber-300',
   eltavolitva: 'border-blood-500/40 bg-blood-500/10 text-blood-300',
 }
+
+/** Csak a szövegszín - keret és háttér nélküli megjelenítéshez. */
+export const statusTextClass: Record<ModStatus, string> = {
+  aktiv: 'text-emerald-300',
+  beta: 'text-amber-300',
+  fejlesztes: 'text-sky-300',
+  archivalt: 'text-ash-400',
+}

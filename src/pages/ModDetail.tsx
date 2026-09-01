@@ -2,7 +2,14 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getGameById, getModBySlug, latestVersion, olderVersions, site } from '@/data'
 import { formatDate, vLabel } from '@/lib/format'
-import { changeClass, changeLabel, compatClass, compatLabel, statusClass, statusLabel } from '@/lib/labels'
+import {
+  changeClass,
+  changeLabel,
+  compatClass,
+  compatLabel,
+  statusLabel,
+  statusTextClass,
+} from '@/lib/labels'
 import { downloadUrl } from '@/lib/download'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -31,6 +38,9 @@ export default function ModDetail() {
   const latest = latestVersion(mod)
   const older = olderVersions(mod)
   const path = `/modok/${mod.slug}`
+
+  // Ha a mod ugyanazt a nevet kapta, mint a játék, ne ismételjük meg.
+  const kulonJatekNev = game && game.name !== mod.name ? game : null
 
   return (
     <>
@@ -96,7 +106,9 @@ export default function ModDetail() {
             items={[
               { label: 'Főoldal', to: '/' },
               { label: 'Modok', to: '/modok' },
-              ...(game ? [{ label: game.name, to: `/jatekok/${game.slug}` }] : []),
+              ...(kulonJatekNev
+                ? [{ label: kulonJatekNev.name, to: `/jatekok/${kulonJatekNev.slug}` }]
+                : []),
               { label: mod.name },
             ]}
           />
@@ -112,12 +124,12 @@ export default function ModDetail() {
             />
 
             <div className="min-w-0 flex-1">
-              {game && (
+              {kulonJatekNev && (
                 <Link
-                  to={`/jatekok/${game.slug}`}
+                  to={`/jatekok/${kulonJatekNev.slug}`}
                   className="zc-label text-blood-400 transition-colors hover:text-blood-300"
                 >
-                  {game.name}
+                  {kulonJatekNev.name}
                 </Link>
               )}
               <h1 className="mt-2 text-3xl leading-none font-black tracking-tighter uppercase sm:text-5xl">
@@ -128,13 +140,6 @@ export default function ModDetail() {
               </p>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                <Badge className={statusClass[mod.status]}>{statusLabel[mod.status]}</Badge>
-                <Badge>{mod.platform}</Badge>
-                {latest && (
-                  <Badge className="border-ink-500 bg-ink-800 font-mono text-ash-200">
-                    {vLabel(latest.version)}
-                  </Badge>
-                )}
                 {mod.tags.map((t) => (
                   <Link key={t} to={`/modok?tag=${encodeURIComponent(t)}`}>
                     <Badge className="border-ink-600 bg-ink-800 text-ash-300 transition-colors hover:border-blood-600 hover:text-ash-100">
@@ -146,6 +151,12 @@ export default function ModDetail() {
 
               <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-4 sm:flex sm:flex-wrap">
                 <div>
+                  <dt className="zc-label text-ash-400">Állapot</dt>
+                  <dd className={`mt-1 text-sm font-semibold ${statusTextClass[mod.status]}`}>
+                    {statusLabel[mod.status]}
+                  </dd>
+                </div>
+                <div>
                   <dt className="zc-label text-ash-400">Aktuális verzió</dt>
                   <dd className="mt-1 font-mono text-lg font-black text-ash-100">
                     {latest ? vLabel(latest.version) : '-'}
@@ -156,6 +167,10 @@ export default function ModDetail() {
                   <dd className="mt-1 text-sm text-ash-200">
                     {latest ? formatDate(latest.releaseDate) : '-'}
                   </dd>
+                </div>
+                <div>
+                  <dt className="zc-label text-ash-400">Platform</dt>
+                  <dd className="mt-1 text-sm text-ash-200">{mod.platform}</dd>
                 </div>
                 <div>
                   <dt className="zc-label text-ash-400">Készítő</dt>
@@ -415,6 +430,7 @@ export default function ModDetail() {
             </ul>
           </nav>
 
+          {/* Ez marad akkor is, ha a nevek egyeznek: innen lehet a játék oldalára jutni. */}
           {game && (
             <div className="border border-ink-700 bg-ink-900 p-4">
               <p className="zc-label text-ash-400">Játék</p>
