@@ -55,7 +55,7 @@ weboldal projektmappáját. A parancsikon viszont bárhonnan indíthatja.
 | **Modok** | Minden mod minden mezője: leírás, funkciók, telepítési lépések, követelmények, kompatibilitás, képek, verziók, változási napló, GYIK |
 | **Játékok** | Játékok felvétele és szerkesztése |
 | **Beállítások** | Oldal neve, mottó, éles cím, GitHub felhasználó és repók |
-| **Képek** | Képek feltöltése a `public/images` alá, azonnal használhatók |
+| **Képek** | Képek feltöltése a `public/images` alá, azonnal használhatók; a méret is látszik (600 kB fölött sárgával, mert lassítja az oldalt) |
 | **Előnézet** | A kész oldal megtekintése a programon belül, asztali / tablet / mobil méretben |
 
 ### A két fontos gomb

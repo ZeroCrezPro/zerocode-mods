@@ -110,6 +110,34 @@ function slugbol(szoveg) {
 
 const maiDatum = () => new Date().toISOString().slice(0, 10)
 
+/**
+ * Az éppen kirajzolt beviteli mezők objektumonként, hogy az egyik mező
+ * frissíthesse a másikat teljes újrarajzolás nélkül (különben elveszne a
+ * fókusz, amikor a felhasználó továbblép a következő mezőre).
+ */
+const mezoElemek = new WeakMap()
+
+function mezoElemRogzit(objektum, kulcs, elem) {
+  let terkep = mezoElemek.get(objektum)
+  if (!terkep) {
+    terkep = {}
+    mezoElemek.set(objektum, terkep)
+  }
+  terkep[kulcs] = elem
+}
+
+/** Ezeket az azonosítókat adja az "+ Új ..." gomb - még nem a felhasználó választotta. */
+const ALAP_SLUGOK = ['uj-mod', 'uj-jatek', '']
+
+/**
+ * Igaz, ha az URL azonosító még "követi" a nevet, tehát nyugodtan
+ * frissíthetjük. Ha a felhasználó kézzel átírta, hozzá sem nyúlunk.
+ */
+function slugKovetheto(objektum, slugKulcs, regiNev) {
+  const slug = objektum[slugKulcs] ?? ''
+  return ALAP_SLUGOK.includes(slug) || slug === slugbol(regiNev ?? '')
+}
+
 /** Fájlméret olvasható alakban. */
 function meretSzoveg(bajt) {
   if (!bajt && bajt !== 0) return ''
@@ -246,7 +274,7 @@ const MOD_SZAKASZOK = [
   {
     cim: 'Alapadatok',
     mezok: [
-      { k: 'name', cim: 'Mod neve', tipus: 'szoveg' },
+      { k: 'name', cim: 'Mod neve', tipus: 'szoveg', slugFrissit: 'slug' },
       {
         k: 'slug',
         cim: 'URL azonosító',
@@ -467,7 +495,7 @@ const JATEK_SZAKASZOK = [
   {
     cim: 'Alapadatok',
     mezok: [
-      { k: 'name', cim: 'Rövid név', tipus: 'szoveg' },
+      { k: 'name', cim: 'Rövid név', tipus: 'szoveg', slugFrissit: 'slug' },
       { k: 'fullName', cim: 'Teljes cím', tipus: 'szoveg' },
       {
         k: 'slug',
@@ -603,6 +631,8 @@ function mezoRajz(objektum, mezo) {
   if (mezo.mutat && !mezo.mutat(objektum)) return null
 
   const ertek = objektum[mezo.k]
+  // A szerkesztés megkezdése előtti érték - ebből tudjuk, követte-e a slug a nevet.
+  const kiindulasiErtek = ertek
 
   switch (mezo.tipus) {
     case 'szoveg':
@@ -622,7 +652,22 @@ function mezoRajz(objektum, mezo) {
           }
           jelolValtozas()
         },
+        // A név elhagyásakor az URL azonosító magától követi a nevet,
+        // amíg a felhasználó kézzel át nem írta.
+        onChange: mezo.slugFrissit
+          ? (e) => {
+              if (!slugKovetheto(objektum, mezo.slugFrissit, kiindulasiErtek)) return
+              const uj = slugbol(e.target.value)
+              if (uj && uj !== objektum[mezo.slugFrissit]) {
+                objektum[mezo.slugFrissit] = uj
+                const slugMezo = mezoElemek.get(objektum)?.[mezo.slugFrissit]
+                if (slugMezo) slugMezo.value = uj
+                jelolValtozas()
+              }
+            }
+          : null,
       })
+      mezoElemRogzit(objektum, mezo.k, be)
 
       // A slug mezők mellé egy gomb, ami a névből képzi az azonosítót.
       if (mezo.slugForras) {
