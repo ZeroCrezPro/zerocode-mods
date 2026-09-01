@@ -18,7 +18,7 @@
       "VERZIÓ: 1.8.1"
     ],
     "cover": "/images/mods/i1.png",
-    "banner": "/images/mods/acbf.png",
+    "banner": "/images/mods/i1.png",
     "icon": "/images/mods/i2.png",
     "tags": [
       "Mod"
@@ -79,6 +79,7 @@
     ],
     "faq": [],
     "externalLinks": [],
-    "game": "Max Payne 2 The Fall of Max Payne"
+    "game": "Max Payne 2 The Fall of Max Payne",
+    "slideshow": []
   }
 ]
