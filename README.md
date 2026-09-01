@@ -35,7 +35,17 @@ A weboldal tartalma **programból is szerkeszthető**, kód nélkül. A projekt 
 lévő `ZeroCode Szerkeszto.exe` egy asztali alkalmazás, amely ugyanazt a sötét-piros
 ZeroCode felületet használja, mint maga az oldal.
 
-**Indítás:** kattints duplán a `ZeroCode Szerkeszto.exe` fájlra.
+**Indítás:** az asztalon lévő **ZeroCode Szerkesztő** parancsikonnal, vagy dupla
+kattintással a `ZeroCode Szerkeszto.exe` fájlon.
+
+Ha a parancsikon hiányzik az asztalról:
+
+```bash
+npm run szerkeszto:parancsikon
+```
+
+Magát az EXE-t ne másold az asztalra: a program a saját helyéből találja meg a
+weboldal projektmappáját. A parancsikon viszont bárhonnan indíthatja.
 
 ### Mit tud?
 

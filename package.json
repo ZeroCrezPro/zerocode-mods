@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "placeholders": "node scripts/make-placeholders.mjs",
     "szerkeszto": "node eszkoz/szerkeszto/szerver.mjs",
-    "szerkeszto:exe": "node eszkoz/szerkeszto/keszit.mjs"
+    "szerkeszto:exe": "node eszkoz/szerkeszto/keszit.mjs",
+    "szerkeszto:parancsikon": "node eszkoz/szerkeszto/parancsikon.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.38.0",

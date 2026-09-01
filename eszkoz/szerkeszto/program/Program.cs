@@ -43,12 +43,7 @@ internal sealed class FoAblak : Form
         Size = new Size(1440, 900);
         StartPosition = FormStartPosition.CenterScreen;
         BackColor = Color.FromArgb(8, 8, 10);
-        try
-        {
-            var ikon = Path.Combine(AppContext.BaseDirectory, "ikon.ico");
-            if (File.Exists(ikon)) Icon = new Icon(ikon);
-        }
-        catch { /* ikon nélkül is elindul */ }
+        Icon = IkonBetoltes();
 
         _allapot.Dock = DockStyle.Fill;
         _allapot.TextAlign = ContentAlignment.MiddleCenter;
@@ -65,6 +60,37 @@ internal sealed class FoAblak : Form
 
         Load += async (_, _) => await IndulasAsync();
         FormClosing += (_, e) => Leallitas(e);
+    }
+
+    /// <summary>
+    /// A programikon betöltése.
+    ///
+    /// Egyfájlos kiadásnál nincs ikon.ico a program mellett, ezért magából az
+    /// EXE-be fordított ikont olvassuk ki - így a címsorban, a tálcán és az
+    /// Alt+Tab listában is a ZeroCode jel látszik.
+    /// </summary>
+    private static Icon? IkonBetoltes()
+    {
+        try
+        {
+            var sajatUt = Environment.ProcessPath;
+            if (sajatUt is not null && File.Exists(sajatUt))
+            {
+                var beagyazott = Icon.ExtractAssociatedIcon(sajatUt);
+                if (beagyazott is not null) return beagyazott;
+            }
+        }
+        catch { /* megyünk tovább a tartalék útvonalra */ }
+
+        try
+        {
+            // Fejlesztés közben (nem egyfájlos build) a fájl ott van a program mellett.
+            var mellette = Path.Combine(AppContext.BaseDirectory, "ikon.ico");
+            if (File.Exists(mellette)) return new Icon(mellette);
+        }
+        catch { /* ikon nélkül is elindul */ }
+
+        return null;
     }
 
     /// <summary>
