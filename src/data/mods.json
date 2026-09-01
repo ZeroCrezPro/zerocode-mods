@@ -1,1 +1,84 @@
-[]
+[
+  {
+    "id": "mod-mtj0wvxm",
+    "slug": "max-payne-2-the-fall-of-max-payne",
+    "name": "Max Payne 2 The Fall of Max Payne",
+    "gameId": "jatek-mtiz6lia",
+    "author": "ZeroCode",
+    "platform": "Windows PC",
+    "status": "fejlesztes",
+    "featured": false,
+    "createdAt": "2026-09-01",
+    "shortDescription": "Játék közbeni mod panel a Max Payne 2: The Fall of Max Payne játékhoz. Egyetlen gombnyomásra (ALT+E) előhívható panelről kapcsolgathatod a csalásokat: végtelen lőszer, végtelen élet, nincs újratöltés, egyből ölés és végtelen bullet time. Nem kell Cheat Engine, sem külön trainer-ablak – a mod a játékkal együtt indul, és megjegyzi, mi volt bekapcsolva.\n",
+    "description": [
+      "MP2 Mod Panel – játék közbeni csaláspanel a Max Payne 2: The Fall of Max Payne játékhoz.",
+      "MI EZ?\nEgy játékon belüli, felugró panel, amiről menet közben, egérrel kapcsolhatod a különböző csalásokat. Nem kell hozzá Cheat Engine, nincs külön trainer-ablak, amit csatolgatni kellene – a mod a játékkal együtt indul, és a panel egyetlen gombnyomásra előjön.",
+      "FUNKCIÓK:\n- Végtelen lőszer – nem fogy a tár, nem kell újratölteni a készletből\n- Végtelen élet – nem veszítesz életet\n- Nincs újratöltés – a fegyver nem tölt újra, folyamatosan tüzelhetsz\n- Egyből ölés – az ellenfelek egyetlen találattól elesnek\n- Végtelen bullet time – a lassítás nem fogy el\n- Maximális lőszer – egy gombnyomásra azonnal teletölti a lőszered\n- Sarok súgó – a képernyő sarkában megjelenő emlékeztető ki-/bekapcsolása",
+      "VEZÉRLÉS:\n- ALT + E – a panel megnyitása és bezárása (bal és jobb ALT is jó)\n- A panel a képernyő jobb oldalán jelenik meg\n- Egy funkció be-/kikapcsolása: kattints a sorára (KI / BE)\n- A „Maximális lőszer” a MOST gombbal azonnal lefut\n- Alapból minden KI van kapcsolva",
+      "JELLEMZŐK:\n- A mod megjegyzi, mi volt bekapcsolva – újraindítás után és másik mentés betöltésekor is\n- Nem külön program: a játékkal együtt indul, nincs külön ablak\n- A ZeroCode felirat jelzi a panel fejlécében, hogy a mod fut\n- Tesztelve a Steam-es kiadáson (maxpayne2.exe 1.0.98.0)",
+      "VERZIÓ: 1.8.1"
+    ],
+    "cover": "/images/mods/i1.png",
+    "banner": "",
+    "icon": "",
+    "tags": [
+      "Mod"
+    ],
+    "features": [
+      "Végtelen lőszer",
+      "Végtelen élet",
+      "Nincs újratöltés",
+      "Egyből ölés",
+      "Végtelen bullet time",
+      "Maximális lőszer (egy gombra teletölti a lőszered)",
+      "Sarok súgó (a sarokban lévő emlékeztető ki/be)"
+    ],
+    "requirements": [
+      {
+        "label": "Legyen meg az alapjáték",
+        "value": "Játék"
+      }
+    ],
+    "installationSteps": [
+      {
+        "title": "A mod telepítése",
+        "detail": "Töltsd le és indítsd el az MP2Mod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot: ZeroCode (a kis- és nagybetű számít), ekkor megjelenik a TELEPÍTÉS gomb. A telepítő magától megkeresi a Max Payne 2 mappáját – ha nem találná, a Tallózás gombbal add meg kézzel. Kattints a TELEPÍTÉS gombra: a mod a scripts mappába kerül, a meglévő fájlokat nem írja felül (később a TÖRLÉS gombbal eltávolítható). Végül indítsd a játékot a Steamről, és játék közben nyomd meg az ALT + E-t a panel előhívásához.\n"
+      }
+    ],
+    "compatibility": [],
+    "screenshots": [],
+    "versions": [
+      {
+        "version": "1.0.0",
+        "releaseDate": "2026-09-01",
+        "size": "1.4 MB",
+        "platform": "Windows",
+        "type": "ZIP",
+        "author": "ZeroCode",
+        "changes": [
+          "Első kiadás"
+        ],
+        "download": {
+          "kind": "github-latest",
+          "file": "MP2Mod.exe"
+        }
+      }
+    ],
+    "changelog": [
+      {
+        "version": "1.0.0",
+        "date": "2026-09-01",
+        "groups": [
+          {
+            "kind": "uj",
+            "items": [
+              "Első kiadás"
+            ]
+          }
+        ]
+      }
+    ],
+    "faq": [],
+    "externalLinks": []
+  }
+]
