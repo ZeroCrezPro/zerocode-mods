@@ -308,6 +308,13 @@ const LETOLTES_MEZOK = [
 ]
 
 const VERZIO_MEZOK = [
+  {
+    k: '_fajlbol',
+    cim: 'Adatok a mod fájljából',
+    tipus: 'fajlbol',
+    teljes: true,
+    sugo: 'Válaszd ki a mod telepítőjét vagy ZIP fájlját a gépeden - a program kitölti belőle a fájlnevet és a fájlméretet. A fájl NEM töltődik fel sehová, csak az adatait olvassa ki.',
+  },
   { k: 'version', cim: 'Verziószám', tipus: 'szoveg', mono: true, hely: '1.3.0', kell: true },
   { k: 'releaseDate', cim: 'Kiadás dátuma', tipus: 'datum', kell: true },
   { k: 'size', cim: 'Fájlméret', tipus: 'szoveg', hely: '18.4 MB', ajanlott: true },
@@ -892,6 +899,50 @@ function mezoRajz(objektum, mezo) {
       return mezoBurok(mezo, sorok, hiany)
     }
 
+    case 'fajlbol': {
+      // A mod telepítőjéből/ZIP-jéből olvassuk ki a fájlnevet és a méretet.
+      // A fájl a gépen marad, csak a böngésző olvassa ki az adatait.
+      const be = el('input', {
+        type: 'file',
+        accept: '.zip,.7z,.rar,.exe,.msi',
+        style: 'display:none',
+        onChange: (e) => {
+          const fajl = e.target.files?.[0]
+          e.target.value = ''
+          if (!fajl) return
+
+          objektum.size = meretSzoveg(fajl.size)
+          if (typeof objektum.download !== 'object' || objektum.download === null) {
+            objektum.download = { kind: 'github-latest', file: '' }
+          }
+          if (objektum.download.kind !== 'url') objektum.download.file = fajl.name
+
+          jelolValtozas()
+          ujraRajzol()
+          pirit(`Kitöltve a fájlból: ${fajl.name} - ${objektum.size}`, 'jo')
+        },
+      })
+
+      const gombok = el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;align-items:center' }, [
+        be,
+        el('button', {
+          type: 'button',
+          class: 'gomb gomb-masodlagos gomb-apro',
+          text: 'Mod fájljának kiválasztása',
+          onClick: () => be.click(),
+        }),
+        el('button', {
+          type: 'button',
+          class: 'gomb gomb-halvany gomb-apro',
+          text: 'Méret lekérdezése a GitHubról',
+          title: 'Ha a kiadás már fent van a GitHubon, onnan is beolvasható a méret.',
+          onClick: (e) => githubMeret(objektum, e.target),
+        }),
+      ])
+
+      return mezoBurok(mezo, gombok)
+    }
+
     case 'kep': {
       const be = el('input', {
         type: 'text',
@@ -1059,6 +1110,8 @@ function mezoRajz(objektum, mezo) {
 function ujBlokk(mezo) {
   const uj = {}
   for (const m of mezo.mezok) {
+    // A segédmezők (pl. fájlválasztó) nem tárolt adatok.
+    if (m.tipus === 'fajlbol') continue
     if (m.tipus === 'lista' || m.tipus === 'blokkok' || m.tipus === 'bekezdesek') uj[m.k] = []
     else if (m.tipus === 'kapcsolo') uj[m.k] = false
     else if (m.tipus === 'valaszto') uj[m.k] = valasztekOpciok(m)[0]?.[0] ?? ''
@@ -1145,6 +1198,72 @@ function hianyOsszegzo(objektum, szakaszok) {
       }),
     ],
   )
+}
+
+/**
+ * A kiadás fájlméretének beolvasása a GitHubról.
+ *
+ * Csak akkor működik, ha a release már fent van, és a fájlnév pontosan
+ * egyezik. A GitHub nyilvános felületét kérdezzük, bejelentkezés nélkül.
+ */
+async function githubMeret(verzio, gomb) {
+  const site = allapot.adatok.site
+  const letoltes = verzio.download ?? {}
+
+  if (letoltes.kind === 'url') {
+    pirit('Közvetlen linknél a méretet kézzel kell megadni.', 'rossz')
+    return
+  }
+  if (!letoltes.file?.trim()) {
+    pirit('Előbb add meg a fájlnevet a kiadásban.', 'rossz')
+    return
+  }
+
+  const gazda = letoltes.owner ?? site.githubUser
+  const repo = letoltes.repo ?? site.releasesRepo
+  const cim =
+    letoltes.kind === 'github-tag'
+      ? `https://api.github.com/repos/${gazda}/${repo}/releases/tags/${encodeURIComponent(letoltes.tag ?? '')}`
+      : `https://api.github.com/repos/${gazda}/${repo}/releases/latest`
+
+  const eredetiFelirat = gomb.textContent
+  gomb.disabled = true
+  gomb.textContent = 'Lekérdezés…'
+
+  try {
+    const valasz = await fetch(cim, { headers: { Accept: 'application/vnd.github+json' } })
+    if (valasz.status === 404) {
+      pirit('Nincs ilyen kiadás a GitHubon (még nem tetted közzé?).', 'rossz')
+      return
+    }
+    if (!valasz.ok) {
+      pirit(`A GitHub nem válaszolt (${valasz.status}).`, 'rossz')
+      return
+    }
+
+    const kiadas = await valasz.json()
+    const fajl = (kiadas.assets ?? []).find((a) => a.name === letoltes.file)
+    if (!fajl) {
+      const nevek = (kiadas.assets ?? []).map((a) => a.name).join(', ')
+      pirit(
+        nevek
+          ? `Nincs "${letoltes.file}" ebben a kiadásban. Ami van: ${nevek}`
+          : 'Ebben a kiadásban nincs feltöltött fájl.',
+        'rossz',
+      )
+      return
+    }
+
+    verzio.size = meretSzoveg(fajl.size)
+    jelolValtozas()
+    ujraRajzol()
+    pirit(`A GitHubról: ${fajl.name} - ${verzio.size}`, 'jo')
+  } catch (hiba) {
+    pirit(`Nem sikerült elérni a GitHubot: ${hiba.message}`, 'rossz')
+  } finally {
+    gomb.disabled = false
+    gomb.textContent = eredetiFelirat
+  }
 }
 
 /* ================================================================== */

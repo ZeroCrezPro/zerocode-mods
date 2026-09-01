@@ -285,6 +285,14 @@ Kézzel, fájlból:
 **Letölthető verziók** panelben nyomd meg a **+ Új verzió** gombot, majd a **Változási
 napló** panelben a **+ Új bejegyzés** gombot.
 
+A verzión belül két gomb segít kitölteni a letöltési adatokat:
+
+- **Mod fájljának kiválasztása** – kiválasztod a gépeden a mod telepítőjét vagy ZIP
+  fájlját, és a program kitölti belőle a *Fájlnév a kiadásban* és a *Fájlméret* mezőt.
+  A fájl nem töltődik fel sehová, csak az adatait olvassa ki.
+- **Méret lekérdezése a GitHubról** – ha a kiadás már fent van a GitHubon, onnan olvassa
+  be a pontos méretet. Hasznos, ha később kicseréled a fájlt a release-ben.
+
 Kézzel, fájlból – két lépés, mindkettő a `src/data/mods.json`-ban, az adott modnál:
 
 **1. Új elem a `versions` tömb ELEJÉRE:**
