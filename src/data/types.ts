@@ -95,40 +95,13 @@ export interface ModVersion {
   prerelease?: boolean
 }
 
-export interface Game {
-  id: string
-  /** URL-barát azonosító: /jatekok/<slug> */
-  slug: string
-  /** Rövid név a kártyákon, pl. "Max Payne 2" */
-  name: string
-  /** Teljes cím, pl. "Max Payne 2: The Fall of Max Payne" */
-  fullName: string
-  releaseYear: number
-  developer?: string
-  publisher?: string
-  platforms: string[]
-  /** Egymondatos összefoglaló (kártyák, meta description) */
-  shortDescription: string
-  /** Bekezdésekre bontott ismertető */
-  description: string[]
-  /** Álló borító (3:4) a kártyákon és az adatlapon */
-  cover: string
-  /** Széles háttérkép (16:5) az adatlap tetején */
-  banner?: string
-  /** Kis négyzetes jel (1:1) a listákban */
-  icon?: string
-  externalLinks?: ExternalLink[]
-  /** Sorrend a listákban (kisebb = előrébb) */
-  order?: number
-}
-
 export interface Mod {
   id: string
   /** URL-barát azonosító: /modok/<slug> */
   slug: string
   name: string
-  /** A Game.id értéke */
-  gameId: string
+  /** Melyik játékhoz készült, ahogy meg kell jelennie (pl. "Max Payne 2") */
+  game: string
   shortDescription: string
   description: string[]
   cover: string
@@ -142,6 +115,8 @@ export interface Mod {
   requirements: Requirement[]
   installationSteps: InstallStep[]
   compatibility: Compatibility[]
+  /** Diavetítő a letöltés gomb alatt - a mod gyors bemutatása */
+  slideshow?: Screenshot[]
   screenshots: Screenshot[]
   /** Verziók - a legfrissebb kerüljön elsőnek */
   versions: ModVersion[]

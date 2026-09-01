@@ -11,4 +11,3 @@ import raw from './mods.json'
 export const mods = raw as Mod[]
 
 export const getModBySlug = (slug: string) => mods.find((m) => m.slug === slug)
-export const getModsByGameId = (gameId: string) => mods.filter((m) => m.gameId === gameId)

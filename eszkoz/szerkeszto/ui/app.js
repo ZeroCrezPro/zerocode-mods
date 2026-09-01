@@ -34,7 +34,7 @@ async function api(ut, beallitas = {}) {
 /** A megnyitott lap a cím # része alapján (így megjegyezhető és linkelhető). */
 function LAPBOL_HASH() {
   const h = (location.hash || '').replace('#', '')
-  return ['attekintes', 'modok', 'jatekok', 'beallitasok', 'kepek', 'elonezet'].includes(h)
+  return ['attekintes', 'modok', 'beallitasok', 'kepek', 'elonezet'].includes(h)
     ? h
     : 'attekintes'
 }
@@ -44,7 +44,6 @@ const allapot = {
   valtozott: false,
   lap: LAPBOL_HASH(),
   modIndex: 0,
-  jatekIndex: 0,
   kepek: [],
   modfajlok: [],
   hibak: [],
@@ -367,7 +366,14 @@ const MOD_SZAKASZOK = [
         kell: true,
         sugo: 'Az oldal címe ebből lesz: /modok/<azonosító>. Csak kisbetű, szám és kötőjel.',
       },
-      { k: 'gameId', cim: 'Melyik játékhoz?', tipus: 'valaszto', valasztek: 'jatekok' },
+      {
+        k: 'game',
+        cim: 'Melyik játékhoz?',
+        tipus: 'szoveg',
+        ajanlott: true,
+        hely: 'Max Payne 2',
+        sugo: 'A játék neve, ahogy meg kell jelennie. Ez csak felirat, nem készül hozzá külön oldal.',
+      },
       { k: 'author', cim: 'Készítő', tipus: 'szoveg' },
       { k: 'platform', cim: 'Platform', tipus: 'szoveg' },
       { k: 'status', cim: 'Állapot', tipus: 'valaszto', valasztek: ALLAPOT_VALASZTEK },
@@ -493,6 +499,35 @@ const MOD_SZAKASZOK = [
     ],
   },
   {
+    cim: 'Diavetítés (a letöltés gomb alatt)',
+    mezok: [
+      {
+        k: 'slideshow',
+        cim: 'Képek a diavetítőben',
+        tipus: 'blokkok',
+        teljes: true,
+        cimke: 'Kép',
+        cimMezo: 'caption',
+        mezok: [
+          { k: 'src', cim: 'Kép', tipus: 'kep', mappa: 'screenshots', teljes: true },
+          {
+            k: 'alt',
+            cim: 'Képleírás (ALT)',
+            tipus: 'szoveg',
+            teljes: true,
+            sugo: 'Kötelező: ezt olvassa fel a képernyőolvasó, és ezt látja a kereső.',
+          },
+          {
+            k: 'caption',
+            cim: 'Felirat a kép alatt',
+            tipus: 'szoveg',
+            teljes: true,
+          },
+        ],
+      },
+    ],
+  },
+  {
     cim: 'Képernyőképek',
     mezok: [
       {
@@ -577,94 +612,6 @@ const MOD_SZAKASZOK = [
           { k: 'answer', cim: 'Válasz', tipus: 'hosszu', teljes: true },
         ],
       },
-    ],
-  },
-  {
-    cim: 'Külső linkek',
-    mezok: [
-      {
-        k: 'externalLinks',
-        cim: 'Linkek',
-        tipus: 'blokkok',
-        teljes: true,
-        cimke: 'Link',
-        cimMezo: 'label',
-        soros: true,
-        mezok: [
-          { k: 'label', cim: 'Felirat', tipus: 'szoveg' },
-          { k: 'url', cim: 'Cím', tipus: 'szoveg', mono: true },
-          { k: 'primary', cim: 'Kiemelt', tipus: 'kapcsolo' },
-        ],
-      },
-    ],
-  },
-]
-
-const JATEK_SZAKASZOK = [
-  {
-    cim: 'Alapadatok',
-    mezok: [
-      { k: 'name', cim: 'Rövid név', tipus: 'szoveg', slugFrissit: 'slug', kell: true },
-      { k: 'fullName', cim: 'Teljes cím', tipus: 'szoveg', ajanlott: true },
-      {
-        k: 'slug',
-        cim: 'URL azonosító',
-        tipus: 'szoveg',
-        mono: true,
-        slugForras: 'name',
-        kell: true,
-        sugo: '/jatekok/<azonosító>',
-      },
-      { k: 'releaseYear', cim: 'Megjelenés éve', tipus: 'szam' },
-      { k: 'developer', cim: 'Fejlesztő', tipus: 'szoveg' },
-      { k: 'publisher', cim: 'Kiadó', tipus: 'szoveg' },
-      { k: 'order', cim: 'Sorrend', tipus: 'szam', sugo: 'Kisebb szám = előrébb a listákban.' },
-    ],
-  },
-  {
-    cim: 'Leírás',
-    mezok: [
-      { k: 'shortDescription', cim: 'Rövid leírás', tipus: 'hosszu', teljes: true, ajanlott: true },
-      {
-        k: 'description',
-        cim: 'Részletes ismertető',
-        tipus: 'bekezdesek',
-        teljes: true,
-        ajanlott: true,
-      },
-    ],
-  },
-  {
-    cim: 'Képek',
-    mezok: [
-      {
-        k: 'cover',
-        cim: 'Borító (álló)',
-        tipus: 'kep',
-        mappa: 'games',
-        ajanlott: true,
-        sugo: 'Álló, 3:4 - ajánlott 600x800. A játékkártyán és az adatlapon látszik.',
-      },
-      {
-        k: 'banner',
-        cim: 'Banner (adatlap tetején)',
-        tipus: 'kep',
-        mappa: 'games',
-        sugo: 'Széles, elmosva a fejléc mögé kerül - ajánlott 1920x640. Üresen a borítót használja.',
-      },
-      {
-        k: 'icon',
-        cim: 'Ikon (négyzetes)',
-        tipus: 'kep',
-        mappa: 'games',
-        sugo: 'Négyzetes, 1:1 - ajánlott 256x256. A keresőben és a modok oldalsávjában látszik.',
-      },
-    ],
-  },
-  {
-    cim: 'Besorolás',
-    mezok: [
-      { k: 'platforms', cim: 'Platformok', tipus: 'lista', teljes: true },
     ],
   },
   {
@@ -790,9 +737,6 @@ function mezoBurok(mezo, belso, hiany) {
 }
 
 function valasztekOpciok(mezo) {
-  if (mezo.valasztek === 'jatekok') {
-    return (allapot.adatok.games ?? []).map((g) => [g.id, g.name])
-  }
   return mezo.valasztek ?? []
 }
 
@@ -1440,7 +1384,6 @@ async function githubMeret(verzio, gomb) {
 const LAPOK = [
   { id: 'attekintes', cim: 'Áttekintés' },
   { id: 'modok', cim: 'Modok' },
-  { id: 'jatekok', cim: 'Játékok' },
   { id: 'beallitasok', cim: 'Beállítások' },
   { id: 'kepek', cim: 'Képek' },
   { id: 'elonezet', cim: 'Előnézet' },
@@ -1469,7 +1412,7 @@ function navRajz() {
 /* ---------- Áttekintés ---------- */
 
 function lapAttekintes() {
-  const { games, mods, site } = allapot.adatok
+  const { mods, site } = allapot.adatok
   const kiadasok = mods.reduce((n, m) => n + (m.versions?.length ?? 0), 0)
 
   const doboz = el('div', { class: 'lap lap-szeles' })
@@ -1477,7 +1420,6 @@ function lapAttekintes() {
   doboz.append(
     el('div', { class: 'statisztika' }, [
       el('div', {}, [el('b', { text: String(mods.length) }), el('span', { text: 'Mod' })]),
-      el('div', {}, [el('b', { text: String(games.length) }), el('span', { text: 'Játék' })]),
       el('div', {}, [el('b', { text: String(kiadasok) }), el('span', { text: 'Kiadás' })]),
       el('div', {}, [
         el('b', { text: allapot.valtozott ? '!' : 'OK' }),
@@ -1486,16 +1428,16 @@ function lapAttekintes() {
     ]),
   )
 
-  if (!mods.length && !games.length) {
+  if (!mods.length) {
     doboz.append(
       el('div', { class: 'uzenet uzenet-figyelem' }, [
         el('div', {}, [
           el('strong', { text: 'Az oldal még üres. ' }),
-          'Az első tartalom felvétele két lépés: előbb a ',
-          el('strong', { text: 'Játékok' }),
-          ' lapon vedd fel a játékot, utána a ',
+          'Kezdd a ',
           el('strong', { text: 'Modok' }),
-          ' lapon a hozzá tartozó modot. Végül Mentés, majd Frissítés.',
+          ' lapon a ',
+          el('strong', { text: '+ Új mod' }),
+          ' gombbal. Végül Mentés, majd Frissítés.',
         ]),
       ]),
     )
@@ -1505,7 +1447,7 @@ function lapAttekintes() {
     el('div', { class: 'uzenet' }, [
       el('div', {}, [
         el('strong', { text: 'Így működik: ' }),
-        'Szerkeszd az adatokat a Modok / Játékok / Beállítások lapon, nyomj ',
+        'Szerkeszd az adatokat a Modok és a Beállítások lapon, nyomj ',
         el('strong', { text: 'Mentés' }),
         '-t, nézd meg az Előnézet lapon, majd kattints a ',
         el('strong', { text: 'Frissítés' }),
@@ -1577,12 +1519,6 @@ function lapAttekintes() {
         el('button', {
           type: 'button',
           class: 'gomb gomb-masodlagos',
-          text: '+ Új játék',
-          onClick: ujJatek,
-        }),
-        el('button', {
-          type: 'button',
-          class: 'gomb gomb-masodlagos',
           text: 'Előnézet frissítése',
           onClick: () => muveletIndit('build', 'Előnézet készítése'),
         }),
@@ -1596,17 +1532,11 @@ function lapAttekintes() {
 /* ---------- Modok ---------- */
 
 function ujMod() {
-  const jatek = allapot.adatok.games[0]
-  if (!jatek) {
-    pirit('Előbb vegyél fel legalább egy játékot.', 'rossz')
-    allapot.lap = 'jatekok'
-    return ujraRajzol()
-  }
   const uj = {
     id: `mod-${Date.now().toString(36)}`,
     slug: 'uj-mod',
     name: 'Új mod',
-    gameId: jatek.id,
+    game: '',
     author: allapot.adatok.site.author ?? 'ZeroCode',
     platform: 'Windows PC',
     status: 'fejlesztes',
@@ -1622,6 +1552,7 @@ function ujMod() {
     requirements: [],
     installationSteps: [],
     compatibility: [],
+    slideshow: [],
     screenshots: [],
     versions: [
       {
@@ -1644,31 +1575,6 @@ function ujMod() {
   allapot.adatok.mods.push(uj)
   allapot.modIndex = allapot.adatok.mods.length - 1
   allapot.lap = 'modok'
-  jelolValtozas()
-  ujraRajzol()
-}
-
-function ujJatek() {
-  const uj = {
-    id: `jatek-${Date.now().toString(36)}`,
-    slug: 'uj-jatek',
-    name: 'Új játék',
-    fullName: 'Új játék',
-    releaseYear: new Date().getFullYear(),
-    developer: '',
-    publisher: '',
-    platforms: ['Windows PC'],
-    shortDescription: '',
-    description: [],
-    cover: '',
-    banner: '',
-    icon: '',
-    externalLinks: [],
-    order: allapot.adatok.games.length + 1,
-  }
-  allapot.adatok.games.push(uj)
-  allapot.jatekIndex = allapot.adatok.games.length - 1
-  allapot.lap = 'jatekok'
   jelolValtozas()
   ujraRajzol()
 }
@@ -1760,35 +1666,18 @@ function listaOldal({ tomb, index, indexAllit, cimAd, alcimAd, kepAd, ujGomb, uj
 }
 
 function lapModok() {
-  const jatekNev = (id) => allapot.adatok.games.find((g) => g.id === id)?.name ?? 'nincs játék'
   return listaOldal({
     tomb: allapot.adatok.mods,
     index: allapot.modIndex,
     indexAllit: (i) => (allapot.modIndex = i),
     cimAd: (m) => m.name || '(névtelen)',
-    alcimAd: (m) => `${jatekNev(m.gameId)} · v${m.versions?.[0]?.version ?? '?'}`,
+    alcimAd: (m) => [m.game, `v${m.versions?.[0]?.version ?? '?'}`].filter(Boolean).join(' · '),
     kepAd: (m) => m.icon || m.cover,
     ujGomb: ujMod,
     ujCimke: '+ Új mod',
     torolCimke: 'Mod törlése',
     szakaszok: MOD_SZAKASZOK,
     uresUzenet: () => {
-      if (!allapot.adatok.games.length) {
-        return el('div', { class: 'ures' }, [
-          el('p', { style: 'font-weight:700;color:var(--ash-200)', text: 'Kezdjük egy játékkal.' }),
-          el('p', {
-            style: 'margin:8px 0 0',
-            text: 'Minden mod egy játékhoz tartozik, ezért előbb vegyél fel legalább egyet.',
-          }),
-          el('button', {
-            type: 'button',
-            class: 'gomb gomb-elsodleges',
-            style: 'margin-top:16px',
-            text: '+ Új játék felvétele',
-            onClick: ujJatek,
-          }),
-        ])
-      }
       return el('div', { class: 'ures' }, [
         el('p', { style: 'font-weight:700;color:var(--ash-200)', text: 'Még nincs mod.' }),
         el('p', {
@@ -1804,37 +1693,6 @@ function lapModok() {
         }),
       ])
     },
-  })
-}
-
-function lapJatekok() {
-  const modSzam = (id) => allapot.adatok.mods.filter((m) => m.gameId === id).length
-  return listaOldal({
-    tomb: allapot.adatok.games,
-    index: allapot.jatekIndex,
-    indexAllit: (i) => (allapot.jatekIndex = i),
-    cimAd: (g) => g.name || '(névtelen)',
-    alcimAd: (g) => `${g.releaseYear ?? ''} · ${modSzam(g.id)} mod`,
-    kepAd: (g) => g.cover,
-    ujGomb: ujJatek,
-    ujCimke: '+ Új játék',
-    torolCimke: 'Játék törlése',
-    szakaszok: JATEK_SZAKASZOK,
-    uresUzenet: () =>
-      el('div', { class: 'ures' }, [
-        el('p', { style: 'font-weight:700;color:var(--ash-200)', text: 'Még nincs játék.' }),
-        el('p', {
-          style: 'margin:8px 0 0',
-          text: 'Vedd fel azt a játékot, amelyhez modot készítesz.',
-        }),
-        el('button', {
-          type: 'button',
-          class: 'gomb gomb-elsodleges',
-          style: 'margin-top:16px',
-          text: '+ Új játék',
-          onClick: ujJatek,
-        }),
-      ]),
   })
 }
 
@@ -1861,8 +1719,12 @@ function lapKepek() {
     }),
   )
 
-  for (const mappa of ['mods', 'games', 'screenshots']) {
-    const nev = { mods: 'Modok', games: 'Játékok', screenshots: 'Képernyőképek' }[mappa]
+  for (const mappa of ['mods', 'screenshots', 'games']) {
+    const nev = {
+      mods: 'Modok és arculat',
+      screenshots: 'Képernyőképek',
+      games: 'Egyéb képek',
+    }[mappa]
     const racs = el('div', { class: 'keprács' })
     const sajat = allapot.kepek.filter((k) => k.mappa === mappa)
 
@@ -2264,7 +2126,6 @@ function ujraRajzol() {
   if (!allapot.adatok) nezet = el('div', { class: 'lap', text: 'Betöltés…' })
   else if (allapot.lap === 'attekintes') nezet = lapAttekintes()
   else if (allapot.lap === 'modok') nezet = lapModok()
-  else if (allapot.lap === 'jatekok') nezet = lapJatekok()
   else if (allapot.lap === 'beallitasok') nezet = lapBeallitasok()
   else if (allapot.lap === 'kepek') nezet = lapKepek()
   else nezet = lapElonezet()

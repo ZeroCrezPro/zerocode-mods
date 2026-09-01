@@ -1,10 +1,14 @@
 # Angol nyelvű útvonalak a magyar megfelelőre
-/games        /jatekok            301
-/games/*      /jatekok/:splat     301
 /mods         /modok              301
 /mods/*       /modok/:splat       301
 /latest       /legujabb           301
 /about        /nevjegy            301
+
+# A játékok szekció megszűnt - a régi címek a modokra mutatnak
+/jatekok      /modok              301
+/jatekok/*    /modok              301
+/games        /modok              301
+/games/*      /modok              301
 
 # Megjegyzés: nincs szükség "/* /index.html 200" SPA-szabályra, mert a build
 # minden útvonalhoz kész HTML fájlt gyárt (lásd scripts/prerender.mjs).

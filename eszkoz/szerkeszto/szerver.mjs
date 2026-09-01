@@ -6,7 +6,7 @@
  * ellenőrzi az induláskor generált egyszeri kulcsot.
  *
  * Feladatai:
- *   - a src/data/*.json fájlok beolvasása és mentése
+ *   - a src/data/site.json és mods.json beolvasása és mentése
  *   - képek feltöltése a public/images alá
  *   - a weboldal buildelése és előnézete
  *   - a "Frissítés" gomb: build -> git commit -> git push -> Cloudflare deploy
@@ -32,7 +32,7 @@ const distDir = path.join(projekt, 'dist')
 const kiadasDir = path.join(projekt, 'kiadasok')
 
 const KULCS = crypto.randomBytes(16).toString('hex')
-const ADATFAJLOK = { site: 'site.json', games: 'games.json', mods: 'mods.json' }
+const ADATFAJLOK = { site: 'site.json', mods: 'mods.json' }
 
 /* ------------------------------------------------------------------ */
 /* Segédfüggvények                                                     */
@@ -126,23 +126,12 @@ async function regiMentesekTakaritasa(dir) {
 
 const SLUG_MINTA = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
-function ellenoriz({ site, games, mods }) {
+function ellenoriz({ site, mods }) {
   const hibak = []
 
   if (!site?.name?.trim()) hibak.push('A beállításoknál az oldal neve nem lehet üres.')
   if (!/^https?:\/\//.test(site?.url ?? '')) {
     hibak.push('A beállításoknál az oldal címének http:// vagy https:// előtaggal kell kezdődnie.')
-  }
-
-  const jatekAzonositok = new Set()
-  for (const [i, g] of (games ?? []).entries()) {
-    const hol = `${i + 1}. játék (${g.name || 'névtelen'})`
-    if (!g.name?.trim()) hibak.push(`${hol}: a név kötelező.`)
-    if (!SLUG_MINTA.test(g.slug ?? '')) {
-      hibak.push(`${hol}: az URL azonosító csak kisbetűt, számot és kötőjelet tartalmazhat.`)
-    }
-    if (jatekAzonositok.has(g.id)) hibak.push(`${hol}: az azonosító (${g.id}) már foglalt.`)
-    jatekAzonositok.add(g.id)
   }
 
   const modSlugok = new Set()
@@ -154,9 +143,6 @@ function ellenoriz({ site, games, mods }) {
     }
     if (modSlugok.has(m.slug)) hibak.push(`${hol}: ez az URL azonosító már foglalt.`)
     modSlugok.add(m.slug)
-    if (!jatekAzonositok.has(m.gameId)) {
-      hibak.push(`${hol}: nincs ilyen játék kiválasztva.`)
-    }
     if (!Array.isArray(m.versions) || m.versions.length === 0) {
       hibak.push(`${hol}: legalább egy verzió kell, különben nincs mit letölteni.`)
     }

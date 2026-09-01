@@ -3,21 +3,19 @@ import { StaticRouter } from 'react-router'
 import { App } from './App'
 import { HeadContext, renderHeadTags, pageTitle } from './components/Seo'
 import type { HeadSink } from './components/Seo'
-import { games, mods, site } from './data'
+import { mods, site } from './data'
 
 /** Minden előrerenderelendő útvonal. */
 export function allRoutes(): string[] {
   return [
     '/',
     '/modok',
-    '/jatekok',
     '/legujabb',
     '/nevjegy',
     '/kapcsolat',
     '/jogi-informaciok',
     '/adatvedelem',
     ...mods.map((m) => `/modok/${m.slug}`),
-    ...games.map((g) => `/jatekok/${g.slug}`),
   ]
 }
 

@@ -1,13 +1,12 @@
-import { games, getGameById, getGameBySlug } from './games'
-import { mods, getModBySlug, getModsByGameId } from './mods'
+import { mods, getModBySlug } from './mods'
 import { site } from './site'
 import { compareVersionDesc } from '@/lib/format'
-import type { Game, Mod, ModVersion } from './types'
+import type { Mod, ModVersion } from './types'
 
 export * from './types'
-export { games, mods, site, getGameById, getGameBySlug, getModBySlug, getModsByGameId }
+export { mods, site, getModBySlug }
 
-/** Egy mod legfrissebb (nem elavult) verziója. */
+/** Egy mod legfrissebb verziója. */
 export function latestVersion(mod: Mod): ModVersion | undefined {
   return [...mod.versions].sort(
     (a, b) =>
@@ -24,16 +23,6 @@ export function olderVersions(mod: Mod): ModVersion[] {
 /** A mod utolsó frissítésének dátuma (ISO). */
 export function lastUpdated(mod: Mod): string {
   return latestVersion(mod)?.releaseDate ?? mod.createdAt
-}
-
-/** Egy játékhoz tartozó modok utolsó frissítése (ISO) vagy null. */
-export function gameLastUpdated(game: Game): string | null {
-  const list = getModsByGameId(game.id).map(lastUpdated).sort()
-  return list.length ? list[list.length - 1] : null
-}
-
-export function modCountForGame(game: Game): number {
-  return getModsByGameId(game.id).length
 }
 
 /** Összes kiadás (verzió) száma. */
@@ -62,7 +51,6 @@ export function allTags(): { tag: string; count: number }[] {
 
 export interface ReleaseFeedItem {
   mod: Mod
-  game: Game | undefined
   version: ModVersion
 }
 
@@ -70,9 +58,7 @@ export interface ReleaseFeedItem {
 export function releaseFeed(limit?: number): ReleaseFeedItem[] {
   const items: ReleaseFeedItem[] = []
   for (const mod of mods) {
-    for (const version of mod.versions) {
-      items.push({ mod, game: getGameById(mod.gameId), version })
-    }
+    for (const version of mod.versions) items.push({ mod, version })
   }
   items.sort(
     (a, b) =>
@@ -87,8 +73,4 @@ export function featuredMods(limit = 6): Mod[] {
   const featured = mods.filter((m) => m.featured)
   const pool = featured.length ? featured : mods
   return [...pool].sort((a, b) => lastUpdated(b).localeCompare(lastUpdated(a))).slice(0, limit)
-}
-
-export function sortedGames(): Game[] {
-  return [...games].sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || a.name.localeCompare(b.name, 'hu'))
 }

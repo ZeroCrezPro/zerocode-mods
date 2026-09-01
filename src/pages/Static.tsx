@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { games, mods, site, totalReleases } from '@/data'
+import { mods, site, totalReleases } from '@/data'
 import { Seo, pageTitle } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Panel, ExternalButton } from '@/components/ui'
@@ -57,8 +57,8 @@ export function About() {
             verziótörténetet.
           </p>
           <p className={proseText}>
-            Jelenleg {games.length} játékhoz összesen {mods.length} mod érhető el,{' '}
-            {totalReleases()} kiadással. A lista folyamatosan bővül.
+            Jelenleg {mods.length} mod érhető el, összesen {totalReleases()} kiadással. A lista
+            folyamatosan bővül.
           </p>
         </div>
       </Panel>

@@ -9,7 +9,6 @@ import { SmartImage } from './SmartImage'
 const nav = [
   { to: '/', label: 'Főoldal', end: true },
   { to: '/modok', label: 'Modok' },
-  { to: '/jatekok', label: 'Játékok' },
   { to: '/legujabb', label: 'Legújabb' },
   { to: '/nevjegy', label: 'Névjegy' },
 ]
@@ -163,9 +162,7 @@ function SearchBox({ onNavigate }: { onNavigate?: () => void }) {
                       </span>
                       <span className="block truncate text-xs text-ash-400">{r.subtitle}</span>
                     </span>
-                    <span className="zc-label shrink-0 text-ash-400">
-                      {r.type === 'mod' ? 'Mod' : 'Játék'}
-                    </span>
+                    <span className="zc-label shrink-0 text-ash-400">Mod</span>
                   </button>
                 </li>
               ))}

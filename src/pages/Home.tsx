@@ -1,18 +1,8 @@
 import { Link } from 'react-router-dom'
-import {
-  featuredMods,
-  games,
-  mods,
-  releaseFeed,
-  site,
-  sortedGames,
-  totalDownloads,
-  totalReleases,
-} from '@/data'
+import { featuredMods, mods, releaseFeed, site, totalDownloads, totalReleases } from '@/data'
 import { formatDate, formatNumber, vLabel } from '@/lib/format'
 import { Seo, pageTitle } from '@/components/Seo'
 import { ModCard } from '@/components/ModCard'
-import { GameCard } from '@/components/GameCard'
 import { Badge, LinkButton, SectionHead, btnClass } from '@/components/ui'
 import { IconArrowRight, IconClock, IconDownload, IconGamepad, IconPackage } from '@/components/Icons'
 import { Empty } from '@/components/Empty'
@@ -21,8 +11,8 @@ function Stats() {
   const downloads = totalDownloads()
   const items: { value: string; label: string }[] = [
     { value: String(mods.length), label: 'Mod' },
-    { value: String(games.length), label: 'Játék' },
     { value: String(totalReleases()), label: 'Kiadás' },
+    { value: 'PC', label: 'Platform' },
     downloads
       ? { value: `${formatNumber(downloads)}+`, label: 'Letöltés' }
       : { value: '100%', label: 'Ingyenes' },
@@ -110,7 +100,7 @@ function LatestUpdates() {
 
   return (
     <ul className="divide-y divide-ink-800 border border-ink-700 bg-ink-900">
-      {feed.map(({ mod, game, version }) => (
+      {feed.map(({ mod, version }) => (
         <li
           key={`${mod.id}-${version.version}`}
           className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-ink-850 sm:flex-row sm:items-center sm:gap-5 sm:px-5"
@@ -121,7 +111,7 @@ function LatestUpdates() {
                 to={`/modok/${mod.slug}`}
                 className="text-sm font-bold text-ash-100 transition-colors hover:text-blood-400"
               >
-                {game?.name} - {mod.name}
+                {mod.name}
               </Link>
               <span className="font-mono text-xs font-bold text-blood-400">
                 {vLabel(version.version)}
@@ -153,7 +143,6 @@ function LatestUpdates() {
 
 export default function Home() {
   const featured = featuredMods(6)
-  const gameList = sortedGames()
 
   return (
     <>
@@ -226,32 +215,6 @@ export default function Home() {
           />
           <LatestUpdates />
         </div>
-      </section>
-
-      <section className="zc-container py-16 sm:py-20">
-        <SectionHead
-          eyebrow="Támogatott címek"
-          title="Játékok"
-          action={
-            <Link
-              to="/jatekok"
-              className="zc-label flex items-center gap-2 text-ash-400 transition-colors hover:text-blood-400"
-            >
-              Összes játék <IconArrowRight width={14} height={14} />
-            </Link>
-          }
-        />
-        {gameList.length === 0 ? (
-          <Empty title="Még nincs felvéve játék.">
-            Itt fognak megjelenni a támogatott játékok.
-          </Empty>
-        ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {gameList.map((g) => (
-              <GameCard key={g.id} game={g} />
-            ))}
-          </div>
-        )}
       </section>
 
       <section className="zc-container pb-16 sm:pb-20">

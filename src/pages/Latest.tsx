@@ -62,7 +62,7 @@ export default function Latest() {
           </h2>
 
           <ol className="space-y-3">
-            {byYear[year].map(({ mod, game, version }, i) => (
+            {byYear[year].map(({ mod, version }, i) => (
               <li
                 key={`${mod.id}-${version.version}`}
                 className="border border-ink-700 bg-ink-900 transition-colors hover:border-blood-600/60"
@@ -83,7 +83,7 @@ export default function Latest() {
                         to={`/modok/${mod.slug}`}
                         className="text-base font-extrabold text-ash-100 transition-colors hover:text-blood-400"
                       >
-                        {game?.name} - {mod.name}
+                        {mod.name}
                       </Link>
                       <span className="font-mono text-sm font-black text-blood-400">
                         {vLabel(version.version)}

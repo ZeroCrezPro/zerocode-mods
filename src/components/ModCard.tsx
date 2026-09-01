@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { Mod } from '@/data/types'
-import { getGameById, latestVersion } from '@/data'
+import { latestVersion } from '@/data'
 import { statusLabel, statusTextClass } from '@/lib/labels'
 import { formatDate, vLabel } from '@/lib/format'
 import { downloadUrl } from '@/lib/download'
@@ -19,11 +19,10 @@ function Adat({ cim, children }: { cim: string; children: ReactNode }) {
 }
 
 export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
-  const game = getGameById(mod.gameId)
   const v = latestVersion(mod)
 
   // Ha a mod ugyanazt a nevet kapta, mint a játék, ne írjuk ki kétszer.
-  const jatekNeve = game && game.name !== mod.name ? game.name : null
+  const jatekNeve = mod.game && mod.game !== mod.name ? mod.game : null
 
   return (
     <article className="group flex h-full flex-col border border-ink-700 bg-ink-900 transition-colors duration-200 hover:border-blood-600/70">

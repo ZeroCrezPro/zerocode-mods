@@ -16,8 +16,7 @@ React + TypeScript + Vite + Tailwind CSS, statikusan előrenderelve, Cloudflare 
 1. [A szerkesztő program](#a-szerkesztő-program)
 2. [Gyors indítás](#gyors-indítás)
 3. [Könyvtárszerkezet](#könyvtárszerkezet)
-4. [Hogyan adok hozzá új játékot?](#hogyan-adok-hozzá-új-játékot)
-5. [Hogyan adok hozzá új modot?](#hogyan-adok-hozzá-új-modot)
+4. [Hogyan adok hozzá új modot?](#hogyan-adok-hozzá-új-modot)
 6. [Hogyan adok ki új verziót?](#hogyan-adok-ki-új-verziót)
 7. [Hogyan működik a letöltés (GitHub Releases)?](#hogyan-működik-a-letöltés-github-releases)
 8. [Hogyan változtatom meg a letöltési URL-t?](#hogyan-változtatom-meg-a-letöltési-url-t)
@@ -53,7 +52,6 @@ weboldal projektmappáját. A parancsikon viszont bárhonnan indíthatja.
 | --- | --- |
 | **Áttekintés** | Statisztika, legutóbbi kiadások, gyors gombok |
 | **Modok** | Minden mod minden mezője: leírás, funkciók, telepítési lépések, követelmények, kompatibilitás, képek, verziók, változási napló, GYIK |
-| **Játékok** | Játékok felvétele és szerkesztése |
 | **Beállítások** | Oldal neve, mottó, éles cím, GitHub felhasználó és repók |
 | **Képek** | Képek feltöltése a `public/images` alá, azonnal használhatók; a méret is látszik (600 kB fölött sárgával, mert lassítja az oldalt) |
 | **Előnézet** | A kész oldal megtekintése a programon belül, asztali / tablet / mobil méretben |
@@ -182,7 +180,6 @@ zerocode-mods/
 │   ├── _redirects              # /games -> /jatekok stb. átirányítások
 │   ├── favicon.svg
 │   └── images/
-│       ├── games/              # játékborítók, bannerek
 │       ├── mods/               # modborítók, bannerek, ikonok
 │       ├── screenshots/        # képernyőképek
 │       └── og-default.svg      # alapértelmezett közösségi megosztókép
@@ -198,10 +195,9 @@ zerocode-mods/
 ├── src/
 │   ├── data/                   # >>> ITT VAN MINDEN TARTALOM <<<
 │   │   ├── site.json           # globális beállítások (a szerkesztő ezt írja)
-│   │   ├── games.json          # játékok
 │   │   ├── mods.json           # modok, verziók, changelog, GYIK
 │   │   ├── types.ts            # adattípusok (mezők leírása kommentben)
-│   │   ├── site.ts / games.ts / mods.ts   # a JSON betöltése, típusokkal
+│   │   ├── site.ts / mods.ts   # a JSON betöltése, típusokkal
 │   │   └── index.ts            # lekérdezések (legfrissebb verzió, statisztika...)
 │   ├── lib/
 │   │   ├── download.ts         # GitHub Releases letöltési URL-ek
@@ -227,50 +223,12 @@ zerocode-mods/
 | `/` | Főoldal (hero, statisztika, kiemelt modok, legújabb frissítések) |
 | `/modok` | Mod katalógus (keresés, rendezés, címkeszűrés) |
 | `/modok/<slug>` | Mod adatlap (leírás, funkciók, képek, telepítés, letöltések, changelog, GYIK) |
-| `/jatekok` | Játékok listája (keresés, rendezés) |
-| `/jatekok/<slug>` | Játék adatlap + a hozzá tartozó modok |
 | `/legujabb` | Összes kiadás időrendben |
 | `/nevjegy`, `/kapcsolat`, `/jogi-informaciok`, `/adatvedelem` | Szöveges oldalak |
 | bármi más | 404 oldal |
 
-Az angol URL-ek (`/mods`, `/games`, `/latest`, `/about`) 301-gyel átirányítanak a magyar megfelelőre.
-
----
-
-## Hogyan adok hozzá új játékot?
-
-**A legegyszerűbb út:** indítsd el a `ZeroCode Szerkeszto.exe` programot, menj a **Játékok**
-lapra, és nyomd meg a **+ Új játék** gombot. Minden mezőhöz tartozik magyarázat.
-
-Kézzel, fájlból:
-
-1. Nyisd meg a `src/data/games.json` fájlt.
-2. Másolj le egy meglévő objektumot a listában, és írd át:
-
-```json
-{
-  "id": "gta-vice-city",
-  "slug": "gta-vice-city",
-  "name": "GTA: Vice City",
-  "fullName": "Grand Theft Auto: Vice City",
-  "releaseYear": 2002,
-  "developer": "Rockstar North",
-  "publisher": "Rockstar Games",
-  "platforms": ["Windows PC"],
-  "shortDescription": "Egy mondat a kártyákra és a meta leírásba.",
-  "description": ["Első bekezdés.", "Második bekezdés."],
-  "cover": "/images/games/gta-vc-cover.svg",
-  "banner": "/images/games/gta-vc-banner.svg",
-  "externalLinks": [{ "label": "Steam áruház", "url": "https://...", "primary": true }],
-  "order": 3
-}
-```
-
-3. Tedd be a borítót és a bannert a `public/images/games/` mappába.
-4. `npm run build` – az oldal, a keresés, a sitemap és a SEO automatikusan felveszi.
-
-**Nincs kép?** Hagyd ki a `cover`/`banner` mezőt, vagy add meg egy nem létező fájl útvonalát:
-az oldal automatikusan egy stílusos ZeroCode helyőrzőt rajzol a nevek kezdőbetűivel.
+Az angol URL-ek (`/mods`, `/latest`, `/about`) 301-gyel átirányítanak a magyar megfelelőre.
+A megszűnt `/jatekok` és `/games` címek a modok listájára mutatnak.
 
 ---
 
@@ -289,7 +247,7 @@ Kézzel, fájlból:
 | `id` | Egyedi azonosító (bárhol nem jelenik meg) |
 | `slug` | Az URL: `/modok/<slug>` |
 | `name` | A mod neve |
-| `gameId` | A játék `id` mezője a `games.ts`-ből |
+| `game` | Melyik játékhoz készült – sima szöveg (pl. `Max Payne 2`) |
 | `shortDescription` | Egy mondat – kártyákra és a meta leírásba |
 | `description` | Bekezdések tömbje a Leírás panelre |
 | `cover`, `banner`, `icon` | Képek útvonala a `public/` alól |
@@ -300,7 +258,8 @@ Kézzel, fájlból:
 | `requirements` | `{ label, value }` párok a Követelmények panelre |
 | `installationSteps` | `{ title, detail? }` – számozott lépések |
 | `compatibility` | `{ label, state, note? }`, state: `'tesztelve'` \| `'reszben'` \| `'nem-tesztelt'` \| `'nem-tamogatott'` |
-| `screenshots` | `{ src, alt, caption? }` – az `alt` kötelező (akadálymentesség) |
+| `slideshow` | Diavetítő a letöltés gomb alatt: `{ src, alt, caption? }` |
+| `screenshots` | Képgaléria lentebb: `{ src, alt, caption? }` – az `alt` kötelező |
 | `versions` | Letölthető verziók, a legfrissebb elöl |
 | `changelog` | Változási napló verziónként |
 | `faq` | `{ question, answer }` párok |
@@ -310,6 +269,17 @@ Kézzel, fájlból:
 3. `npm run build`, majd publikálás (lásd lentebb).
 
 ---
+
+## A diavetítő
+
+A mod adatlapján a letöltés gomb és a leírás között megjelenik egy diavetítő: egy nagy
+kép, két oldalán nyíllal, alatta ponttal minden képhez. Ez a mod gyors bemutatására való.
+
+A képeket a szerkesztő **Diavetítés (a letöltés gomb alatt)** paneljében lehet megadni,
+a lentebbi Képek galériától függetlenül – így külön válogathatod, mi kerüljön rögtön a
+látogató szeme elé, és mi maradjon a részletes galériába.
+
+Ha nem adsz meg egyetlen képet sem, a diavetítő nem jelenik meg.
 
 ## Hogyan adok ki új verziót?
 
@@ -435,10 +405,8 @@ rajzol – törött kép sehol nem jelenik meg.
 | **Mod** – borítókép | a modok listájában látszó kép | 1200 × 675 (16:9) |
 | **Mod** – banner | elmosva az adatlap fejléce mögé | 1920 × 640 |
 | **Mod** – ikon | kereső, Legújabb lap, adatlap | 256 × 256 (1:1) |
-| **Mod** – képernyőképek | a Képek galéria | 1280 × 720 vagy 1920 × 1080 |
-| **Játék** – borító | játékkártya és adatlap | 600 × 800 (3:4) |
-| **Játék** – banner | elmosva az adatlap fejléce mögé | 1920 × 640 |
-| **Játék** – ikon | kereső, a mod oldalsávja | 256 × 256 (1:1) |
+| **Mod** – diavetítés | a letöltés gomb alatt, nyilakkal lapozható | 1920 × 1080 (16:9) |
+| **Mod** – képernyőképek | a Képek galéria lentebb | 1280 × 720 vagy 1920 × 1080 |
 | **Oldal** – logó | a fejléc és a lábléc jele | 128 × 128 |
 | **Oldal** – böngészőfül ikonja | a fül címkéjén látszó ikon | 64 × 64 vagy SVG |
 | **Oldal** – megosztókép | ha valaki megosztja a linket | 1200 × 630 |

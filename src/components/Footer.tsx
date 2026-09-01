@@ -7,7 +7,6 @@ const columns: { title: string; links: { label: string; to?: string; href?: stri
     title: 'Tartalom',
     links: [
       { label: 'Modok', to: '/modok' },
-      { label: 'Játékok', to: '/jatekok' },
       { label: 'Legújabb kiadások', to: '/legujabb' },
     ],
   },

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getGameById, getModBySlug, latestVersion, olderVersions, site } from '@/data'
+import { getModBySlug, latestVersion, olderVersions, site } from '@/data'
 import { formatDate, vLabel } from '@/lib/format'
 import {
   changeClass,
@@ -15,6 +15,7 @@ import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { SmartImage } from '@/components/SmartImage'
 import { Gallery } from '@/components/Lightbox'
+import { Diavetites } from '@/components/Diavetites'
 import { AccordionItem } from '@/components/Accordion'
 import { VersionCard } from '@/components/VersionCard'
 import { Badge, ExternalButton, Panel, btnClass } from '@/components/ui'
@@ -34,18 +35,17 @@ export default function ModDetail() {
 
   if (!mod) return <NotFound />
 
-  const game = getGameById(mod.gameId)
   const latest = latestVersion(mod)
   const older = olderVersions(mod)
   const path = `/modok/${mod.slug}`
 
   // Ha a mod ugyanazt a nevet kapta, mint a játék, ne ismételjük meg.
-  const kulonJatekNev = game && game.name !== mod.name ? game : null
+  const jatekNeve = mod.game && mod.game !== mod.name ? mod.game : null
 
   return (
     <>
       <Seo
-        title={`${game?.name ?? ''} ${mod.name} - Letöltés | ${site.name}`.trim()}
+        title={`${mod.name} - Letöltés | ${site.name}`}
         description={mod.shortDescription}
         path={path}
         image={mod.banner || mod.cover}
@@ -54,7 +54,7 @@ export default function ModDetail() {
           {
             '@context': 'https://schema.org',
             '@type': 'SoftwareApplication',
-            name: `${game?.name ?? ''} ${mod.name}`.trim(),
+            name: mod.name,
             applicationCategory: 'GameApplication',
             operatingSystem: mod.platform,
             softwareVersion: latest?.version,
@@ -107,9 +107,6 @@ export default function ModDetail() {
             items={[
               { label: 'Főoldal', to: '/' },
               { label: 'Modok', to: '/modok' },
-              ...(kulonJatekNev
-                ? [{ label: kulonJatekNev.name, to: `/jatekok/${kulonJatekNev.slug}` }]
-                : []),
               { label: mod.name },
             ]}
           />
@@ -125,14 +122,7 @@ export default function ModDetail() {
             />
 
             <div className="min-w-0 flex-1">
-              {kulonJatekNev && (
-                <Link
-                  to={`/jatekok/${kulonJatekNev.slug}`}
-                  className="zc-label text-blood-400 transition-colors hover:text-blood-300"
-                >
-                  {kulonJatekNev.name}
-                </Link>
-              )}
+              {jatekNeve && <p className="zc-label text-blood-400">{jatekNeve}</p>}
               <h1 className="mt-2 text-3xl leading-none font-black tracking-tighter uppercase sm:text-5xl">
                 {mod.name}
               </h1>
@@ -203,6 +193,13 @@ export default function ModDetail() {
           </div>
         </div>
       </section>
+
+      {/* ---------- Diavetítő a letöltés gomb és a leírás között ---------- */}
+      {mod.slideshow && mod.slideshow.length > 0 && (
+        <div className="zc-container pt-8 sm:pt-10">
+          <Diavetites kepek={mod.slideshow} />
+        </div>
+      )}
 
       {/* ---------- Tartalom ---------- */}
       <div className="zc-container grid gap-6 py-10 sm:py-14 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -431,26 +428,10 @@ export default function ModDetail() {
             </ul>
           </nav>
 
-          {/* Ez marad akkor is, ha a nevek egyeznek: innen lehet a játék oldalára jutni. */}
-          {game && (
+          {mod.game && (
             <div className="border border-ink-700 bg-ink-900 p-4">
-              <p className="zc-label text-ash-400">Játék</p>
-              <Link
-                to={`/jatekok/${game.slug}`}
-                className="mt-2 flex items-center gap-3 transition-colors hover:text-blood-400"
-              >
-                <SmartImage
-                  src={game.icon || game.cover}
-                  alt=""
-                  ratio={game.icon ? 'aspect-square' : 'aspect-[3/4]'}
-                  className="w-12 shrink-0 border border-ink-700"
-                  fallbackText={game.name}
-                />
-                <span className="min-w-0">
-                  <span className="block text-sm font-bold text-ash-100">{game.name}</span>
-                  <span className="block text-xs text-ash-400">{game.releaseYear}</span>
-                </span>
-              </Link>
+              <p className="zc-label text-ash-400">Melyik játékhoz</p>
+              <p className="mt-2 text-sm font-bold text-ash-100">{mod.game}</p>
             </div>
           )}
 

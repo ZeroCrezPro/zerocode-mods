@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { allTags, getGameById, lastUpdated, mods, site } from '@/data'
+import { allTags, lastUpdated, mods, site } from '@/data'
 import type { Mod } from '@/data/types'
 import { matches, normalize } from '@/lib/search'
 import { cx } from '@/lib/format'
@@ -20,12 +20,10 @@ const sortOptions: { key: SortKey; label: string }[] = [
 ]
 
 function haystack(mod: Mod): string {
-  const game = getGameById(mod.gameId)
   return normalize(
     [
       mod.name,
-      game?.name ?? '',
-      game?.fullName ?? '',
+      mod.game,
       mod.shortDescription,
       mod.description.join(' '),
       mod.tags.join(' '),

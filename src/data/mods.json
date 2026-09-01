@@ -3,7 +3,6 @@
     "id": "mod-mtj0wvxm",
     "slug": "max-payne-2-the-fall-of-max-payne",
     "name": "Max Payne 2 The Fall of Max Payne",
-    "gameId": "jatek-mtiz6lia",
     "author": "ZeroCode",
     "platform": "Windows PC",
     "status": "fejlesztes",
@@ -79,6 +78,7 @@
       }
     ],
     "faq": [],
-    "externalLinks": []
+    "externalLinks": [],
+    "game": "Max Payne 2 The Fall of Max Payne"
   }
 ]
