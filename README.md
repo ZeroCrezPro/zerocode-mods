@@ -58,6 +58,20 @@ weboldal projektmappáját. A parancsikon viszont bárhonnan indíthatja.
 | **Képek** | Képek feltöltése a `public/images` alá, azonnal használhatók; a méret is látszik (600 kB fölött sárgával, mert lassítja az oldalt) |
 | **Előnézet** | A kész oldal megtekintése a programon belül, asztali / tablet / mobil méretben |
 
+### Mi hiányzik még?
+
+A program menet közben jelzi, mit kell még kitölteni:
+
+- **piros, lüktető keret + KÖTELEZŐ** – enélkül a mentés nem megy át (pl. a mod neve,
+  az URL azonosító, a letöltendő fájl neve a kiadásban);
+- **sárga keret + HIÁNYZIK** – menteni lehet, de az oldal hiányos lesz (pl. rövid leírás,
+  borítókép, funkciólista);
+- **pont a panel fejlécén és a bal oldali listán** – melyik panelben, illetve melyik
+  modnál maradt kitöltetlen mező;
+- **összegző sáv az űrlap tetején** – hány mező hiányzik, és egy gomb, ami az elsőhöz ugrik.
+
+A jelzés gépelés közben frissül, tehát azonnal látszik, ha egy mező már rendben van.
+
 ### A két fontos gomb
 
 **Mentés** (vagy `Ctrl` + `S`) – a módosításokat a gépeden lévő adatfájlokba írja

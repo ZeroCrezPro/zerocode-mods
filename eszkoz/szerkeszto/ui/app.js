@@ -110,6 +110,58 @@ function slugbol(szoveg) {
 
 const maiDatum = () => new Date().toISOString().slice(0, 10)
 
+/* ================================================================== */
+/* Hiányzó adatok                                                      */
+/* ================================================================== */
+
+/** Üresnek számít az üres szöveg, az üres lista és a hiányzó érték. */
+function uresE(ertek) {
+  if (ertek === null || ertek === undefined) return true
+  if (Array.isArray(ertek)) return ertek.length === 0
+  if (typeof ertek === 'string') return ertek.trim() === ''
+  return false
+}
+
+/** 'kell' (kötelező), 'ajanlott' (érdemes kitölteni) vagy null. */
+function mezoHiany(objektum, mezo) {
+  if (mezo.mutat && !mezo.mutat(objektum)) return null
+  if (!uresE(objektum[mezo.k])) return null
+  if (mezo.kell) return 'kell'
+  if (mezo.ajanlott) return 'ajanlott'
+  return null
+}
+
+/**
+ * Végigjárja a mezőleírást és megszámolja a hiányokat.
+ * A beágyazott blokkokba (verziók, telepítési lépések...) is belenéz.
+ */
+function hianyokSzamolasa(objektum, mezok, ki = { kell: 0, ajanlott: 0 }) {
+  for (const mezo of mezok) {
+    if (mezo.mutat && !mezo.mutat(objektum)) continue
+
+    if (mezo.tipus === 'csoport') {
+      hianyokSzamolasa(objektum[mezo.k] ?? {}, mezo.mezok, ki)
+      continue
+    }
+
+    const hiany = mezoHiany(objektum, mezo)
+    if (hiany) ki[hiany]++
+
+    if (mezo.tipus === 'blokkok') {
+      for (const elem of objektum[mezo.k] ?? []) hianyokSzamolasa(elem, mezo.mezok, ki)
+    }
+  }
+  return ki
+}
+
+/** Egy teljes űrlap (szakaszok) hiányai. */
+function urlapHianyai(objektum, szakaszok) {
+  return hianyokSzamolasa(
+    objektum,
+    szakaszok.flatMap((sz) => sz.mezok),
+  )
+}
+
 /**
  * Az éppen kirajzolt beviteli mezők objektumonként, hogy az egyik mező
  * frissíthesse a másikat teljes újrarajzolás nélkül (különben elveszne a
@@ -223,6 +275,7 @@ const LETOLTES_MEZOK = [
     tipus: 'szoveg',
     mono: true,
     hely: 'ZeroCodeMod-MaxPayne2-Setup.zip',
+    kell: true,
     mutat: (o) => o.kind !== 'url',
     sugo: 'Pontosan úgy, ahogy a GitHub Release oldalán szerepel (a kis- és nagybetű számít).',
   },
@@ -232,6 +285,7 @@ const LETOLTES_MEZOK = [
     tipus: 'szoveg',
     mono: true,
     hely: 'mp2-zerocode-v1.1.0',
+    kell: true,
     mutat: (o) => o.kind === 'github-tag',
   },
   {
@@ -240,6 +294,7 @@ const LETOLTES_MEZOK = [
     tipus: 'szoveg',
     mono: true,
     hely: 'https://...',
+    kell: true,
     mutat: (o) => o.kind === 'url',
   },
   {
@@ -253,9 +308,9 @@ const LETOLTES_MEZOK = [
 ]
 
 const VERZIO_MEZOK = [
-  { k: 'version', cim: 'Verziószám', tipus: 'szoveg', mono: true, hely: '1.3.0' },
-  { k: 'releaseDate', cim: 'Kiadás dátuma', tipus: 'datum' },
-  { k: 'size', cim: 'Fájlméret', tipus: 'szoveg', hely: '18.4 MB' },
+  { k: 'version', cim: 'Verziószám', tipus: 'szoveg', mono: true, hely: '1.3.0', kell: true },
+  { k: 'releaseDate', cim: 'Kiadás dátuma', tipus: 'datum', kell: true },
+  { k: 'size', cim: 'Fájlméret', tipus: 'szoveg', hely: '18.4 MB', ajanlott: true },
   { k: 'platform', cim: 'Platform', tipus: 'szoveg', hely: 'Windows' },
   { k: 'type', cim: 'Típus', tipus: 'valaszto', valasztek: TIPUS_VALASZTEK },
   {
@@ -266,7 +321,7 @@ const VERZIO_MEZOK = [
   },
   { k: 'author', cim: 'Készítő', tipus: 'szoveg' },
   { k: 'prerelease', cim: 'Előzetes (béta) kiadás', tipus: 'kapcsolo' },
-  { k: 'changes', cim: 'Változások ebben a verzióban', tipus: 'lista', teljes: true },
+  { k: 'changes', cim: 'Változások ebben a verzióban', tipus: 'lista', teljes: true, ajanlott: true },
   { k: 'download', cim: 'Letöltés', tipus: 'csoport', mezok: LETOLTES_MEZOK, teljes: true },
 ]
 
@@ -274,13 +329,14 @@ const MOD_SZAKASZOK = [
   {
     cim: 'Alapadatok',
     mezok: [
-      { k: 'name', cim: 'Mod neve', tipus: 'szoveg', slugFrissit: 'slug' },
+      { k: 'name', cim: 'Mod neve', tipus: 'szoveg', slugFrissit: 'slug', kell: true },
       {
         k: 'slug',
         cim: 'URL azonosító',
         tipus: 'szoveg',
         mono: true,
         slugForras: 'name',
+        kell: true,
         sugo: 'Az oldal címe ebből lesz: /modok/<azonosító>. Csak kisbetű, szám és kötőjel.',
       },
       { k: 'gameId', cim: 'Melyik játékhoz?', tipus: 'valaszto', valasztek: 'jatekok' },
@@ -299,6 +355,7 @@ const MOD_SZAKASZOK = [
         cim: 'Rövid leírás (egy mondat)',
         tipus: 'hosszu',
         teljes: true,
+        ajanlott: true,
         sugo: 'Ez jelenik meg a kártyákon és a Google találati listájában.',
       },
       {
@@ -306,6 +363,7 @@ const MOD_SZAKASZOK = [
         cim: 'Részletes leírás',
         tipus: 'bekezdesek',
         teljes: true,
+        ajanlott: true,
         sugo: 'Üres sorral válaszd el a bekezdéseket.',
       },
     ],
@@ -313,7 +371,7 @@ const MOD_SZAKASZOK = [
   {
     cim: 'Képek',
     mezok: [
-      { k: 'cover', cim: 'Borítókép (kártyákon)', tipus: 'kep', mappa: 'mods' },
+      { k: 'cover', cim: 'Borítókép (kártyákon)', tipus: 'kep', mappa: 'mods', ajanlott: true },
       { k: 'banner', cim: 'Banner (adatlap tetején)', tipus: 'kep', mappa: 'mods' },
       { k: 'icon', cim: 'Ikon', tipus: 'kep', mappa: 'mods' },
     ],
@@ -326,9 +384,10 @@ const MOD_SZAKASZOK = [
         cim: 'Címkék',
         tipus: 'lista',
         teljes: true,
+        ajanlott: true,
         sugo: 'Például: Gameplay, Trainer, Utility, Quality of Life, Installer, Launcher.',
       },
-      { k: 'features', cim: 'Funkciók', tipus: 'lista', teljes: true },
+      { k: 'features', cim: 'Funkciók', tipus: 'lista', teljes: true, ajanlott: true },
     ],
   },
   {
@@ -339,6 +398,7 @@ const MOD_SZAKASZOK = [
         cim: 'Követelmények',
         tipus: 'blokkok',
         teljes: true,
+        ajanlott: true,
         cimke: 'Sor',
         cimMezo: 'label',
         soros: true,
@@ -357,6 +417,7 @@ const MOD_SZAKASZOK = [
         cim: 'Telepítési lépések',
         tipus: 'blokkok',
         teljes: true,
+        ajanlott: true,
         cimke: 'Lépés',
         cimMezo: 'title',
         mezok: [
@@ -416,6 +477,7 @@ const MOD_SZAKASZOK = [
         cim: 'Verziók (a legfrissebb legyen elöl)',
         tipus: 'blokkok',
         teljes: true,
+        kell: true,
         cimke: 'Verzió',
         cimMezo: 'version',
         cimElotag: 'v',
@@ -495,14 +557,15 @@ const JATEK_SZAKASZOK = [
   {
     cim: 'Alapadatok',
     mezok: [
-      { k: 'name', cim: 'Rövid név', tipus: 'szoveg', slugFrissit: 'slug' },
-      { k: 'fullName', cim: 'Teljes cím', tipus: 'szoveg' },
+      { k: 'name', cim: 'Rövid név', tipus: 'szoveg', slugFrissit: 'slug', kell: true },
+      { k: 'fullName', cim: 'Teljes cím', tipus: 'szoveg', ajanlott: true },
       {
         k: 'slug',
         cim: 'URL azonosító',
         tipus: 'szoveg',
         mono: true,
         slugForras: 'name',
+        kell: true,
         sugo: '/jatekok/<azonosító>',
       },
       { k: 'releaseYear', cim: 'Megjelenés éve', tipus: 'szam' },
@@ -514,14 +577,20 @@ const JATEK_SZAKASZOK = [
   {
     cim: 'Leírás',
     mezok: [
-      { k: 'shortDescription', cim: 'Rövid leírás', tipus: 'hosszu', teljes: true },
-      { k: 'description', cim: 'Részletes ismertető', tipus: 'bekezdesek', teljes: true },
+      { k: 'shortDescription', cim: 'Rövid leírás', tipus: 'hosszu', teljes: true, ajanlott: true },
+      {
+        k: 'description',
+        cim: 'Részletes ismertető',
+        tipus: 'bekezdesek',
+        teljes: true,
+        ajanlott: true,
+      },
     ],
   },
   {
     cim: 'Képek',
     mezok: [
-      { k: 'cover', cim: 'Borító', tipus: 'kep', mappa: 'games' },
+      { k: 'cover', cim: 'Borító', tipus: 'kep', mappa: 'games', ajanlott: true },
       { k: 'banner', cim: 'Banner', tipus: 'kep', mappa: 'games' },
     ],
   },
@@ -556,7 +625,7 @@ const BEALLITAS_SZAKASZOK = [
   {
     cim: 'Az oldal',
     mezok: [
-      { k: 'name', cim: 'Oldal neve', tipus: 'szoveg' },
+      { k: 'name', cim: 'Oldal neve', tipus: 'szoveg', kell: true },
       { k: 'author', cim: 'Készítő', tipus: 'szoveg' },
       { k: 'brandTop', cim: 'Logó felső sora', tipus: 'szoveg' },
       { k: 'brandBottom', cim: 'Logó alsó sora', tipus: 'szoveg' },
@@ -580,6 +649,7 @@ const BEALLITAS_SZAKASZOK = [
         tipus: 'szoveg',
         mono: true,
         teljes: true,
+        kell: true,
         sugo: 'Egyedi domain bekötése után IDE írd az új címet, különben a Google a régire hivatkozik.',
       },
       { k: 'githubUser', cim: 'GitHub felhasználónév', tipus: 'szoveg', mono: true },
@@ -611,9 +681,17 @@ const BEALLITAS_SZAKASZOK = [
 /* Űrlapmotor                                                          */
 /* ================================================================== */
 
-function mezoBurok(mezo, belso) {
+function mezoBurok(mezo, belso, hiany) {
   const doboz = el('div', { class: 'mezo' + (mezo.teljes ? ' teljes' : '') })
-  doboz.append(el('span', { class: 'mezo-cim', text: mezo.cim }))
+
+  const cimke = el('span', { class: 'mezo-cim', text: mezo.cim })
+  if (hiany === 'kell') {
+    cimke.append(el('span', { class: 'mezo-jel kell', text: 'KÖTELEZŐ' }))
+  } else if (hiany === 'ajanlott') {
+    cimke.append(el('span', { class: 'mezo-jel ajanl', text: 'HIÁNYZIK' }))
+  }
+  doboz.append(cimke)
+
   doboz.append(belso)
   if (mezo.sugo) doboz.append(el('p', { class: 'sugo', text: mezo.sugo }))
   return doboz
@@ -633,6 +711,14 @@ function mezoRajz(objektum, mezo) {
   const ertek = objektum[mezo.k]
   // A szerkesztés megkezdése előtti érték - ebből tudjuk, követte-e a slug a nevet.
   const kiindulasiErtek = ertek
+  const hiany = mezoHiany(objektum, mezo)
+
+  /** A jelzés gépelés közben is frissül, hogy azonnal látszódjon, ha kész. */
+  const jelzestFrissit = (elem) => {
+    const most = mezoHiany(objektum, mezo)
+    elem.classList.toggle('hianyzik', most === 'kell')
+    elem.classList.toggle('ajanlott', most === 'ajanlott')
+  }
 
   switch (mezo.tipus) {
     case 'szoveg':
@@ -640,7 +726,9 @@ function mezoRajz(objektum, mezo) {
     case 'datum': {
       const be = el('input', {
         type: mezo.tipus === 'szam' ? 'number' : mezo.tipus === 'datum' ? 'date' : 'text',
-        class: mezo.mono ? 'mono' : '',
+        class:
+          (mezo.mono ? 'mono ' : '') +
+          (hiany === 'kell' ? 'hianyzik' : hiany === 'ajanlott' ? 'ajanlott' : ''),
         value: ertek ?? '',
         placeholder: mezo.hely ?? '',
         onInput: (e) => {
@@ -650,6 +738,7 @@ function mezoRajz(objektum, mezo) {
           } else {
             objektum[mezo.k] = v
           }
+          jelzestFrissit(e.target)
           jelolValtozas()
         },
         // A név elhagyásakor az URL azonosító magától követi a nevet,
@@ -687,35 +776,40 @@ function mezoRajz(objektum, mezo) {
               },
             }),
           ]),
+          hiany,
         )
       }
-      return mezoBurok(mezo, be)
+      return mezoBurok(mezo, be, hiany)
     }
 
     case 'hosszu': {
       const be = el('textarea', {
+        class: hiany === 'kell' ? 'hianyzik' : hiany === 'ajanlott' ? 'ajanlott' : '',
         onInput: (e) => {
           objektum[mezo.k] = e.target.value
+          jelzestFrissit(e.target)
           jelolValtozas()
         },
       })
       be.value = ertek ?? ''
-      return mezoBurok(mezo, be)
+      return mezoBurok(mezo, be, hiany)
     }
 
     case 'bekezdesek': {
       const be = el('textarea', {
         style: 'min-height:150px',
+        class: hiany === 'kell' ? 'hianyzik' : hiany === 'ajanlott' ? 'ajanlott' : '',
         onInput: (e) => {
           objektum[mezo.k] = e.target.value
             .split(/\n\s*\n/)
             .map((s) => s.trim())
             .filter(Boolean)
+          jelzestFrissit(e.target)
           jelolValtozas()
         },
       })
       be.value = (ertek ?? []).join('\n\n')
-      return mezoBurok(mezo, be)
+      return mezoBurok(mezo, be, hiany)
     }
 
     case 'kapcsolo': {
@@ -744,7 +838,8 @@ function mezoRajz(objektum, mezo) {
       for (const [ertekE, cimE] of valasztekOpciok(mezo)) {
         be.append(el('option', { value: ertekE, selected: ertek === ertekE }, [cimE]))
       }
-      return mezoBurok(mezo, be)
+      if (hiany) be.classList.add(hiany === 'kell' ? 'hianyzik' : 'ajanlott')
+      return mezoBurok(mezo, be, hiany)
     }
 
     case 'lista': {
@@ -793,7 +888,8 @@ function mezoRajz(objektum, mezo) {
           },
         }),
       )
-      return mezoBurok(mezo, sorok)
+      if (hiany) sorok.classList.add(hiany === 'kell' ? 'doboz-hianyzik' : 'doboz-ajanlott')
+      return mezoBurok(mezo, sorok, hiany)
     }
 
     case 'kep': {
@@ -802,8 +898,10 @@ function mezoRajz(objektum, mezo) {
         class: 'mono',
         value: ertek ?? '',
         placeholder: '/images/...',
+        class: hiany === 'kell' ? 'hianyzik' : hiany === 'ajanlott' ? 'ajanlott' : '',
         onInput: (e) => {
           objektum[mezo.k] = e.target.value
+          jelzestFrissit(e.target)
           jelolValtozas()
         },
       })
@@ -850,7 +948,7 @@ function mezoRajz(objektum, mezo) {
             : null,
         ]),
       ])
-      return mezoBurok(mezo, doboz)
+      return mezoBurok(mezo, doboz, hiany)
     }
 
     case 'csoport': {
@@ -933,6 +1031,10 @@ function mezoRajz(objektum, mezo) {
         )
       })
 
+      if (hiany && tomb.length === 0) {
+        doboz.classList.add(hiany === 'kell' ? 'doboz-hianyzik' : 'doboz-ajanlott')
+      }
+
       doboz.append(
         el('button', {
           type: 'button',
@@ -945,7 +1047,7 @@ function mezoRajz(objektum, mezo) {
           },
         }),
       )
-      return mezoBurok(mezo, doboz)
+      return mezoBurok(mezo, doboz, tomb.length === 0 ? hiany : null)
     }
 
     default:
@@ -979,14 +1081,70 @@ function szakaszokRajz(objektum, szakaszok) {
       ;(mezo.teljes ? test : racs).append(rajz)
     }
     if (racs.childElementCount) test.prepend(racs)
-    toredek.append(
-      el('section', { class: 'panel' }, [
-        el('div', { class: 'panel-fej' }, [el('h3', { text: szakasz.cim })]),
-        test,
-      ]),
-    )
+
+    // Pont a fejlécen, hogy összecsukott/hosszú űrlapon is látszódjon,
+    // melyik panelben maradt kitöltetlen mező.
+    const szakaszHiany = hianyokSzamolasa(objektum, szakasz.mezok)
+    const fej = el('div', { class: 'panel-fej' }, [el('h3', { text: szakasz.cim })])
+    if (szakaszHiany.kell || szakaszHiany.ajanlott) {
+      const kell = szakaszHiany.kell > 0
+      fej.append(
+        el('span', {
+          class: 'panel-jelzo ' + (kell ? 'kell' : 'ajanl'),
+          title: kell
+            ? `${szakaszHiany.kell} kötelező mező hiányzik ebben a panelben`
+            : `${szakaszHiany.ajanlott} mező üres ebben a panelben`,
+        }),
+      )
+    }
+
+    toredek.append(el('section', { class: 'panel' }, [fej, test]))
   }
   return toredek
+}
+
+/** Összegző sáv: mi hiányzik még ezen az űrlapon? */
+function hianyOsszegzo(objektum, szakaszok) {
+  const h = urlapHianyai(objektum, szakaszok)
+
+  if (!h.kell && !h.ajanlott) {
+    return el('div', { class: 'hianyosszegzo rendben' }, [
+      el('span', {}, [
+        el('strong', { text: 'Minden mező ki van töltve. ' }),
+        'Mentés, majd Frissítés - és kint van az oldalon.',
+      ]),
+    ])
+  }
+
+  const reszek = []
+  if (h.kell) reszek.push(`${h.kell} kötelező`)
+  if (h.ajanlott) reszek.push(`${h.ajanlott} ajánlott`)
+
+  return el(
+    'div',
+    { class: 'hianyosszegzo' + (h.kell ? '' : ' csak-ajanlott') },
+    [
+      el('span', {}, [
+        el('strong', { text: `${reszek.join(' és ')} mező hiányzik. ` }),
+        h.kell
+          ? 'A pirosan villogó mezők nélkül a mentés nem megy át. '
+          : 'A sárga mezők nélkül is menthetsz, de hiányos lesz az oldal. ',
+      ]),
+      el('button', {
+        type: 'button',
+        class: 'gomb gomb-masodlagos gomb-apro',
+        text: 'Ugrás az elsőhöz',
+        onClick: () => {
+          const cel =
+            document.querySelector('.hianyzik, .doboz-hianyzik') ??
+            document.querySelector('.ajanlott, .doboz-ajanlott')
+          if (!cel) return
+          cel.scrollIntoView({ block: 'center', behavior: 'smooth' })
+          if (typeof cel.focus === 'function') cel.focus({ preventScroll: true })
+        },
+      }),
+    ],
+  )
 }
 
 /* ================================================================== */
@@ -1266,6 +1424,17 @@ function listaOldal({ tomb, index, indexAllit, cimAd, alcimAd, kepAd, ujGomb, uj
               el('span', { class: 'lista-cim', text: cimAd(elem) }),
               el('span', { class: 'lista-alcim', text: alcimAd(elem) }),
             ]),
+            // Pont a lista elemén, ha ebben a modban/játékban hiányzik valami
+            (() => {
+              const h = urlapHianyai(elem, szakaszok)
+              if (!h.kell && !h.ajanlott) return null
+              return el('span', {
+                class: 'panel-jelzo ' + (h.kell ? 'kell' : 'ajanl'),
+                title: h.kell
+                  ? h.kell + ' kötelező mező hiányzik'
+                  : h.ajanlott + ' mező üres',
+              })
+            })(),
           ],
         ),
       ]),
@@ -1296,6 +1465,7 @@ function listaOldal({ tomb, index, indexAllit, cimAd, alcimAd, kepAd, ujGomb, uj
         }),
       ]),
     )
+    lap.append(hianyOsszegzo(aktiv, szakaszok))
     lap.append(szakaszokRajz(aktiv, szakaszok))
   }
 
@@ -1386,6 +1556,7 @@ function lapJatekok() {
 function lapBeallitasok() {
   const lap = el('div', { class: 'lap lap-szeles' })
   lap.append(el('h1', { style: 'font-size:22px;margin-bottom:18px', text: 'Beállítások' }))
+  lap.append(hianyOsszegzo(allapot.adatok.site, BEALLITAS_SZAKASZOK))
   lap.append(szakaszokRajz(allapot.adatok.site, BEALLITAS_SZAKASZOK))
   return lap
 }

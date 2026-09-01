@@ -491,6 +491,119 @@ select:focus {
   outline: none;
 }
 
+/* ---------------- Hiányzó adatok jelzése ---------------- */
+
+/*
+ * Két szint:
+ *   .hianyzik - kötelező mező, enélkül a mentés sem megy át (piros, lüktet)
+ *   .ajanlott - nem kötelező, de enélkül hiányos lesz az oldal (sárga)
+ */
+
+@keyframes zc-luktet {
+  0%,
+  100% {
+    border-color: rgba(214, 31, 39, 0.55);
+    box-shadow: 0 0 0 0 rgba(214, 31, 39, 0);
+  }
+  50% {
+    border-color: var(--blood-400);
+    box-shadow: 0 0 0 3px rgba(214, 31, 39, 0.22);
+  }
+}
+
+input.hianyzik,
+textarea.hianyzik,
+select.hianyzik,
+.doboz-hianyzik {
+  border-color: var(--blood-500);
+  animation: zc-luktet 1.7s ease-in-out infinite;
+}
+
+input.ajanlott,
+textarea.ajanlott,
+select.ajanlott,
+.doboz-ajanlott {
+  border-color: rgba(251, 191, 36, 0.55);
+}
+
+/* Aki kikapcsolta az animációkat, annál is látszik a jelzés - csak nem villog. */
+@media (prefers-reduced-motion: reduce) {
+  input.hianyzik,
+  textarea.hianyzik,
+  select.hianyzik,
+  .doboz-hianyzik {
+    animation: none;
+    box-shadow: 0 0 0 2px rgba(214, 31, 39, 0.3);
+  }
+}
+
+/* Az üres listák és blokkok köré is kell keret, ott nincs beviteli mező. */
+.doboz-hianyzik,
+.doboz-ajanlott {
+  border: 1px solid;
+  padding: 10px;
+}
+
+/* Címke melletti apró jelölés */
+.mezo-jel {
+  margin-left: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.mezo-jel.kell {
+  color: var(--blood-400);
+}
+
+.mezo-jel.ajanl {
+  color: var(--sarga);
+}
+
+/* Pont a panel fejlécén, ha a panelben hiányzik valami */
+.panel-jelzo {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.panel-jelzo.kell {
+  background: var(--blood-500);
+  animation: zc-luktet 1.7s ease-in-out infinite;
+}
+
+.panel-jelzo.ajanl {
+  background: var(--sarga);
+}
+
+/* Összegző sáv az űrlap tetején */
+.hianyosszegzo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 15px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(214, 31, 39, 0.45);
+  background: rgba(214, 31, 39, 0.08);
+  font-size: 13px;
+}
+
+.hianyosszegzo.csak-ajanlott {
+  border-color: rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.07);
+}
+
+.hianyosszegzo.rendben {
+  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(52, 211, 153, 0.07);
+}
+
+.hianyosszegzo .gomb {
+  margin-left: auto;
+}
+
 input.hibas,
 textarea.hibas {
   border-color: var(--blood-500);
