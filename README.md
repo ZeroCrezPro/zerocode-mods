@@ -11,18 +11,89 @@ React + TypeScript + Vite + Tailwind CSS, statikusan előrenderelve, Cloudflare 
 
 ## Tartalomjegyzék
 
-1. [Gyors indítás](#gyors-indítás)
-2. [Könyvtárszerkezet](#könyvtárszerkezet)
-3. [Hogyan adok hozzá új játékot?](#hogyan-adok-hozzá-új-játékot)
-4. [Hogyan adok hozzá új modot?](#hogyan-adok-hozzá-új-modot)
-5. [Hogyan adok ki új verziót?](#hogyan-adok-ki-új-verziót)
-6. [Hogyan működik a letöltés (GitHub Releases)?](#hogyan-működik-a-letöltés-github-releases)
-7. [Hogyan változtatom meg a letöltési URL-t?](#hogyan-változtatom-meg-a-letöltési-url-t)
-8. [Hogyan adok hozzá képet?](#hogyan-adok-hozzá-képet)
-9. [Hogyan publikálok frissítést?](#hogyan-publikálok-frissítést)
-10. [SEO és előrenderelés](#seo-és-előrenderelés)
-11. [Cloudflare Pages beállítás](#cloudflare-pages-beállítás)
-12. [Gyakori hibák](#gyakori-hibák)
+1. [A szerkesztő program](#a-szerkesztő-program)
+2. [Gyors indítás](#gyors-indítás)
+3. [Könyvtárszerkezet](#könyvtárszerkezet)
+4. [Hogyan adok hozzá új játékot?](#hogyan-adok-hozzá-új-játékot)
+5. [Hogyan adok hozzá új modot?](#hogyan-adok-hozzá-új-modot)
+6. [Hogyan adok ki új verziót?](#hogyan-adok-ki-új-verziót)
+7. [Hogyan működik a letöltés (GitHub Releases)?](#hogyan-működik-a-letöltés-github-releases)
+8. [Hogyan változtatom meg a letöltési URL-t?](#hogyan-változtatom-meg-a-letöltési-url-t)
+9. [Hogyan adok hozzá képet?](#hogyan-adok-hozzá-képet)
+10. [Hogyan publikálok frissítést?](#hogyan-publikálok-frissítést)
+11. [SEO és előrenderelés](#seo-és-előrenderelés)
+12. [Cloudflare Pages beállítás](#cloudflare-pages-beállítás)
+13. [Gyakori hibák](#gyakori-hibák)
+
+---
+
+## A szerkesztő program
+
+A weboldal tartalma **programból is szerkeszthető**, kód nélkül. A projekt gyökerében
+lévő `ZeroCode Szerkeszto.exe` egy asztali alkalmazás, amely ugyanazt a sötét-piros
+ZeroCode felületet használja, mint maga az oldal.
+
+**Indítás:** kattints duplán a `ZeroCode Szerkeszto.exe` fájlra.
+
+### Mit tud?
+
+| Lap | Mire való |
+| --- | --- |
+| **Áttekintés** | Statisztika, legutóbbi kiadások, gyors gombok |
+| **Modok** | Minden mod minden mezője: leírás, funkciók, telepítési lépések, követelmények, kompatibilitás, képek, verziók, változási napló, GYIK |
+| **Játékok** | Játékok felvétele és szerkesztése |
+| **Beállítások** | Oldal neve, mottó, éles cím, GitHub felhasználó és repók |
+| **Képek** | Képek feltöltése a `public/images` alá, azonnal használhatók |
+| **Előnézet** | A legyártott oldal megtekintése a programon belül |
+
+### A két fontos gomb
+
+**Mentés** (vagy `Ctrl` + `S`) – a módosításokat a gépeden lévő adatfájlokba írja
+(`src/data/*.json`). Mentés előtt a program ellenőrzi az adatokat, és magyarul jelzi,
+ha valami hiányzik vagy hibás. Minden mentésről biztonsági másolat készül a
+`.szerkeszto-mentes` mappába (a legutóbbi 40 megmarad).
+
+**Frissítés** – ez teszi ki a módosításokat az élő weboldalra. Négy lépést futtat le,
+és a naplóban élőben mutatja, hol tart:
+
+1. legyártja a weboldalt (`npm run build`),
+2. elmenti a változásokat a verziókövetőbe (`git commit`),
+3. feltölti GitHubra (`git push`),
+4. publikálja a Cloudflare Pages-re.
+
+Ha bármelyik lépés hibára fut, a napló pontosan megmutatja, melyik és miért – a
+korábbi élő oldal ilyenkor változatlan marad.
+
+### Mire van szükség?
+
+- **Node.js 20+** – enélkül a program nem tud buildelni (https://nodejs.org, LTS).
+- **.NET 10 asztali futtatókörnyezet** – az EXE ezzel indul.
+- A Frissítés gombhoz **bejelentkezett `git` és `wrangler`** (ezt egyszer kell beállítani).
+
+A programnak a weboldal mappájában (vagy annak egy almappájában) kell lennie – onnan
+találja meg a projektet.
+
+### Ha nem indul az EXE
+
+Böngészőből is használható ugyanaz a felület:
+
+```bash
+npm run szerkeszto
+```
+
+A parancs kiírja a megnyitandó címet (`http://127.0.0.1:...`), amit be lehet illeszteni
+a böngészőbe. A kiszolgáló csak a saját géped felől érhető el, és minden kérésnél
+egyszeri kulcsot vár.
+
+### Az EXE újrafordítása
+
+```bash
+npm run szerkeszto:exe
+```
+
+Ehhez a .NET SDK kell (https://dotnet.microsoft.com/download). A forrás az
+`eszkoz/szerkeszto/` mappában van: `szerver.mjs` (helyi kiszolgáló), `ui/` (felület),
+`program/` (az EXE C# forrása).
 
 ---
 
@@ -36,6 +107,8 @@ npm run preview      # a legyártott dist/ kipróbálása
 npm run typecheck    # TypeScript ellenőrzés
 npm run lint         # gyors linter
 npm run placeholders # helyőrző SVG képek újragenerálása
+npm run szerkeszto     # a szerkesztő felület böngészőben
+npm run szerkeszto:exe # a szerkesztő EXE újrafordítása (.NET SDK kell)
 ```
 
 Node.js 20 vagy újabb szükséges.
@@ -58,12 +131,19 @@ zerocode-mods/
 ├── scripts/
 │   ├── prerender.mjs           # statikus HTML gyártás minden útvonalra
 │   └── make-placeholders.mjs   # helyőrző SVG-k generálása
+├── eszkoz/szerkeszto/           # a szerkesztő program forrása
+│   ├── szerver.mjs             # helyi kiszolgáló (adatok, képek, publikálás)
+│   ├── ui/                     # a szerkesztő felülete
+│   ├── program/                # az EXE C# forrása
+│   └── keszit.mjs              # az EXE fordítása
+├── ZeroCode Szerkeszto.exe      # a szerkesztő program (dupla kattintás)
 ├── src/
-│   ├── data/                   # >>> ITT KELL SZERKESZTENI <<<
+│   ├── data/                   # >>> ITT VAN MINDEN TARTALOM <<<
+│   │   ├── site.json           # globális beállítások (a szerkesztő ezt írja)
+│   │   ├── games.json          # játékok
+│   │   ├── mods.json           # modok, verziók, changelog, GYIK
 │   │   ├── types.ts            # adattípusok (mezők leírása kommentben)
-│   │   ├── site.ts             # globális beállítások, GitHub felhasználó, URL
-│   │   ├── games.ts            # játékok
-│   │   ├── mods.ts             # modok, verziók, changelog, GYIK
+│   │   ├── site.ts / games.ts / mods.ts   # a JSON betöltése, típusokkal
 │   │   └── index.ts            # lekérdezések (legfrissebb verzió, statisztika...)
 │   ├── lib/
 │   │   ├── download.ts         # GitHub Releases letöltési URL-ek
@@ -101,10 +181,15 @@ Az angol URL-ek (`/mods`, `/games`, `/latest`, `/about`) 301-gyel átirányítan
 
 ## Hogyan adok hozzá új játékot?
 
-1. Nyisd meg a `src/data/games.ts` fájlt.
-2. Másolj le egy meglévő objektumot a `games` tömbben, és írd át:
+**A legegyszerűbb út:** indítsd el a `ZeroCode Szerkeszto.exe` programot, menj a **Játékok**
+lapra, és nyomd meg a **+ Új játék** gombot. Minden mezőhöz tartozik magyarázat.
 
-```ts
+Kézzel, fájlból:
+
+1. Nyisd meg a `src/data/games.json` fájlt.
+2. Másolj le egy meglévő objektumot a listában, és írd át:
+
+```json
 {
   id: 'gta-vice-city',                  // egyedi azonosító, a modok erre hivatkoznak
   slug: 'gta-vice-city',                // az URL: /jatekok/gta-vice-city
@@ -134,8 +219,13 @@ az oldal automatikusan egy stílusos ZeroCode helyőrzőt rajzol a nevek kezdőb
 
 ## Hogyan adok hozzá új modot?
 
-1. Nyisd meg a `src/data/mods.ts` fájlt.
-2. Másolj le egy teljes mod objektumot, és írd át. A kötelező mezők:
+**A legegyszerűbb út:** a `ZeroCode Szerkeszto.exe` programban a **Modok** lap, majd
+**+ Új mod**. A program végigvezet minden mezőn, és mentés előtt ellenőrzi őket.
+
+Kézzel, fájlból:
+
+1. Nyisd meg a `src/data/mods.json` fájlt.
+2. Másolj le egy teljes mod objektumot, és írd át. A mezők:
 
 | Mező | Mit jelent |
 | --- | --- |
@@ -166,7 +256,11 @@ az oldal automatikusan egy stílusos ZeroCode helyőrzőt rajzol a nevek kezdőb
 
 ## Hogyan adok ki új verziót?
 
-Két lépés, mindkettő a `src/data/mods.ts`-ben, az adott modnál:
+**A legegyszerűbb út:** a szerkesztő program **Modok** lapján, az adott modnál a
+**Letölthető verziók** panelben nyomd meg a **+ Új verzió** gombot, majd a **Változási
+napló** panelben a **+ Új bejegyzés** gombot.
+
+Kézzel, fájlból – két lépés, mindkettő a `src/data/mods.json`-ban, az adott modnál:
 
 **1. Új elem a `versions` tömb ELEJÉRE:**
 
@@ -246,7 +340,8 @@ Vagy a GitHub webes felületén: **Releases → Draft a new release → fájl be
 
 ## Hogyan változtatom meg a letöltési URL-t?
 
-- **Minden modra egyszerre:** `src/data/site.ts` → `githubUser` és `releasesRepo`.
+- **Minden modra egyszerre:** a szerkesztő **Beállítások** lapján a *GitHub felhasználónév*
+  és a *Modfájlok repója* mező (fájlban: `src/data/site.json`).
 - **Egy modra:** az adott verzió `download` mezőjében add meg a `repo` (és ha kell, `owner`) mezőt:
 
 ```ts
@@ -285,6 +380,11 @@ valódi képekre – csak az adatfájlban írd át a kiterjesztést.
 
 ## Hogyan publikálok frissítést?
 
+**A legegyszerűbb út:** a szerkesztő programban a jobb felső **Frissítés** gomb. Mindent
+elvégez: build, mentés, feltöltés, publikálás – és élőben mutatja a naplót.
+
+Parancssorból ugyanez:
+
 ```bash
 npm run build          # ellenőrizd, hogy hibátlanul lefut
 git add -A
@@ -317,7 +417,7 @@ Az oldal SPA, de a build **minden útvonalhoz legyárt egy kész HTML fájlt**
 Ha új oldalt (route-ot) veszel fel az `App.tsx`-be, add hozzá az `allRoutes()` listához is az
 `src/entry-server.tsx` fájlban – különben nem készül hozzá statikus HTML.
 
-Az oldal címét a `src/data/site.ts` `url` mezője adja. **Egyedi domain bekötése után ezt írd át**,
+Az oldal címét a `src/data/site.json` fájl `url` mezője adja (a szerkesztőben: Beállítások → Az oldal éles címe). **Egyedi domain bekötése után ezt írd át**,
 különben a canonical és az Open Graph linkek a régi címre mutatnak.
 
 ---
@@ -351,7 +451,8 @@ működik, a kettő nem keverhető.
 ### Egyedi domain
 
 Cloudflare Pages → a projekt → **Custom domains** → *Set up a domain*. Az oldal újraépítése
-nélkül működik; utána a `src/data/site.ts` `url` mezőjét írd át, és pushold.
+nélkül működik; utána a szerkesztő **Beállítások** lapján írd át az éles címet, és nyomj
+**Frissítés**-t.
 
 ---
 
@@ -369,7 +470,17 @@ Az útvonal a `public/` mappához képest értendő, `/images/...`-szal kezdve. 
 nem törik el, csak a ZeroCode helyőrzőt rajzolja ki helyette.
 
 **„Nem találom az új modot a keresőben”**
-Futott a `npm run build`? A keresés az adatfájlokból épül, tehát csak build után frissül.
+Futott a `npm run build` (vagy a szerkesztőben az *Előnézet frissítése*)? A keresés az
+adatfájlokból épül, tehát csak build után frissül.
+
+**„A szerkesztő nem indul el”**
+Telepítve van a Node.js? Ellenőrzés: `node --version`. Ha nincs, töltsd le a
+https://nodejs.org oldalról (LTS). Ha az EXE indul, de üres marad, próbáld a
+`npm run szerkeszto` parancsot, és nyisd meg a kiírt címet böngészőben.
+
+**„A Frissítés gomb hibára fut”**
+A napló megmutatja, melyik lépésnél. A leggyakoribb ok, hogy a `git` vagy a `wrangler`
+nincs bejelentkezve ezen a gépen. A korábbi élő oldal ilyenkor változatlan marad.
 
 ---
 

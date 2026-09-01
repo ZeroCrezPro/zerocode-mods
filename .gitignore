@@ -42,3 +42,10 @@ pnpm-debug.log*
 *.exe
 *.msi
 *.iso
+
+# ZeroCode Szerkesztő (fordított program és biztonsági mentések)
+eszkoz/szerkeszto/program/bin/
+eszkoz/szerkeszto/program/obj/
+eszkoz/szerkeszto/program/kiadas/
+eszkoz/szerkeszto/program/ikon.ico
+.szerkeszto-mentes/

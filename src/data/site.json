@@ -1,0 +1,15 @@
+{
+  "name": "ZeroCode Mods",
+  "brandTop": "ZEROCODE",
+  "brandBottom": "MODS",
+  "author": "ZeroCode",
+  "tagline": "Játékmodok, eszközök és fejlesztések egy helyen.",
+  "description": "ZeroCode Mods - saját készítésű játékmodok, trainerek és eszközök PC-re. Ingyenes letöltés, verziókövetés, telepítési útmutató és változási napló.",
+  "url": "https://zerocode-mods.pages.dev",
+  "githubUser": "ZeroCrezPro",
+  "githubRepo": "zerocode-mods",
+  "releasesRepo": "zerocode-mods-releases",
+  "email": "papucslevi@gmail.com",
+  "ogImage": "/images/og-default.svg",
+  "totalDownloadsOverride": null
+}

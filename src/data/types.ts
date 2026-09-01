@@ -151,3 +151,22 @@ export interface Mod {
   /** Első kiadás dátuma (ISO) */
   createdAt: string
 }
+
+/** A site.json szerkezete (globális oldalbeállítások). */
+export interface SiteConfig {
+  name: string
+  brandTop: string
+  brandBottom: string
+  author: string
+  tagline: string
+  description: string
+  /** Éles cím, egyedi domain bekötése után ezt kell átírni */
+  url: string
+  githubUser: string
+  githubRepo: string
+  releasesRepo: string
+  email: string
+  ogImage: string
+  /** Összesített letöltésszám a főoldali statisztikához; null = nincs mérve */
+  totalDownloadsOverride: number | null
+}
