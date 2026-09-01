@@ -67,7 +67,7 @@ export function quickSearch(query: string, limit = 8): QuickResult[] {
       title: m.name,
       subtitle: gameOf(m)?.name ?? 'Mod',
       href: `/modok/${m.slug}`,
-      image: m.icon ?? m.cover,
+      image: m.icon || m.cover,
     }))
   const gameHits: QuickResult[] = games
     .filter((g) => matches(query, haystackForGame(g)))

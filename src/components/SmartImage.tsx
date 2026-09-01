@@ -15,6 +15,7 @@ export function SmartImage({
   ratio = 'aspect-[16/9]',
   eager = false,
   fallbackText,
+  dekoracio = false,
 }: {
   src?: string
   alt: string
@@ -23,8 +24,19 @@ export function SmartImage({
   ratio?: string
   eager?: boolean
   fallbackText?: string
+  /**
+   * Díszítő kép (pl. elmosott háttér a fejlécben). Ha nincs kép, semmit nem
+   * rajzolunk a helyére - a helyőrző betűk ott csak zavaró szellemképként
+   * jelennének meg.
+   */
+  dekoracio?: boolean
 }) {
   const [failed, setFailed] = useState(false)
+
+  if (dekoracio && (!src || failed)) {
+    return <div className={cx('bg-ink-950', ratio, className)} aria-hidden />
+  }
+
   const initials = (fallbackText ?? alt)
     .split(/\s+/)
     .filter(Boolean)

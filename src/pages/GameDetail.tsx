@@ -26,7 +26,7 @@ export default function GameDetail() {
         title={pageTitle(`${game.name} modok`)}
         description={`${game.fullName} - ${gameMods.length} ZeroCode mod és eszköz. ${game.shortDescription}`}
         path={path}
-        image={game.banner ?? game.cover}
+        image={game.banner || game.cover}
         jsonLd={[
           {
             '@context': 'https://schema.org',
@@ -56,12 +56,13 @@ export default function GameDetail() {
       <section className="relative overflow-hidden border-b border-ink-700">
         <div className="absolute inset-0" aria-hidden>
           <SmartImage
-            src={game.banner ?? game.cover}
+            src={game.banner || game.cover}
             alt=""
             ratio="h-full"
             className="h-full"
             eager
             imgClassName="opacity-15 blur-[2px]"
+            dekoracio
           />
           <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/85 to-ink-950/60" />
         </div>
@@ -151,19 +152,21 @@ export default function GameDetail() {
       </section>
 
       <div className="zc-container py-12 sm:py-16">
-        <section className="mb-12">
-          <SectionHead eyebrow="A játékról" title="Ismertető" />
-          <div className="max-w-3xl space-y-4">
-            {game.description.map((para) => (
-              <p key={para.slice(0, 40)} className="text-sm leading-relaxed text-ash-300">
-                {para}
-              </p>
-            ))}
-          </div>
-        </section>
+        {game.description.length > 0 && (
+          <section className="mb-12">
+            <SectionHead eyebrow="A játékról" title="Ismertető" />
+            <div className="max-w-3xl space-y-4">
+              {game.description.map((para) => (
+                <p key={para.slice(0, 40)} className="text-sm leading-relaxed text-ash-300">
+                  {para}
+                </p>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section>
-          <SectionHead eyebrow={game.name} title="ZeroCode modok ehhez a játékhoz" />
+          <SectionHead eyebrow="Letölthető" title="ZeroCode modok ehhez a játékhoz" />
           {gameMods.length === 0 ? (
             <Empty title="Ehhez a játékhoz még nincs kiadott mod.">
               Dolgozom rajta - nézz vissza később, vagy kövesd a GitHub oldalt.

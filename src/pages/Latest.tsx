@@ -69,7 +69,7 @@ export default function Latest() {
               >
                 <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5">
                   <SmartImage
-                    src={mod.icon ?? mod.cover}
+                    src={mod.icon || mod.cover}
                     alt=""
                     ratio="aspect-square"
                     eager={i === 0}

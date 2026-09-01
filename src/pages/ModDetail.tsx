@@ -48,7 +48,7 @@ export default function ModDetail() {
         title={`${game?.name ?? ''} ${mod.name} - Letöltés | ${site.name}`.trim()}
         description={mod.shortDescription}
         path={path}
-        image={mod.banner ?? mod.cover}
+        image={mod.banner || mod.cover}
         type="article"
         jsonLd={[
           {
@@ -91,12 +91,13 @@ export default function ModDetail() {
       <section className="relative overflow-hidden border-b border-ink-700">
         <div className="absolute inset-0" aria-hidden>
           <SmartImage
-            src={mod.banner ?? mod.cover}
+            src={mod.banner || mod.cover}
             alt=""
             ratio="h-full"
             className="h-full"
             eager
             imgClassName="opacity-15 blur-[2px]"
+            dekoracio
           />
           <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/88 to-ink-950/55" />
         </div>
@@ -115,7 +116,7 @@ export default function ModDetail() {
 
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-7">
             <SmartImage
-              src={mod.icon ?? mod.cover}
+              src={mod.icon || mod.cover}
               alt={`${mod.name} ikon`}
               ratio="aspect-square"
               eager
