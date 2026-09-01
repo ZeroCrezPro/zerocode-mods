@@ -19,7 +19,7 @@
       "VERZIÓ: 1.8.1"
     ],
     "cover": "/images/mods/i1.png",
-    "banner": "",
+    "banner": "/images/mods/i2.png",
     "icon": "",
     "tags": [
       "Mod"
@@ -49,11 +49,11 @@
     "screenshots": [],
     "versions": [
       {
-        "version": "1.0.0",
+        "version": "1.8.1",
         "releaseDate": "2026-09-01",
         "size": "1.4 MB",
         "platform": "Windows",
-        "type": "ZIP",
+        "type": "Installer",
         "author": "ZeroCode",
         "changes": [
           "Első kiadás"
