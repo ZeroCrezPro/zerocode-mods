@@ -11,5 +11,7 @@
   "releasesRepo": "zerocode-mods-releases",
   "email": "papucslevi@gmail.com",
   "ogImage": "/images/og-default.svg",
-  "totalDownloadsOverride": null
+  "totalDownloadsOverride": null,
+  "logo": "",
+  "favicon": ""
 }

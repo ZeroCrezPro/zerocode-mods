@@ -399,9 +399,28 @@ const MOD_SZAKASZOK = [
   {
     cim: 'Képek',
     mezok: [
-      { k: 'cover', cim: 'Borítókép (kártyákon)', tipus: 'kep', mappa: 'mods', ajanlott: true },
-      { k: 'banner', cim: 'Banner (adatlap tetején)', tipus: 'kep', mappa: 'mods' },
-      { k: 'icon', cim: 'Ikon', tipus: 'kep', mappa: 'mods' },
+      {
+        k: 'cover',
+        cim: 'Borítókép (kártyákon)',
+        tipus: 'kep',
+        mappa: 'mods',
+        ajanlott: true,
+        sugo: 'Fekvő, 16:9 - ajánlott 1200x675. Ez látszik a modok listájában.',
+      },
+      {
+        k: 'banner',
+        cim: 'Banner (adatlap tetején)',
+        tipus: 'kep',
+        mappa: 'mods',
+        sugo: 'Széles, elmosva a fejléc mögé kerül - ajánlott 1920x640. Üresen a borítót használja.',
+      },
+      {
+        k: 'icon',
+        cim: 'Ikon (négyzetes)',
+        tipus: 'kep',
+        mappa: 'mods',
+        sugo: 'Négyzetes, 1:1 - ajánlott 256x256. A keresőben és a Legújabb lapon látszik.',
+      },
     ],
   },
   {
@@ -618,8 +637,28 @@ const JATEK_SZAKASZOK = [
   {
     cim: 'Képek',
     mezok: [
-      { k: 'cover', cim: 'Borító', tipus: 'kep', mappa: 'games', ajanlott: true },
-      { k: 'banner', cim: 'Banner', tipus: 'kep', mappa: 'games' },
+      {
+        k: 'cover',
+        cim: 'Borító (álló)',
+        tipus: 'kep',
+        mappa: 'games',
+        ajanlott: true,
+        sugo: 'Álló, 3:4 - ajánlott 600x800. A játékkártyán és az adatlapon látszik.',
+      },
+      {
+        k: 'banner',
+        cim: 'Banner (adatlap tetején)',
+        tipus: 'kep',
+        mappa: 'games',
+        sugo: 'Széles, elmosva a fejléc mögé kerül - ajánlott 1920x640. Üresen a borítót használja.',
+      },
+      {
+        k: 'icon',
+        cim: 'Ikon (négyzetes)',
+        tipus: 'kep',
+        mappa: 'games',
+        sugo: 'Négyzetes, 1:1 - ajánlott 256x256. A keresőben és a modok oldalsávjában látszik.',
+      },
     ],
   },
   {
@@ -692,9 +731,34 @@ const BEALLITAS_SZAKASZOK = [
     ],
   },
   {
+    cim: 'Az oldal képei',
+    mezok: [
+      {
+        k: 'logo',
+        cim: 'Logó (fejlécben)',
+        tipus: 'kep',
+        mappa: 'mods',
+        sugo: 'Négyzetes, ajánlott 128x128 (PNG vagy SVG). Üresen a beépített ZeroCode jel látszik.',
+      },
+      {
+        k: 'favicon',
+        cim: 'Böngészőfül ikonja',
+        tipus: 'kep',
+        mappa: 'mods',
+        sugo: 'Kicsi, négyzetes - ajánlott 64x64 vagy SVG. Ez látszik a fül címkéjén.',
+      },
+      {
+        k: 'ogImage',
+        cim: 'Megosztókép',
+        tipus: 'kep',
+        mappa: 'mods',
+        sugo: 'Ez jelenik meg, ha valaki megosztja az oldalt - ajánlott 1200x630.',
+      },
+    ],
+  },
+  {
     cim: 'Egyéb',
     mezok: [
-      { k: 'ogImage', cim: 'Megosztókép', tipus: 'kep', mappa: 'mods' },
       {
         k: 'totalDownloadsOverride',
         cim: 'Összes letöltés (statisztika)',
@@ -1598,6 +1662,7 @@ function ujJatek() {
     description: [],
     cover: '',
     banner: '',
+    icon: '',
     externalLinks: [],
     order: allapot.adatok.games.length + 1,
   }

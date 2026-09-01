@@ -440,9 +440,9 @@ export default function ModDetail() {
                 className="mt-2 flex items-center gap-3 transition-colors hover:text-blood-400"
               >
                 <SmartImage
-                  src={game.cover}
+                  src={game.icon || game.cover}
                   alt=""
-                  ratio="aspect-[3/4]"
+                  ratio={game.icon ? 'aspect-square' : 'aspect-[3/4]'}
                   className="w-12 shrink-0 border border-ink-700"
                   fallbackText={game.name}
                 />

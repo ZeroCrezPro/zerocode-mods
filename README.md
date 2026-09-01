@@ -426,16 +426,26 @@ download: { kind: 'github-latest', file: 'valami.zip', repo: 'masik-repo' },
 3. Képernyőképeknél mindig adj meg értelmes `alt` szöveget – ez akadálymentességi követelmény
    és a keresőnek is számít.
 
-Ajánlott méretek:
+Minden képhelyet külön lehet megadni a szerkesztőben. Ahol nincs kép, ott a felület
+vagy visszaesik egy másikra (pl. ikon helyett a borítóra), vagy egy ZeroCode helyőrzőt
+rajzol – törött kép sehol nem jelenik meg.
 
-| Felhasználás | Méret | Formátum |
+| Hol | Mire való | Ajánlott méret |
 | --- | --- | --- |
-| Játékborító | 600 × 800 | `.webp` vagy `.jpg` |
-| Játék/mod banner | 1920 × 640 | `.webp` vagy `.jpg` |
-| Mod borító (kártya) | 1200 × 675 | `.webp` vagy `.jpg` |
-| Mod ikon | 256 × 256 | `.png` vagy `.svg` |
-| Képernyőkép | 1280 × 720 vagy 1920 × 1080 | `.webp` vagy `.jpg` |
-| Közösségi megosztókép | 1200 × 630 | `.jpg` vagy `.png` |
+| **Mod** – borítókép | a modok listájában látszó kép | 1200 × 675 (16:9) |
+| **Mod** – banner | elmosva az adatlap fejléce mögé | 1920 × 640 |
+| **Mod** – ikon | kereső, Legújabb lap, adatlap | 256 × 256 (1:1) |
+| **Mod** – képernyőképek | a Képek galéria | 1280 × 720 vagy 1920 × 1080 |
+| **Játék** – borító | játékkártya és adatlap | 600 × 800 (3:4) |
+| **Játék** – banner | elmosva az adatlap fejléce mögé | 1920 × 640 |
+| **Játék** – ikon | kereső, a mod oldalsávja | 256 × 256 (1:1) |
+| **Oldal** – logó | a fejléc és a lábléc jele | 128 × 128 |
+| **Oldal** – böngészőfül ikonja | a fül címkéjén látszó ikon | 64 × 64 vagy SVG |
+| **Oldal** – megosztókép | ha valaki megosztja a linket | 1200 × 630 |
+
+Formátum: fényképszerű képhez `.webp` vagy `.jpg`, átlátszó hátterű jelhez `.png`
+vagy `.svg`. A szerkesztő kiírja a feltöltött képek méretét, és sárgával jelzi, ha egy
+kép 600 kB fölött van – az már lassítja az oldal betöltését.
 
 **Kép nélkül is működik minden.** Ha egy modhoz vagy játékhoz nincs kép, a felület
 magától kirajzol egy ZeroCode helyőrzőt a név kezdőbetűivel – semmi nem törik el.

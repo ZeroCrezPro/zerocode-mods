@@ -33,6 +33,9 @@ export function Footer() {
     <footer className="mt-20 border-t border-ink-700 bg-ink-900">
       <div className="zc-container grid gap-10 py-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div>
+          {site.logo && (
+            <img src={site.logo} alt="" aria-hidden className="mb-3 h-12 w-12 object-contain" />
+          )}
           <p className="text-[15px] font-black tracking-[0.18em] text-ash-100">{site.brandTop}</p>
           <p className="mt-1 text-[10px] font-bold tracking-[0.42em] text-blood-400">
             {site.brandBottom}

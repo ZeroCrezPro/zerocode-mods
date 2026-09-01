@@ -21,13 +21,22 @@ function Brand() {
       className="group flex items-center gap-3"
       aria-label={`${site.name} - főoldal`}
     >
-      <span
-        aria-hidden
-        className="relative flex h-10 w-10 shrink-0 items-center justify-center border border-blood-600/60 bg-blood-600/10 font-mono text-base font-black text-blood-400 transition-colors group-hover:bg-blood-600 group-hover:text-white"
-      >
-        Z
-        <span className="absolute -right-px -bottom-px h-2 w-2 bg-blood-500" />
-      </span>
+      {site.logo ? (
+        <img
+          src={site.logo}
+          alt=""
+          aria-hidden
+          className="h-10 w-10 shrink-0 object-contain"
+        />
+      ) : (
+        <span
+          aria-hidden
+          className="relative flex h-10 w-10 shrink-0 items-center justify-center border border-blood-600/60 bg-blood-600/10 font-mono text-base font-black text-blood-400 transition-colors group-hover:bg-blood-600 group-hover:text-white"
+        >
+          Z
+          <span className="absolute -right-px -bottom-px h-2 w-2 bg-blood-500" />
+        </span>
+      )}
       <span className="flex flex-col leading-none">
         <span className="text-[15px] font-black tracking-[0.18em] text-ash-100">
           {site.brandTop}

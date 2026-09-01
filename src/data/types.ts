@@ -111,8 +111,12 @@ export interface Game {
   shortDescription: string
   /** Bekezdésekre bontott ismertető */
   description: string[]
+  /** Álló borító (3:4) a kártyákon és az adatlapon */
   cover: string
+  /** Széles háttérkép (16:5) az adatlap tetején */
   banner?: string
+  /** Kis négyzetes jel (1:1) a listákban */
+  icon?: string
   externalLinks?: ExternalLink[]
   /** Sorrend a listákban (kisebb = előrébb) */
   order?: number
@@ -164,6 +168,11 @@ export interface SiteConfig {
   githubRepo: string
   releasesRepo: string
   email: string
+  /** Fejléc logó képe. Üresen a beépített ZeroCode jel látszik. */
+  logo: string
+  /** Böngészőfül ikonja. Üresen a beépített favicon.svg. */
+  favicon: string
+  /** Közösségi megosztókép (1200x630) */
   ogImage: string
   /** Összesített letöltésszám a főoldali statisztikához; null = nincs mérve */
   totalDownloadsOverride: number | null

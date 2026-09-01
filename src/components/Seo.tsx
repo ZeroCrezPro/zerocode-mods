@@ -38,6 +38,7 @@ export function renderHeadTags(data: SeoData): string {
       .replace(/"/g, '&quot;')
 
   const tags = [
+    `<link rel="icon" href="${esc(site.favicon || '/favicon.svg')}" />`,
     `<title>${esc(title)}</title>`,
     `<meta name="description" content="${esc(data.description)}" />`,
     `<link rel="canonical" href="${esc(url)}" />`,
@@ -103,6 +104,15 @@ export function Seo(data: SeoData) {
     setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', data.title)
     setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', data.description)
     setMeta('meta[name="twitter:image"]', 'name', 'twitter:image', image)
+
+    // Böngészőfül ikonja (a beállításokból, vagy a beépített alapértelmezett)
+    let ikon = document.head.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (!ikon) {
+      ikon = document.createElement('link')
+      ikon.rel = 'icon'
+      document.head.appendChild(ikon)
+    }
+    ikon.href = site.favicon || '/favicon.svg'
 
     let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
     if (!link) {

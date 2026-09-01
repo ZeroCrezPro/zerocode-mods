@@ -76,7 +76,7 @@ export function quickSearch(query: string, limit = 8): QuickResult[] {
       title: g.name,
       subtitle: `${mods.filter((m) => m.gameId === g.id).length} mod`,
       href: `/jatekok/${g.slug}`,
-      image: g.cover,
+      image: g.icon || g.cover,
     }))
   return [...modHits, ...gameHits].slice(0, limit)
 }

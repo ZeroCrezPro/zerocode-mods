@@ -394,33 +394,41 @@ a {
 
 /* ---------------- Panel ---------------- */
 
+/*
+ * Egy panel egy összetartozó adatcsoport (Alapadatok, Leírás, Képek...).
+ * A fejléce jól elkülönül, hogy hosszú űrlapon is látszódjon, hol kezdődik
+ * és hol ér véget egy csoport.
+ */
 .panel {
-  border: 1px solid var(--ink-700);
+  border: 1px solid var(--ink-600);
   background: var(--ink-900);
-  margin-bottom: 18px;
+  margin-bottom: 26px;
 }
 
 .panel-fej {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--ink-700);
-  background: var(--ink-850);
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ink-600);
+  background:
+    linear-gradient(90deg, rgba(179, 22, 31, 0.18) 0%, rgba(179, 22, 31, 0) 45%),
+    var(--ink-800);
 }
 
 .panel-fej h2,
 .panel-fej h3 {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
+  color: var(--ash-100);
 }
 
 .panel-fej::before {
   content: '';
-  width: 3px;
-  height: 13px;
+  width: 4px;
+  height: 19px;
   background: var(--blood-500);
   flex-shrink: 0;
 }
@@ -432,7 +440,7 @@ a {
 }
 
 .panel-test {
-  padding: 16px;
+  padding: 18px 16px;
 }
 
 /* ---------------- Űrlap ---------------- */
@@ -448,12 +456,12 @@ a {
 .mezo > label,
 .mezo-cim {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ash-400);
+  color: var(--ash-300);
 }
 
 .sugo {
@@ -698,15 +706,16 @@ textarea.hibas {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--ink-700);
-  background: var(--ink-800);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--ink-600);
+  background: var(--ink-700);
 }
 
 .blokk-cim {
   font-size: 12px;
   font-weight: 700;
-  color: var(--ash-200);
+  letter-spacing: 0.04em;
+  color: var(--ash-100);
 }
 
 .blokk-fej .jobbra {
