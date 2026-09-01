@@ -65,11 +65,17 @@ export default function Mods() {
     setParams(next, { replace: true })
   }
 
+  const vanTartalom = mods.length > 0
+
   return (
     <div className="zc-container py-10 sm:py-14">
       <Seo
         title={pageTitle('Modok')}
-        description={`Az összes ZeroCode mod és eszköz egy helyen - ${mods.length} mod, telepítési útmutatóval, verziólistával és közvetlen letöltéssel.`}
+        description={
+          vanTartalom
+            ? `Az összes ZeroCode mod és eszköz egy helyen - ${mods.length} mod, telepítési útmutatóval, verziólistával és közvetlen letöltéssel.`
+            : 'Az összes ZeroCode mod és eszköz egy helyen, telepítési útmutatóval, verziólistával és közvetlen letöltéssel.'
+        }
         path="/modok"
       />
 
@@ -83,95 +89,106 @@ export default function Mods() {
         </p>
       </header>
 
-      <div className="mb-6 border border-ink-700 bg-ink-900 p-4">
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <div className="relative flex-1">
-            <label htmlFor="mod-kereso" className="sr-only">
-              Keresés a modok között
-            </label>
-            <IconSearch
-              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ash-400"
-              aria-hidden
-            />
-            <input
-              id="mod-kereso"
-              type="search"
-              value={query}
-              onChange={(e) => setParam('q', e.target.value)}
-              placeholder="Keresés modok, játékok, funkciók között..."
-              className="h-11 w-full border border-ink-600 bg-ink-850 pr-3 pl-9 text-sm text-ash-100 placeholder:text-ash-400 focus:border-blood-600 focus:outline-none"
-            />
+      {/* A kereső és a szűrők csak akkor jelennek meg, ha van mit szűrni. */}
+      {vanTartalom && (
+        <div className="mb-6 border border-ink-700 bg-ink-900 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <label htmlFor="mod-kereso" className="sr-only">
+                Keresés a modok között
+              </label>
+              <IconSearch
+                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ash-400"
+                aria-hidden
+              />
+              <input
+                id="mod-kereso"
+                type="search"
+                value={query}
+                onChange={(e) => setParam('q', e.target.value)}
+                placeholder="Keresés modok, játékok, funkciók között..."
+                className="h-11 w-full border border-ink-600 bg-ink-850 pr-3 pl-9 text-sm text-ash-100 placeholder:text-ash-400 focus:border-blood-600 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="mod-rendezes" className="sr-only">
+                Rendezés
+              </label>
+              <select
+                id="mod-rendezes"
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+                className="h-11 w-full border border-ink-600 bg-ink-850 px-3 text-sm text-ash-100 focus:border-blood-600 focus:outline-none sm:w-56"
+              >
+                {sortOptions.map((o) => (
+                  <option key={o.key} value={o.key}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="mod-rendezes" className="sr-only">
-              Rendezés
-            </label>
-            <select
-              id="mod-rendezes"
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortKey)}
-              className="h-11 w-full border border-ink-600 bg-ink-850 px-3 text-sm text-ash-100 focus:border-blood-600 focus:outline-none sm:w-56"
-            >
-              {sortOptions.map((o) => (
-                <option key={o.key} value={o.key}>
-                  {o.label}
-                </option>
+          {tags.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setParam('tag', '')}
+                aria-pressed={!activeTag}
+                className={cx(
+                  'border px-2.5 py-1 text-[11px] font-bold tracking-wider uppercase transition-colors',
+                  !activeTag
+                    ? 'border-blood-500 bg-blood-600 text-white'
+                    : 'border-ink-600 bg-ink-850 text-ash-300 hover:border-blood-600',
+                )}
+              >
+                Összes
+              </button>
+              {tags.map(({ tag, count }) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => setParam('tag', activeTag === tag ? '' : tag)}
+                  aria-pressed={activeTag === tag}
+                  className={cx(
+                    'border px-2.5 py-1 text-[11px] font-bold tracking-wider uppercase transition-colors',
+                    activeTag === tag
+                      ? 'border-blood-500 bg-blood-600 text-white'
+                      : 'border-ink-600 bg-ink-850 text-ash-300 hover:border-blood-600',
+                  )}
+                >
+                  {tag} <span className="opacity-60">{count}</span>
+                </button>
               ))}
-            </select>
-          </div>
+            </div>
+          )}
         </div>
+      )}
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setParam('tag', '')}
-            aria-pressed={!activeTag}
-            className={cx(
-              'border px-2.5 py-1 text-[11px] font-bold tracking-wider uppercase transition-colors',
-              !activeTag
-                ? 'border-blood-500 bg-blood-600 text-white'
-                : 'border-ink-600 bg-ink-850 text-ash-300 hover:border-blood-600',
-            )}
-          >
-            Összes
-          </button>
-          {tags.map(({ tag, count }) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => setParam('tag', activeTag === tag ? '' : tag)}
-              aria-pressed={activeTag === tag}
-              className={cx(
-                'border px-2.5 py-1 text-[11px] font-bold tracking-wider uppercase transition-colors',
-                activeTag === tag
-                  ? 'border-blood-500 bg-blood-600 text-white'
-                  : 'border-ink-600 bg-ink-850 text-ash-300 hover:border-blood-600',
-              )}
-            >
-              {tag} <span className="opacity-60">{count}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      {vanTartalom && (
+        <p className="mb-4 text-xs text-ash-400" role="status" aria-live="polite">
+          {list.length} találat
+          {query && (
+            <>
+              {' '}
+              erre: <span className="text-ash-200">{query}</span>
+            </>
+          )}
+          {activeTag && (
+            <>
+              {' '}
+              &middot; címke: <span className="text-ash-200">{activeTag}</span>
+            </>
+          )}
+        </p>
+      )}
 
-      <p className="mb-4 text-xs text-ash-400" role="status" aria-live="polite">
-        {list.length} találat
-        {query && (
-          <>
-            {' '}
-            erre: <span className="text-ash-200">{query}</span>
-          </>
-        )}
-        {activeTag && (
-          <>
-            {' '}
-            &middot; címke: <span className="text-ash-200">{activeTag}</span>
-          </>
-        )}
-      </p>
-
-      {list.length === 0 ? (
+      {!vanTartalom ? (
+        <Empty title="Még nincs közzétett mod.">
+          Az első ZeroCode mod hamarosan érkezik. Nézz vissza később, vagy kövesd a GitHub oldalt.
+        </Empty>
+      ) : list.length === 0 ? (
         <Empty title="Nincs a keresésnek megfelelő mod.">
           Próbáld meg más kifejezéssel, vagy töröld a címkeszűrőt.
         </Empty>
