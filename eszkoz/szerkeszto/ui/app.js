@@ -7,6 +7,7 @@
  */
 
 const KULCS = window.ZC_KULCS
+const ELONEZET = window.ZC_ELONEZET
 
 /* ================================================================== */
 /* Kiszolgáló hívások                                                  */
@@ -729,8 +730,20 @@ function mezoRajz(objektum, mezo) {
           jelolValtozas()
         },
       })
-      const kep = el('img', { alt: '', src: ertek || '' })
-      kep.addEventListener('error', () => (kep.style.visibility = 'hidden'))
+      // Előnézet csak akkor, ha tényleg van megadott kép.
+      let kep = null
+      if (ertek) {
+        kep = el('img', { alt: '', src: ertek })
+        kep.addEventListener('error', () => {
+          kep.replaceWith(
+            el('span', {
+              class: 'kep-hianyzik',
+              title: 'Ez a kép nem található',
+              text: 'nincs meg',
+            }),
+          )
+        })
+      }
       const doboz = el('div', {}, [
         be,
         el('div', { class: 'kep-elonezet' }, [
@@ -1318,7 +1331,14 @@ function lapKepek() {
     const racs = el('div', { class: 'keprács' })
     const sajat = allapot.kepek.filter((k) => k.mappa === mappa)
 
-    if (!sajat.length) racs.append(el('p', { class: 'sugo', text: 'Még nincs kép ebben a mappában.' }))
+    if (!sajat.length) {
+      racs.append(
+        el('p', {
+          class: 'sugo teljes-sor',
+          text: 'Még nincs kép ebben a mappában. Használd a Kép feltöltése gombot.',
+        }),
+      )
+    }
 
     for (const k of sajat) {
       racs.append(
@@ -1386,13 +1406,42 @@ async function kepekBetolt() {
 
 /* ---------- Előnézet ---------- */
 
+/** Eszközméretek az előnézethez (a weboldal töréspontjaihoz igazítva). */
+const ESZKOZOK = [
+  { id: 'asztali', cimke: 'Asztali', szelesseg: null },
+  { id: 'tablet', cimke: 'Tablet', szelesseg: 834 },
+  { id: 'mobil', cimke: 'Mobil', szelesseg: 390 },
+]
+
+let elonezetEszkoz = 'asztali'
+
 function lapElonezet() {
-  const cim = el('div', { class: 'elonezet-cim', text: 'A helyi előnézet a legutóbbi build alapján készül.' })
   const keret = el('iframe', {
     class: 'elonezet-keret',
-    src: '/elonezet/index.html',
+    src: ELONEZET,
     title: 'A weboldal előnézete',
   })
+  elonezetKeret = keret
+
+  const szinpad = el('div', { class: 'elonezet-szinpad' }, [keret])
+  const alkalmazMeret = () => {
+    const e = ESZKOZOK.find((x) => x.id === elonezetEszkoz)
+    keret.style.width = e?.szelesseg ? `${e.szelesseg}px` : '100%'
+    szinpad.classList.toggle('keretezett', Boolean(e?.szelesseg))
+  }
+
+  const meretGombok = ESZKOZOK.map((e) =>
+    el('button', {
+      type: 'button',
+      class: 'gomb gomb-masodlagos gomb-apro',
+      text: e.cimke,
+      'aria-pressed': elonezetEszkoz === e.id ? 'true' : 'false',
+      onClick: () => {
+        elonezetEszkoz = e.id
+        ujraRajzol()
+      },
+    }),
+  )
 
   const sav = el('div', { class: 'elonezet-sav' }, [
     el('button', {
@@ -1405,9 +1454,13 @@ function lapElonezet() {
       type: 'button',
       class: 'gomb gomb-masodlagos gomb-apro',
       text: 'Újratöltés',
-      onClick: () => (keret.src = `/elonezet/index.html?t=${Date.now()}`),
+      onClick: () => elonezetUjratolt(),
     }),
-    cim,
+    el('div', { class: 'elonezet-meret' }, meretGombok),
+    el('div', {
+      class: 'elonezet-cim',
+      text: 'A helyi előnézet a legutóbbi build alapján készül - a mentett módosítások az Előnézet frissítése után látszanak.',
+    }),
     el('button', {
       type: 'button',
       class: 'gomb gomb-halvany gomb-apro',
@@ -1416,7 +1469,15 @@ function lapElonezet() {
     }),
   ])
 
-  return el('div', { class: 'elonezet-doboz' }, [sav, keret])
+  alkalmazMeret()
+  return el('div', { class: 'elonezet-doboz' }, [sav, szinpad])
+}
+
+/** Az éppen látható előnézeti keret (hogy build után újratölthessük). */
+let elonezetKeret = null
+
+function elonezetUjratolt() {
+  if (elonezetKeret) elonezetKeret.src = ELONEZET + '?t=' + Date.now()
 }
 
 /* ================================================================== */
@@ -1474,6 +1535,8 @@ function naploCsatlakoz(naploDoboz) {
     if (esemeny.tipus === 'kesz') {
       pirit(esemeny.szoveg, 'jo')
       $('#gombFrissites').disabled = false
+      // A friss build azonnal látszódjon az előnézetben.
+      if (allapot.lap === 'elonezet') elonezetUjratolt()
     }
     if (esemeny.tipus === 'hiba') {
       pirit('A művelet hibára futott - a napló mutatja, hol.', 'rossz')
@@ -1566,7 +1629,12 @@ async function kepValaszto(mappa, kivalasztva) {
     racs.replaceChildren()
     const sajat = allapot.kepek.filter((k) => k.mappa === mappa)
     if (!sajat.length) {
-      racs.append(el('p', { class: 'sugo', text: 'Még nincs kép ebben a mappában. Tölts fel egyet!' }))
+      racs.append(
+        el('p', {
+          class: 'sugo teljes-sor',
+          text: 'Még nincs kép ebben a mappában. Tölts fel egyet a fenti gombbal!',
+        }),
+      )
     }
     for (const k of sajat) {
       racs.append(

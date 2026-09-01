@@ -503,7 +503,18 @@ textarea.hibas {
 .racs2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
+  gap: 16px;
+  align-items: start;
+}
+
+/* A rácson belül a térközt a gap adja, ne a mezők saját margója. */
+.racs2 > .mezo {
+  margin-bottom: 0;
+}
+
+/* Ha a rács után még jönnek teljes szélességű mezők, kell közé hely. */
+.racs2:not(:last-child) {
+  margin-bottom: 18px;
 }
 
 .kapcsolo {
@@ -511,6 +522,13 @@ textarea.hibas {
   align-items: center;
   gap: 9px;
   cursor: pointer;
+}
+
+/* A rácsban a jelölőnégyzet a szomszédos beviteli mezőkkel egy vonalba kerül
+   (a többi mező fölött ott van a címke, itt nincs). */
+.racs2 > .mezo > .kapcsolo {
+  min-height: 34px;
+  margin-top: 21px;
 }
 
 .kapcsolo input {
@@ -799,6 +817,11 @@ textarea.hibas {
   gap: 10px;
 }
 
+/* Az "üres mappa" üzenet a teljes szélességet foglalja el, ne egy oszlopot. */
+.keprács > .teljes-sor {
+  grid-column: 1 / -1;
+}
+
 .kepgomb {
   border: 1px solid var(--ink-700);
   background: var(--ink-850);
@@ -840,12 +863,25 @@ textarea.hibas {
 .kep-elonezet img {
   width: 74px;
   height: 46px;
-  object-fit: cover;
+  object-fit: contain;
   border: 1px solid var(--ink-700);
-  background: var(--ink-850);
+  background: var(--ink-950);
 }
 
 /* ---------------- Előnézet keret ---------------- */
+
+.kep-hianyzik {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 74px;
+  height: 46px;
+  border: 1px dashed rgba(214, 31, 39, 0.5);
+  color: var(--blood-300);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
 
 .elonezet-sav {
   display: flex;
@@ -880,6 +916,38 @@ textarea.hibas {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   height: 100%;
+}
+
+.elonezet-szinpad {
+  display: flex;
+  justify-content: center;
+  min-height: 0;
+  background: var(--ink-950);
+}
+
+/* Szűkebb eszközméretnél látszódjon a készülék kerete */
+.elonezet-szinpad.keretezett {
+  padding: 18px 0;
+  background:
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.014) 0 1px, transparent 1px 9px),
+    var(--ink-900);
+}
+
+.elonezet-szinpad.keretezett .elonezet-keret {
+  border: 1px solid var(--ink-600);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+}
+
+.elonezet-meret {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.elonezet-meret .gomb[aria-pressed='true'] {
+  border-color: var(--blood-500);
+  background: var(--blood-600);
+  color: #fff;
 }
 
 /* ---------------- Pirítós üzenet ---------------- */

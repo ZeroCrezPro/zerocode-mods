@@ -46,7 +46,7 @@ ZeroCode felületet használja, mint maga az oldal.
 | **Játékok** | Játékok felvétele és szerkesztése |
 | **Beállítások** | Oldal neve, mottó, éles cím, GitHub felhasználó és repók |
 | **Képek** | Képek feltöltése a `public/images` alá, azonnal használhatók |
-| **Előnézet** | A legyártott oldal megtekintése a programon belül |
+| **Előnézet** | A kész oldal megtekintése a programon belül, asztali / tablet / mobil méretben |
 
 ### A két fontos gomb
 

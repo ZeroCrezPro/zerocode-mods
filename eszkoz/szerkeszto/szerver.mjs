@@ -398,7 +398,7 @@ const szerver = http.createServer(async (req, res) => {
 
   // Csak a saját gépről, csak a saját kulccsal.
   const kulcs = url.searchParams.get('k') ?? req.headers['x-zc-kulcs']
-  const nyilvanos = ut === '/' || ut.startsWith('/ui/') || ut.startsWith('/elonezet')
+  const nyilvanos = ut === '/' || ut.startsWith('/ui/') || ut === '/favicon.svg'
   if (!nyilvanos && kulcs !== KULCS) {
     return valasz(res, 403, MIME['.txt'], 'Érvénytelen kulcs')
   }
@@ -407,21 +407,16 @@ const szerver = http.createServer(async (req, res) => {
     /* --- felület --- */
     if (ut === '/') {
       const html = await fsp.readFile(path.join(uiDir, 'index.html'), 'utf8')
-      return valasz(res, 200, MIME['.html'], html.replace('__KULCS__', KULCS))
+      return valasz(
+        res,
+        200,
+        MIME['.html'],
+        html.replace('__KULCS__', KULCS).replace('__ELONEZET__', elonezetCim()),
+      )
     }
     if (ut.startsWith('/ui/')) return statikus(res, uiDir, ut.slice(4))
+    if (ut === '/favicon.svg') return statikus(res, path.join(projekt, 'public'), '/favicon.svg')
 
-    /* --- előnézet (a legutóbb buildelt oldal) --- */
-    if (ut === '/elonezet' || ut === '/elonezet/') {
-      res.writeHead(302, { Location: '/elonezet/index.html' })
-      return res.end()
-    }
-    if (ut.startsWith('/elonezet/')) {
-      if (!fs.existsSync(distDir)) {
-        return valasz(res, 200, MIME['.html'], '<p>Még nincs elkészült előnézet. Kattints az Előnézet frissítése gombra.</p>')
-      }
-      return statikus(res, distDir, ut.slice('/elonezet'.length), '404.html')
-    }
 
     /* --- adatok --- */
     if (ut === '/api/adatok' && req.method === 'GET') {
@@ -493,10 +488,43 @@ const szerver = http.createServer(async (req, res) => {
   }
 })
 
+/* ------------------------------------------------------------------ */
+/* Előnézeti kiszolgáló                                                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A legyártott oldalt saját porton, saját gyökeréről szolgáljuk ki.
+ *
+ * Ez azért kell, mert a kész oldal a stíluslapot és a szkriptet abszolút
+ * útvonalról (/assets/...) kéri. Ha almappából jönne, a böngésző nem
+ * találná meg őket, és az előnézet formázás nélkül jelenne meg.
+ */
+const elonezetSzerver = http.createServer(async (req, res) => {
+  const ut = new URL(req.url, 'http://127.0.0.1').pathname
+
+  if (!fs.existsSync(distDir)) {
+    return valasz(
+      res,
+      200,
+      MIME['.html'],
+      '<!doctype html><meta charset="utf-8"><body style="margin:0;background:#08080a;color:#8b8b96;' +
+        'font:15px Segoe UI,Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh">' +
+        '<p>Még nincs elkészült előnézet. Kattints az <b style="color:#f2f2f4">Előnézet frissítése</b> gombra.</p>',
+    )
+  }
+  return statikus(res, distDir, ut === '/' ? '/index.html' : ut, '404.html')
+})
+
+const elonezetCim = () => `http://127.0.0.1:${elonezetSzerver.address().port}/`
+
 const port = Number(process.env.ZC_PORT ?? 0)
-szerver.listen(port, '127.0.0.1', () => {
-  const p = szerver.address().port
-  // Az indító EXE ezt a sort olvassa ki:
-  console.log(`ZC_SZERKESZTO_URL=http://127.0.0.1:${p}/?k=${KULCS}`)
-  console.log(`ZeroCode Szerkesztő fut. Projekt: ${projekt}`)
+
+elonezetSzerver.listen(0, '127.0.0.1', () => {
+  szerver.listen(port, '127.0.0.1', () => {
+    const p = szerver.address().port
+    // Az indító EXE ezt a sort olvassa ki:
+    console.log(`ZC_SZERKESZTO_URL=http://127.0.0.1:${p}/?k=${KULCS}`)
+    console.log(`ZeroCode Szerkesztő fut. Projekt: ${projekt}`)
+    console.log(`Előnézet: ${elonezetCim()}`)
+  })
 })
