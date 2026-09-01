@@ -274,18 +274,32 @@ async function muveletFuttat(nev, uzenet) {
       const vanMitMenteni = !(await parancsSikeres('git', ['diff', '--cached', '--quiet']))
 
       if (vanMitMenteni) {
-        await parancs(
-          'git',
-          [
-            '-c',
-            'core.autocrlf=false',
-            'commit',
-            '-m',
-            (uzenet || '').trim() || 'Tartalom frissítése a szerkesztőből',
-          ],
-          'Mentés a verziókövetőbe',
-          { halkan: true },
+        // A mentési üzenetet fájlon keresztül adjuk át: a Windows parancssora
+        // elrontaná az ékezetes betűket, a -F kapcsoló viszont UTF-8-ként olvassa.
+        const uzenetFajl = path.join(projekt, '.szerkeszto-uzenet.txt')
+        await fsp.writeFile(
+          uzenetFajl,
+          ((uzenet || '').trim() || 'Tartalom frissítése a szerkesztőből') + '\n',
+          'utf8',
         )
+        try {
+          await parancs(
+            'git',
+            [
+              '-c',
+              'core.autocrlf=false',
+              '-c',
+              'i18n.commitEncoding=UTF-8',
+              'commit',
+              '-F',
+              uzenetFajl,
+            ],
+            'Mentés a verziókövetőbe',
+            { halkan: true },
+          )
+        } finally {
+          await fsp.rm(uzenetFajl, { force: true })
+        }
         naploz('sor', 'A változások elmentve.')
       } else {
         naploz('sor', 'Nincs új változás - a publikálás ettől még lefut.')
