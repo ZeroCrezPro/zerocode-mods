@@ -1987,6 +1987,50 @@ function hibakMutat() {
 /* --- publikálás ablak --- */
 
 let naploForras = null
+let bezarasIdozito = null
+
+/** A napló ablak bezárása (a figyelést is leállítja). */
+function publikalasAblakBezar() {
+  clearTimeout(bezarasIdozito)
+  bezarasIdozito = null
+  naploForras?.close()
+  naploForras = null
+  $('#publikalasAblak').hidden = true
+}
+
+/**
+ * Sikeres művelet után magától bezárjuk az ablakot.
+ * Hibánál nem: ott a napló az egyetlen kapaszkodó.
+ * A visszaszámlálás alatt bármelyik kattintás megszakítja a bezárást,
+ * hogy a naplót nyugodtan el lehessen olvasni.
+ */
+function bezarasVisszaszamlalas(masodperc = 3) {
+  const gomb = $('#publikalasBezar')
+  let hatra = masodperc
+
+  const megszakit = () => {
+    clearInterval(ora)
+    clearTimeout(bezarasIdozito)
+    bezarasIdozito = null
+    gomb.textContent = 'Bezárás'
+    $('#publikalasAblak').removeEventListener('click', megszakit)
+  }
+
+  const ora = setInterval(() => {
+    hatra -= 1
+    if (hatra > 0) gomb.textContent = `Bezárás (${hatra})`
+  }, 1000)
+
+  gomb.textContent = `Bezárás (${hatra})`
+  $('#publikalasAblak').addEventListener('click', megszakit)
+
+  bezarasIdozito = setTimeout(() => {
+    clearInterval(ora)
+    gomb.textContent = 'Bezárás'
+    $('#publikalasAblak').removeEventListener('click', megszakit)
+    publikalasAblakBezar()
+  }, masodperc * 1000)
+}
 
 function naploCsatlakoz(naploDoboz) {
   naploForras?.close()
@@ -2004,10 +2048,12 @@ function naploCsatlakoz(naploDoboz) {
       })
       // A friss build azonnal látszódjon az előnézetben.
       if (allapot.lap === 'elonezet') elonezetUjratolt()
+      bezarasVisszaszamlalas()
     }
     if (esemeny.tipus === 'hiba') {
       pirit('A művelet hibára futott - a napló mutatja, hol.', 'rossz')
       $('#gombFrissites').disabled = false
+      // Hibánál marad nyitva az ablak, hogy elolvasható legyen a napló.
     }
   }
 }
@@ -2089,7 +2135,7 @@ async function frissitesInditas() {
         type: 'button',
         class: 'gomb gomb-halvany',
         text: 'Mégsem',
-        onClick: () => (ablak.hidden = true),
+        onClick: publikalasAblakBezar,
       }),
     ]),
   )
@@ -2170,7 +2216,7 @@ function ujraRajzol() {
 
 $('#gombMentes').addEventListener('click', () => mentes())
 $('#gombFrissites').addEventListener('click', frissitesInditas)
-$('#publikalasBezar').addEventListener('click', () => ($('#publikalasAblak').hidden = true))
+$('#publikalasBezar').addEventListener('click', publikalasAblakBezar)
 $('#kepBezar').addEventListener('click', () => ($('#kepAblak').hidden = true))
 
 document.addEventListener('keydown', (e) => {
@@ -2179,7 +2225,7 @@ document.addEventListener('keydown', (e) => {
     mentes()
   }
   if (e.key === 'Escape') {
-    $('#publikalasAblak').hidden = true
+    publikalasAblakBezar()
     $('#kepAblak').hidden = true
   }
 })

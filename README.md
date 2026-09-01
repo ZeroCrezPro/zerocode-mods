@@ -88,6 +88,10 @@ ha valami hiányzik vagy hibás. Minden mentésről biztonsági másolat készü
 4. feltölti GitHubra (`git push`),
 5. publikálja a Cloudflare Pages-re.
 
+Sikeres futás után a naplóablak magától bezáródik (három másodperc múlva; ha közben
+belekattintasz, nyitva marad). Hiba esetén nem záródik be, hogy el tudd olvasni, hol
+akadt el.
+
 A modfájlok szándékosan előbb mennek fel, mint az oldal – így nincs olyan pillanat,
 amikor az oldal már hirdet egy letöltést, ami még nem létezik. A képek az oldallal
 együtt kerülnek ki, azokkal nincs külön teendő.
