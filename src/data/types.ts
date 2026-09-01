@@ -113,8 +113,6 @@ export interface Game {
   description: string[]
   cover: string
   banner?: string
-  /** Kategóriák a szűréshez, pl. ["Akció", "TPS"] */
-  categories: string[]
   externalLinks?: ExternalLink[]
   /** Sorrend a listákban (kisebb = előrébb) */
   order?: number

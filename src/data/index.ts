@@ -60,13 +60,6 @@ export function allTags(): { tag: string; count: number }[] {
     .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag, 'hu'))
 }
 
-/** Minden játékkategória. */
-export function allCategories(): string[] {
-  const set = new Set<string>()
-  for (const g of games) for (const c of g.categories) set.add(c)
-  return [...set].sort((a, b) => a.localeCompare(b, 'hu'))
-}
-
 export interface ReleaseFeedItem {
   mod: Mod
   game: Game | undefined

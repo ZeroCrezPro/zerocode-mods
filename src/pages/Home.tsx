@@ -15,6 +15,7 @@ import { ModCard } from '@/components/ModCard'
 import { GameCard } from '@/components/GameCard'
 import { Badge, LinkButton, SectionHead, btnClass } from '@/components/ui'
 import { IconArrowRight, IconClock, IconDownload, IconGamepad, IconPackage } from '@/components/Icons'
+import { Empty } from '@/components/Empty'
 
 function Stats() {
   const downloads = totalDownloads()
@@ -98,6 +99,15 @@ function Hero() {
 
 function LatestUpdates() {
   const feed = releaseFeed(6)
+
+  if (!feed.length) {
+    return (
+      <Empty title="Még nincs kiadás.">
+        Amint megjelenik az első mod, itt fog látszani időrendben.
+      </Empty>
+    )
+  }
+
   return (
     <ul className="divide-y divide-ink-800 border border-ink-700 bg-ink-900">
       {feed.map(({ mod, game, version }) => (
@@ -187,11 +197,17 @@ export default function Home() {
             </Link>
           }
         />
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((mod, i) => (
-            <ModCard key={mod.id} mod={mod} eager={i < 3} />
-          ))}
-        </div>
+        {featured.length === 0 ? (
+          <Empty title="Még nincs közzétett mod.">
+            Az első ZeroCode mod hamarosan érkezik. Addig is nézz körbe a Névjegy oldalon.
+          </Empty>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((mod, i) => (
+              <ModCard key={mod.id} mod={mod} eager={i < 3} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="border-y border-ink-800 bg-ink-900/40 py-16 sm:py-20">
@@ -225,11 +241,17 @@ export default function Home() {
             </Link>
           }
         />
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {gameList.map((g) => (
-            <GameCard key={g.id} game={g} />
-          ))}
-        </div>
+        {gameList.length === 0 ? (
+          <Empty title="Még nincs felvéve játék.">
+            Itt fognak megjelenni a támogatott játékok.
+          </Empty>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {gameList.map((g) => (
+              <GameCard key={g.id} game={g} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="zc-container pb-16 sm:pb-20">

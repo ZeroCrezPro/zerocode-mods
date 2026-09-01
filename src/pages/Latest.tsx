@@ -7,6 +7,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { SmartImage } from '@/components/SmartImage'
 import { Badge, btnClass } from '@/components/ui'
 import { IconDownload } from '@/components/Icons'
+import { Empty } from '@/components/Empty'
 
 export default function Latest() {
   const feed = releaseFeed()
@@ -35,10 +36,22 @@ export default function Latest() {
           Legújabb kiadások
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-ash-400">
-          Az összes {site.author} kiadás időrendben, a legfrissebbel kezdve. Összesen{' '}
-          {feed.length} kiadás.
+          {feed.length ? (
+            <>
+              Az összes {site.author} kiadás időrendben, a legfrissebbel kezdve. Összesen{' '}
+              {feed.length} kiadás.
+            </>
+          ) : (
+            <>Itt jelenik meg minden {site.author} kiadás időrendben.</>
+          )}
         </p>
       </header>
+
+      {feed.length === 0 && (
+        <Empty title="Még nincs egyetlen kiadás sem.">
+          Amint megjelenik az első mod, itt fog látszani a teljes kiadástörténet.
+        </Empty>
+      )}
 
       {years.map((year) => (
         <section key={year} className="mb-10">

@@ -1,20 +1,35 @@
 /**
  * Helyőrző képek generálása (SVG).
  *
- * Ezek szándékosan egyszerű, saját készítésű grafikák - bármikor
- * lecserélhetők valódi képekre ugyanezen a néven (vagy .jpg/.webp
- * kiterjesztéssel, ha az adatfájlban is átírod az útvonalat).
+ * Alapból csak az Open Graph alapképet (a közösségi megosztásnál látszó képet)
+ * készíti el. Ha egy modhoz vagy játékhoz gyorsan kell egy ideiglenes kép,
+ * add meg paraméterként:
  *
- * Futtatás:  npm run placeholders
+ *   node scripts/make-placeholders.mjs mods/uj-mod-cover.svg "ÚJ MOD" "Max Payne 2"
+ *
+ * A weboldalon egyébként nem kötelező kép: ha egy kép hiányzik vagy hibás az
+ * útvonala, a felület magától kirajzol egy ZeroCode helyőrzőt a nevek
+ * kezdőbetűivel, tehát semmi nem törik el.
  */
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const imgDir = path.join(root, 'public', 'images')
+const here = path.dirname(fileURLToPath(import.meta.url))
+const imgDir = path.join(here, '..', 'public', 'images')
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+/** Az útvonal alapján kitalált méret - hogy ne kelljen fejből tudni. */
+function meretUtvonalbol(rel) {
+  const nev = rel.toLowerCase()
+  if (nev.includes('icon')) return { w: 256, h: 256, mono: true }
+  if (nev.includes('banner')) return { w: 1920, h: 640 }
+  if (nev.includes('cover') && nev.startsWith('games/')) return { w: 600, h: 800 }
+  if (nev.includes('cover')) return { w: 1200, h: 675 }
+  if (nev.startsWith('screenshots/')) return { w: 1280, h: 720 }
+  return { w: 1200, h: 630 }
+}
 
 function svg({ w, h, title, subtitle, accent = '#d61f27', mono = false }) {
   const size1 = Math.round(Math.min(w, h) * (mono ? 0.3 : 0.1)) + 8
@@ -52,80 +67,22 @@ function svg({ w, h, title, subtitle, accent = '#d61f27', mono = false }) {
 `
 }
 
-const files = [
-  // Játékborítók és bannerek
-  ['games/max-payne-2-cover.svg', { w: 600, h: 800, title: 'MAX PAYNE 2', subtitle: 'Borító' }],
-  [
-    'games/max-payne-2-banner.svg',
-    { w: 1600, h: 640, title: 'MAX PAYNE 2', subtitle: 'The Fall of Max Payne' },
-  ],
-  ['games/nfs-carbon-cover.svg', { w: 600, h: 800, title: 'NFS CARBON', subtitle: 'Borító' }],
-  [
-    'games/nfs-carbon-banner.svg',
-    { w: 1600, h: 640, title: 'NEED FOR SPEED CARBON', subtitle: '2006' },
-  ],
-
-  // Modok
-  [
-    'mods/mp2-zerocode-cover.svg',
-    { w: 1200, h: 675, title: 'ZEROCODE MOD', subtitle: 'Max Payne 2' },
-  ],
-  [
-    'mods/mp2-zerocode-banner.svg',
-    { w: 1920, h: 640, title: 'ZEROCODE MOD', subtitle: 'Max Payne 2' },
-  ],
-  ['mods/mp2-zerocode-icon.svg', { w: 256, h: 256, title: 'ZC', mono: true }],
-  [
-    'mods/nfsc-modloader-cover.svg',
-    { w: 1200, h: 675, title: 'CARBON MOD LOADER', subtitle: 'NFS Carbon' },
-  ],
-  [
-    'mods/nfsc-modloader-banner.svg',
-    { w: 1920, h: 640, title: 'CARBON MOD LOADER', subtitle: 'NFS Carbon' },
-  ],
-  ['mods/nfsc-modloader-icon.svg', { w: 256, h: 256, title: 'ML', mono: true }],
-  [
-    'mods/nfsc-savetool-cover.svg',
-    { w: 1200, h: 675, title: 'CARBON SAVETOOL', subtitle: 'NFS Carbon' },
-  ],
-  [
-    'mods/nfsc-savetool-banner.svg',
-    { w: 1920, h: 640, title: 'CARBON SAVETOOL', subtitle: 'NFS Carbon' },
-  ],
-  ['mods/nfsc-savetool-icon.svg', { w: 256, h: 256, title: 'ST', mono: true }],
-
-  // Képernyőképek
-  [
-    'screenshots/mp2-zerocode-01.svg',
-    { w: 1280, h: 720, title: 'JÁTÉKON BELÜLI MENÜ', subtitle: 'Képernyőkép' },
-  ],
-  ['screenshots/mp2-zerocode-02.svg', { w: 1280, h: 720, title: 'FUNKCIÓK', subtitle: 'Képernyőkép' }],
-  ['screenshots/mp2-zerocode-03.svg', { w: 1280, h: 720, title: 'TELEPÍTŐ', subtitle: 'Képernyőkép' }],
-  [
-    'screenshots/nfsc-modloader-01.svg',
-    { w: 1280, h: 720, title: 'MODLISTA', subtitle: 'Képernyőkép' },
-  ],
-  [
-    'screenshots/nfsc-modloader-02.svg',
-    { w: 1280, h: 720, title: 'BIZTONSÁGI MENTÉS', subtitle: 'Képernyőkép' },
-  ],
-  [
-    'screenshots/nfsc-savetool-01.svg',
-    { w: 1280, h: 720, title: 'MENTÉSSZERKESZTŐ', subtitle: 'Képernyőkép' },
-  ],
-  ['screenshots/nfsc-savetool-02.svg', { w: 1280, h: 720, title: 'CLI MÓD', subtitle: 'Képernyőkép' }],
-
-  // Open Graph alapkép
-  [
-    'og-default.svg',
-    { w: 1200, h: 630, title: 'ZEROCODE MODS', subtitle: 'Játékmodok egy helyen' },
-  ],
-]
-
-for (const [rel, opts] of files) {
+async function ir(rel, opts) {
   const out = path.join(imgDir, rel)
   await fs.mkdir(path.dirname(out), { recursive: true })
   await fs.writeFile(out, svg(opts), 'utf8')
+  console.log(`Kész: public/images/${rel}`)
 }
 
-console.log(`Kész: ${files.length} helyőrző kép a public/images alatt.`)
+const [rel, title, subtitle] = process.argv.slice(2)
+
+if (rel) {
+  await ir(rel, { ...meretUtvonalbol(rel), title: title ?? 'ZEROCODE', subtitle })
+} else {
+  await ir('og-default.svg', {
+    w: 1200,
+    h: 630,
+    title: 'ZEROCODE MODS',
+    subtitle: 'Játékmodok egy helyen',
+  })
+}

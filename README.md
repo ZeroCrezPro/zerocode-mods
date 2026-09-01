@@ -5,6 +5,8 @@ React + TypeScript + Vite + Tailwind CSS, statikusan előrenderelve, Cloudflare 
 
 - **Éles oldal:** https://zerocode-mods.pages.dev
 - **Nyelv:** magyar
+- **Tartalom:** az oldal üres állapotból indul – a játékokat és a modokat a szerkesztő
+  programmal lehet egyesével felvenni
 - **Költség:** 0 Ft (Cloudflare Pages ingyenes csomag + GitHub Releases)
 
 ---
@@ -169,7 +171,7 @@ zerocode-mods/
 | `/` | Főoldal (hero, statisztika, kiemelt modok, legújabb frissítések) |
 | `/modok` | Mod katalógus (keresés, rendezés, címkeszűrés) |
 | `/modok/<slug>` | Mod adatlap (leírás, funkciók, képek, telepítés, letöltések, changelog, GYIK) |
-| `/jatekok` | Játékok listája (keresés, rendezés, kategóriaszűrés) |
+| `/jatekok` | Játékok listája (keresés, rendezés) |
 | `/jatekok/<slug>` | Játék adatlap + a hozzá tartozó modok |
 | `/legujabb` | Összes kiadás időrendben |
 | `/nevjegy`, `/kapcsolat`, `/jogi-informaciok`, `/adatvedelem` | Szöveges oldalak |
@@ -191,21 +193,20 @@ Kézzel, fájlból:
 
 ```json
 {
-  id: 'gta-vice-city',                  // egyedi azonosító, a modok erre hivatkoznak
-  slug: 'gta-vice-city',                // az URL: /jatekok/gta-vice-city
-  name: 'GTA: Vice City',               // rövid név a kártyákon
-  fullName: 'Grand Theft Auto: Vice City',
-  releaseYear: 2002,
-  developer: 'Rockstar North',
-  publisher: 'Rockstar Games',
-  platforms: ['Windows PC'],
-  categories: ['Akció', 'Nyílt világ'], // ezek adják a szűrőgombokat
-  shortDescription: 'Egy mondat a kártyákra és a meta leírásba.',
-  description: ['Első bekezdés.', 'Második bekezdés.'],
-  cover: '/images/games/gta-vc-cover.svg',
-  banner: '/images/games/gta-vc-banner.svg',
-  externalLinks: [{ label: 'Steam áruház', url: 'https://...', primary: true }],
-  order: 3,                             // sorrend a listákban
+  "id": "gta-vice-city",
+  "slug": "gta-vice-city",
+  "name": "GTA: Vice City",
+  "fullName": "Grand Theft Auto: Vice City",
+  "releaseYear": 2002,
+  "developer": "Rockstar North",
+  "publisher": "Rockstar Games",
+  "platforms": ["Windows PC"],
+  "shortDescription": "Egy mondat a kártyákra és a meta leírásba.",
+  "description": ["Első bekezdés.", "Második bekezdés."],
+  "cover": "/images/games/gta-vc-cover.svg",
+  "banner": "/images/games/gta-vc-banner.svg",
+  "externalLinks": [{ "label": "Steam áruház", "url": "https://...", "primary": true }],
+  "order": 3
 }
 ```
 
@@ -371,8 +372,14 @@ Ajánlott méretek:
 | Képernyőkép | 1280 × 720 vagy 1920 × 1080 | `.webp` vagy `.jpg` |
 | Közösségi megosztókép | 1200 × 630 | `.jpg` vagy `.png` |
 
-A jelenlegi képek generált SVG helyőrzők (`npm run placeholders`). Bátran cseréld le őket
-valódi képekre – csak az adatfájlban írd át a kiterjesztést.
+**Kép nélkül is működik minden.** Ha egy modhoz vagy játékhoz nincs kép, a felület
+magától kirajzol egy ZeroCode helyőrzőt a név kezdőbetűivel – semmi nem törik el.
+
+Ha mégis kell egy gyors ideiglenes kép:
+
+```bash
+node scripts/make-placeholders.mjs mods/uj-mod-cover.svg "ÚJ MOD" "Max Payne 2"
+```
 
 > Ne használj engedély nélkül más weboldalról letöltött grafikát.
 
@@ -468,6 +475,10 @@ Az adott release nem létezik, vagy más a fájlnév. Ellenőrizd a Releases old
 **„Egy kép nem jelenik meg”**
 Az útvonal a `public/` mappához képest értendő, `/images/...`-szal kezdve. Ha hibás, az oldal
 nem törik el, csak a ZeroCode helyőrzőt rajzolja ki helyette.
+
+**„Üres az oldal”**
+Ez a kiindulási állapot: a `src/data/games.json` és a `mods.json` üres lista (`[]`).
+Vegyél fel egy játékot, utána egy modot – a mod mindig egy játékhoz tartozik.
 
 **„Nem találom az új modot a keresőben”**
 Futott a `npm run build` (vagy a szerkesztőben az *Előnézet frissítése*)? A keresés az

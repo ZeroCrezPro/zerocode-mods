@@ -27,7 +27,7 @@ function haystackForMod(mod: Mod, gameName: string): string {
 
 function haystackForGame(game: Game): string {
   return normalize(
-    [game.name, game.fullName, game.shortDescription, game.description.join(' '), game.categories.join(' ')].join(' '),
+    [game.name, game.fullName, game.shortDescription, game.description.join(' ')].join(' '),
   )
 }
 

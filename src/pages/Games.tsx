@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { allCategories, gameLastUpdated, games, modCountForGame } from '@/data'
+import { gameLastUpdated, games, modCountForGame } from '@/data'
 import type { Game } from '@/data/types'
 import { matches, normalize } from '@/lib/search'
-import { cx } from '@/lib/format'
 import { Seo, pageTitle } from '@/components/Seo'
 import { GameCard } from '@/components/GameCard'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -27,7 +26,6 @@ function haystack(game: Game): string {
       game.fullName,
       game.shortDescription,
       game.description.join(' '),
-      game.categories.join(' '),
       game.developer ?? '',
       game.publisher ?? '',
     ].join(' '),
@@ -37,14 +35,10 @@ function haystack(game: Game): string {
 export default function Games() {
   const [params, setParams] = useSearchParams()
   const query = params.get('q') ?? ''
-  const category = params.get('kategoria') ?? ''
   const [sort, setSort] = useState<SortKey>('az')
 
-  const categories = useMemo(() => allCategories(), [])
-
   const list = useMemo(() => {
-    let out = games.filter((g) => matches(query, haystack(g)))
-    if (category) out = out.filter((g) => g.categories.includes(category))
+    const out = games.filter((g) => matches(query, haystack(g)))
     const byName = (a: Game, b: Game) => a.name.localeCompare(b.name, 'hu')
     switch (sort) {
       case 'za':
@@ -60,7 +54,7 @@ export default function Games() {
       default:
         return [...out].sort(byName)
     }
-  }, [query, category, sort])
+  }, [query, sort])
 
   const setParam = (key: string, value: string) => {
     const next = new URLSearchParams(params)
@@ -73,7 +67,11 @@ export default function Games() {
     <div className="zc-container py-10 sm:py-14">
       <Seo
         title={pageTitle('Játékok')}
-        description={`A ZeroCode Mods által támogatott játékok listája - ${games.length} cím, hozzájuk tartozó modokkal és eszközökkel.`}
+        description={
+          games.length
+            ? `A ZeroCode Mods által támogatott játékok listája - ${games.length} cím, hozzájuk tartozó modokkal és eszközökkel.`
+            : 'A ZeroCode Mods által támogatott játékok listája.'
+        }
         path="/jatekok"
       />
 
@@ -88,86 +86,60 @@ export default function Games() {
         </p>
       </header>
 
-      <div className="mb-6 border border-ink-700 bg-ink-900 p-4">
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <div className="relative flex-1">
-            <label htmlFor="jatek-kereso" className="sr-only">
-              Keresés a játékok között
-            </label>
-            <IconSearch
-              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ash-400"
-              aria-hidden
-            />
-            <input
-              id="jatek-kereso"
-              type="search"
-              value={query}
-              onChange={(e) => setParam('q', e.target.value)}
-              placeholder="Keresés játékok között..."
-              className="h-11 w-full border border-ink-600 bg-ink-850 pr-3 pl-9 text-sm text-ash-100 placeholder:text-ash-400 focus:border-blood-600 focus:outline-none"
-            />
-          </div>
+      {games.length > 0 && (
+        <div className="mb-6 border border-ink-700 bg-ink-900 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <label htmlFor="jatek-kereso" className="sr-only">
+                Keresés a játékok között
+              </label>
+              <IconSearch
+                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ash-400"
+                aria-hidden
+              />
+              <input
+                id="jatek-kereso"
+                type="search"
+                value={query}
+                onChange={(e) => setParam('q', e.target.value)}
+                placeholder="Keresés játékok között..."
+                className="h-11 w-full border border-ink-600 bg-ink-850 pr-3 pl-9 text-sm text-ash-100 placeholder:text-ash-400 focus:border-blood-600 focus:outline-none"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="jatek-rendezes" className="sr-only">
-              Rendezés
-            </label>
-            <select
-              id="jatek-rendezes"
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortKey)}
-              className="h-11 w-full border border-ink-600 bg-ink-850 px-3 text-sm text-ash-100 focus:border-blood-600 focus:outline-none sm:w-56"
-            >
-              {sortOptions.map((o) => (
-                <option key={o.key} value={o.key}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+            <div>
+              <label htmlFor="jatek-rendezes" className="sr-only">
+                Rendezés
+              </label>
+              <select
+                id="jatek-rendezes"
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+                className="h-11 w-full border border-ink-600 bg-ink-850 px-3 text-sm text-ash-100 focus:border-blood-600 focus:outline-none sm:w-56"
+              >
+                {sortOptions.map((o) => (
+                  <option key={o.key} value={o.key}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
+      )}
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setParam('kategoria', '')}
-            aria-pressed={!category}
-            className={cx(
-              'border px-2.5 py-1 text-[11px] font-bold tracking-wider uppercase transition-colors',
-              !category
-                ? 'border-blood-500 bg-blood-600 text-white'
-                : 'border-ink-600 bg-ink-850 text-ash-300 hover:border-blood-600',
-            )}
-          >
-            Összes kategória
-          </button>
-          {categories.map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => setParam('kategoria', category === c ? '' : c)}
-              aria-pressed={category === c}
-              className={cx(
-                'border px-2.5 py-1 text-[11px] font-bold tracking-wider uppercase transition-colors',
-                category === c
-                  ? 'border-blood-500 bg-blood-600 text-white'
-                  : 'border-ink-600 bg-ink-850 text-ash-300 hover:border-blood-600',
-              )}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </div>
+      {games.length > 0 && (
+        <p className="mb-4 text-xs text-ash-400" role="status" aria-live="polite">
+          {list.length} játék
+        </p>
+      )}
 
-      <p className="mb-4 text-xs text-ash-400" role="status" aria-live="polite">
-        {list.length} játék
-      </p>
-
-      {list.length === 0 ? (
-        <Empty title="Nincs a keresésnek megfelelő játék.">
-          Próbáld más kifejezéssel, vagy törölj a szűrőkből.
+      {games.length === 0 ? (
+        <Empty title="Még nincs felvéve játék.">
+          Hamarosan érkeznek a támogatott címek.
         </Empty>
+      ) : list.length === 0 ? (
+        <Empty title="Nincs a keresésnek megfelelő játék.">Próbáld más kifejezéssel.</Empty>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((g, i) => (

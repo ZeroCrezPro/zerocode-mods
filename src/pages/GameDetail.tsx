@@ -98,9 +98,6 @@ export default function GameDetail() {
                   </Badge>
                 ))}
                 <Badge>{game.releaseYear}</Badge>
-                {game.categories.map((c) => (
-                  <Badge key={c}>{c}</Badge>
-                ))}
               </div>
 
               <p className="mt-5 max-w-2xl text-sm leading-relaxed text-ash-300">

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import type { Game } from '@/data/types'
 import { gameLastUpdated, modCountForGame } from '@/data'
 import { formatDate } from '@/lib/format'
-import { Badge, btnClass } from './ui'
+import { btnClass } from './ui'
 import { SmartImage } from './SmartImage'
 
 export function GameCard({ game, eager = false }: { game: Game; eager?: boolean }) {
@@ -28,12 +28,6 @@ export function GameCard({ game, eager = false }: { game: Game; eager?: boolean 
       </Link>
 
       <div className="flex flex-1 flex-col p-4">
-        <div className="mb-2 flex flex-wrap gap-2">
-          {game.categories.slice(0, 3).map((c) => (
-            <Badge key={c}>{c}</Badge>
-          ))}
-        </div>
-
         <h3 className="text-lg leading-tight font-extrabold tracking-tight text-ash-100">
           <Link to={`/jatekok/${game.slug}`} className="transition-colors group-hover:text-blood-400">
             {game.name}

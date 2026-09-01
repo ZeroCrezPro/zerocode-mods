@@ -468,13 +468,6 @@ const JATEK_SZAKASZOK = [
     cim: 'Besorolás',
     mezok: [
       { k: 'platforms', cim: 'Platformok', tipus: 'lista', teljes: true },
-      {
-        k: 'categories',
-        cim: 'Kategóriák',
-        tipus: 'lista',
-        teljes: true,
-        sugo: 'Ezekből lesznek a szűrőgombok a Játékok oldalon.',
-      },
     ],
   },
   {
@@ -959,6 +952,21 @@ function lapAttekintes() {
     ]),
   )
 
+  if (!mods.length && !games.length) {
+    doboz.append(
+      el('div', { class: 'uzenet uzenet-figyelem' }, [
+        el('div', {}, [
+          el('strong', { text: 'Az oldal még üres. ' }),
+          'Az első tartalom felvétele két lépés: előbb a ',
+          el('strong', { text: 'Játékok' }),
+          ' lapon vedd fel a játékot, utána a ',
+          el('strong', { text: 'Modok' }),
+          ' lapon a hozzá tartozó modot. Végül Mentés, majd Frissítés.',
+        ]),
+      ]),
+    )
+  }
+
   doboz.append(
     el('div', { class: 'uzenet' }, [
       el('div', {}, [
@@ -1116,7 +1124,6 @@ function ujJatek() {
     developer: '',
     publisher: '',
     platforms: ['Windows PC'],
-    categories: [],
     shortDescription: '',
     description: [],
     cover: '',
@@ -1131,7 +1138,7 @@ function ujJatek() {
   ujraRajzol()
 }
 
-function listaOldal({ tomb, index, indexAllit, cimAd, alcimAd, kepAd, ujGomb, ujCimke, szakaszok, torolCimke }) {
+function listaOldal({ tomb, index, indexAllit, cimAd, alcimAd, kepAd, ujGomb, ujCimke, szakaszok, torolCimke, uresUzenet }) {
   const oldalsav = el('div', { class: 'oldalsav' })
   oldalsav.append(
     el('div', { class: 'oldalsav-fej' }, [
@@ -1180,7 +1187,7 @@ function listaOldal({ tomb, index, indexAllit, cimAd, alcimAd, kepAd, ujGomb, uj
   const aktiv = tomb[index]
 
   if (!aktiv) {
-    lap.append(el('div', { class: 'ures', text: 'Válassz a bal oldali listából, vagy vegyél fel újat.' }))
+    lap.append(uresUzenet ? uresUzenet() : el('div', { class: 'ures', text: 'Válassz a bal oldali listából, vagy vegyél fel újat.' }))
   } else {
     lap.append(
       el('div', { style: 'display:flex;align-items:center;gap:12px;margin-bottom:18px' }, [
@@ -1218,6 +1225,38 @@ function lapModok() {
     ujCimke: '+ Új mod',
     torolCimke: 'Mod törlése',
     szakaszok: MOD_SZAKASZOK,
+    uresUzenet: () => {
+      if (!allapot.adatok.games.length) {
+        return el('div', { class: 'ures' }, [
+          el('p', { style: 'font-weight:700;color:var(--ash-200)', text: 'Kezdjük egy játékkal.' }),
+          el('p', {
+            style: 'margin:8px 0 0',
+            text: 'Minden mod egy játékhoz tartozik, ezért előbb vegyél fel legalább egyet.',
+          }),
+          el('button', {
+            type: 'button',
+            class: 'gomb gomb-elsodleges',
+            style: 'margin-top:16px',
+            text: '+ Új játék felvétele',
+            onClick: ujJatek,
+          }),
+        ])
+      }
+      return el('div', { class: 'ures' }, [
+        el('p', { style: 'font-weight:700;color:var(--ash-200)', text: 'Még nincs mod.' }),
+        el('p', {
+          style: 'margin:8px 0 0',
+          text: 'Vedd fel az elsőt - a program minden mezőt végigkérdez.',
+        }),
+        el('button', {
+          type: 'button',
+          class: 'gomb gomb-elsodleges',
+          style: 'margin-top:16px',
+          text: '+ Új mod',
+          onClick: ujMod,
+        }),
+      ])
+    },
   })
 }
 
@@ -1234,6 +1273,21 @@ function lapJatekok() {
     ujCimke: '+ Új játék',
     torolCimke: 'Játék törlése',
     szakaszok: JATEK_SZAKASZOK,
+    uresUzenet: () =>
+      el('div', { class: 'ures' }, [
+        el('p', { style: 'font-weight:700;color:var(--ash-200)', text: 'Még nincs játék.' }),
+        el('p', {
+          style: 'margin:8px 0 0',
+          text: 'Vedd fel azt a játékot, amelyhez modot készítesz.',
+        }),
+        el('button', {
+          type: 'button',
+          class: 'gomb gomb-elsodleges',
+          style: 'margin-top:16px',
+          text: '+ Új játék',
+          onClick: ujJatek,
+        }),
+      ]),
   })
 }
 
