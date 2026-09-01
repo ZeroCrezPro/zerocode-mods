@@ -50,8 +50,8 @@ ZeroCode felületet használja, mint maga az oldal.
 
 **Mentés** (vagy `Ctrl` + `S`) – a módosításokat a gépeden lévő adatfájlokba írja
 (`src/data/*.json`). Mentés előtt a program ellenőrzi az adatokat, és magyarul jelzi,
-ha valami hiányzik vagy hibás. Minden mentésről biztonsági másolat készül a
-`.szerkeszto-mentes` mappába (a legutóbbi 40 megmarad).
+ha valami hiányzik vagy hibás. Minden mentésről biztonsági másolat készül a `.szerkeszto-mentes` mappába
+(a legutóbbi 40 megmarad). Ez a mappa nem kerül fel GitHubra – csak a te gépeden van.
 
 **Frissítés** – ez teszi ki a módosításokat az élő weboldalra. Négy lépést futtat le,
 és a naplóban élőben mutatja, hol tart:
