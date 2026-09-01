@@ -19,7 +19,7 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import crypto from 'node:crypto'
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -28,6 +28,8 @@ const adatDir = path.join(projekt, 'src', 'data')
 const kepDir = path.join(projekt, 'public', 'images')
 const uiDir = path.join(here, 'ui')
 const distDir = path.join(projekt, 'dist')
+// Ide kerülnek a kiadásra váró modfájlok, amíg a Frissítés fel nem tölti őket.
+const kiadasDir = path.join(projekt, 'kiadasok')
 
 const KULCS = crypto.randomBytes(16).toString('hex')
 const ADATFAJLOK = { site: 'site.json', games: 'games.json', mods: 'mods.json' }
@@ -64,7 +66,7 @@ function valasz(res, kod, tipus, tartalom) {
 
 const json = (res, kod, obj) => valasz(res, kod, MIME['.json'], JSON.stringify(obj))
 
-async function testOlvas(req, hatar = 40 * 1024 * 1024) {
+async function testOlvas(req, hatar = 600 * 1024 * 1024) {
   const darabok = []
   let meret = 0
   for await (const d of req) {
@@ -255,6 +257,114 @@ async function parancsEngedekeny(program, argumentumok, cimke) {
 const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx'
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
 
+/**
+ * A kiadásra váró modfájlok feltöltése a GitHub Releases-be.
+ *
+ * Csak azt tölti fel, ami tényleg vár rá: a már feltöltött, változatlan
+ * fájlokat átugorja. Ha nincs mit feltölteni, nem csinál semmit.
+ */
+async function modFajlokFeltoltese() {
+  const varakozok = await varakozoFajlok()
+  const adatok = await adatokBeolvas()
+
+  // Csak azok érdekelnek, amelyek tényleg egy létező mod verziójához tartoznak
+  const feladatok = []
+  for (const f of varakozok) {
+    const mod = adatok.mods.find((m) => m.id === f.modId)
+    const verzio = mod?.versions?.find((v) => v.version === f.verzio)
+    if (!mod || !verzio) continue
+
+    const letoltes = verzio.download ?? {}
+    if (letoltes.kind === 'url') continue
+
+    const gazda = letoltes.owner ?? adatok.site.githubUser
+    const repo = letoltes.repo ?? adatok.site.releasesRepo
+    const cimke =
+      letoltes.kind === 'github-tag' && letoltes.tag?.trim()
+        ? letoltes.tag.trim()
+        : `${mod.slug}-v${verzio.version}`
+
+    if (f.feltoltve === `${gazda}/${repo}#${cimke}`) continue // már fent van
+    feladatok.push({ f, mod, verzio, gazda, repo, cimke, legfrissebb: letoltes.kind === 'github-latest' })
+  }
+
+  if (feladatok.length === 0) {
+    naploz('lepes', '1/5 - Modfájlok')
+    naploz('sor', varakozok.length ? 'Minden modfájl fent van már.' : 'Nincs feltöltésre váró modfájl.')
+    return
+  }
+
+  naploz('lepes', `1/5 - Modfájlok feltöltése (${feladatok.length} db)`)
+
+  const gh = ghKeres()
+  if (!gh) {
+    throw new Error(
+      'A GitHub CLI (gh) nem található, ezért a modfájlt nem tudom feltölteni. ' +
+        'Telepítsd a https://cli.github.com oldalról, majd futtasd egyszer: gh auth login',
+    )
+  }
+
+  // Egy repóban csak egy kiadás lehet a "legfrissebb" - erre figyelmeztetünk.
+  const legfrissebbek = feladatok.filter((t) => t.legfrissebb)
+  const repokSzerint = new Map()
+  for (const t of legfrissebbek) {
+    const kulcs = `${t.gazda}/${t.repo}`
+    repokSzerint.set(kulcs, (repokSzerint.get(kulcs) ?? 0) + 1)
+  }
+  for (const [repo, db] of repokSzerint) {
+    if (db > 1) {
+      naploz(
+        'sor',
+        `Figyelem: ${db} mod is a "mindig a legfrissebb kiadás" beállítást használja a ${repo} repóban. ` +
+          'Egy repóban viszont csak egy kiadás lehet a legfrissebb, ezért a többi letöltése hibás lesz. ' +
+          'Állítsd át őket "egy konkrét GitHub kiadás" beállításra.',
+      )
+    }
+  }
+
+  for (const t of feladatok) {
+    const cel = `${t.gazda}/${t.repo}`
+    naploz('sor', `${t.f.nev} -> ${cel} (${t.cimke})`)
+
+    const vanMar = await parancsSikeres(gh, ['release', 'view', t.cimke, '--repo', cel])
+
+    if (vanMar) {
+      await parancs(
+        gh,
+        ['release', 'upload', t.cimke, t.f.utvonal, '--repo', cel, '--clobber'],
+        'Fájl cseréje a meglévő kiadásban',
+        { halkan: true },
+      )
+    } else {
+      const jegyzet =
+        (t.verzio.changes ?? []).map((c) => `- ${c}`).join('\n') || 'Új kiadás.'
+      const argumentumok = [
+        'release',
+        'create',
+        t.cimke,
+        t.f.utvonal,
+        '--repo',
+        cel,
+        '--title',
+        `${t.mod.name} v${t.verzio.version}`,
+        '--notes',
+        jegyzet,
+      ]
+      if (t.verzio.prerelease) argumentumok.push('--prerelease')
+      else if (t.legfrissebb) argumentumok.push('--latest')
+
+      await parancs(gh, argumentumok, 'Új kiadás létrehozása', { halkan: true })
+    }
+
+    await fsp.writeFile(
+      path.join(path.dirname(t.f.utvonal), '.feltoltve'),
+      `${cel}#${t.cimke}`,
+      'utf8',
+    )
+    naploz('sor', `  kész: ${t.f.nev}`)
+  }
+}
+
 async function muveletFuttat(nev, uzenet) {
   if (futoMuvelet) throw new Error(`Már fut egy művelet: ${futoMuvelet}`)
   futoMuvelet = nev
@@ -265,9 +375,13 @@ async function muveletFuttat(nev, uzenet) {
       await parancs(npm, ['run', 'build'], 'Weboldal építése')
       naploz('kesz', 'Az előnézet elkészült.')
     } else if (nev === 'frissites') {
-      await parancs(npm, ['run', 'build'], '1/4 - Weboldal építése')
+      // Előbb a modfájlok mennek fel, csak utána az oldal - különben az oldal
+      // olyan letöltésre mutatna, ami még nem létezik.
+      await modFajlokFeltoltese()
 
-      naploz('lepes', '2/4 - Változások mentése')
+      await parancs(npm, ['run', 'build'], '2/5 - Weboldal építése')
+
+      naploz('lepes', '3/5 - Változások mentése')
       await parancs('git', ['add', '-A'], 'Változások összegyűjtése', { halkan: true })
 
       // A "git diff --cached --quiet" 0-val tér vissza, ha nincs mit menteni.
@@ -305,14 +419,18 @@ async function muveletFuttat(nev, uzenet) {
         naploz('sor', 'Nincs új változás - a publikálás ettől még lefut.')
       }
 
-      await parancsEngedekeny('git', ['push', 'origin', 'main'], '3/4 - Feltöltés GitHubra')
+      await parancsEngedekeny('git', ['push', 'origin', 'main'], '4/5 - Feltöltés GitHubra')
 
       await parancs(
         npx,
         ['wrangler', 'pages', 'deploy', 'dist', '--project-name=zerocode-mods', '--branch=main', '--commit-dirty=true'],
-        '4/4 - Publikálás a Cloudflare Pages-re',
+        '5/5 - Publikálás a Cloudflare Pages-re',
       )
       naploz('kesz', 'Kész! A módosítások kint vannak az éles oldalon.')
+    } else if (nev === 'modfajlok') {
+      // Csak a modfájlok feltöltése, az oldal újraépítése nélkül
+      await modFajlokFeltoltese()
+      naploz('kesz', 'A modfájlok feltöltése befejeződött.')
     } else {
       throw new Error(`Ismeretlen művelet: ${nev}`)
     }
@@ -349,6 +467,111 @@ async function kepekListaja() {
     }
   }
   return ki
+}
+
+/* ------------------------------------------------------------------ */
+/* Kiadásra váró modfájlok                                             */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A modok telepítői/ZIP fájljai nem kerülnek a weboldal repójába (nagyok,
+ * és nem is oda valók). A szerkesztőből ide, a "kiadasok" mappába kerülnek,
+ * innen tölti fel őket a Frissítés a GitHub Releases-be.
+ *
+ * Szerkezet:  kiadasok/<mod azonosító>/<verziószám>/<fájlnév>
+ * A feltöltés tényét egy .feltoltve fájl jelzi ugyanabban a mappában,
+ * hogy változatlan fájlt ne töltsünk fel újra és újra.
+ */
+
+const azonositoMinta = /^[A-Za-z0-9._-]+$/
+
+function verzioMappa(modId, verzio) {
+  if (!azonositoMinta.test(modId) || !azonositoMinta.test(verzio)) {
+    throw new Error('Érvénytelen azonosító.')
+  }
+  return path.join(kiadasDir, modId, verzio)
+}
+
+/** Egy verzióhoz tartozó, kiadásra váró fájl adatai (vagy null). */
+async function varakozoFajl(modId, verzio) {
+  const mappa = verzioMappa(modId, verzio)
+  let fajlok = []
+  try {
+    fajlok = await fsp.readdir(mappa)
+  } catch {
+    return null
+  }
+  const nev = fajlok.find((f) => f !== '.feltoltve')
+  if (!nev) return null
+
+  const st = await fsp.stat(path.join(mappa, nev))
+  let feltoltve = null
+  try {
+    feltoltve = (await fsp.readFile(path.join(mappa, '.feltoltve'), 'utf8')).trim()
+  } catch {
+    /* még nincs feltöltve */
+  }
+  return { modId, verzio, nev, meret: st.size, feltoltve, utvonal: path.join(mappa, nev) }
+}
+
+/** Minden kiadásra váró fájl. */
+async function varakozoFajlok() {
+  const ki = []
+  let modok = []
+  try {
+    modok = await fsp.readdir(kiadasDir)
+  } catch {
+    return ki
+  }
+  for (const modId of modok) {
+    let verziok = []
+    try {
+      verziok = await fsp.readdir(path.join(kiadasDir, modId))
+    } catch {
+      continue
+    }
+    for (const v of verziok) {
+      const f = await varakozoFajl(modId, v).catch(() => null)
+      if (f) ki.push(f)
+    }
+  }
+  return ki
+}
+
+/** Feltöltésre váró fájl mentése (a korábbit lecseréli). */
+async function modFajlMentes(modId, verzio, nyersNev, adat) {
+  const nev = path.basename(nyersNev).replace(/[^A-Za-z0-9._ -]+/g, '-')
+  if (!nev) throw new Error('Érvénytelen fájlnév.')
+
+  const mappa = verzioMappa(modId, verzio)
+  await fsp.rm(mappa, { recursive: true, force: true })
+  await fsp.mkdir(mappa, { recursive: true })
+  await fsp.writeFile(path.join(mappa, nev), adat)
+  return { nev, meret: adat.length }
+}
+
+/* ------------------------------------------------------------------ */
+/* GitHub CLI                                                          */
+/* ------------------------------------------------------------------ */
+
+let ghGyorsitotar
+function ghKeres() {
+  if (ghGyorsitotar !== undefined) return ghGyorsitotar
+  const jeloltek = [
+    'gh',
+    'C:\\Program Files\\GitHub CLI\\gh.exe',
+    'C:\\Program Files (x86)\\GitHub CLI\\gh.exe',
+    path.join(process.env.LOCALAPPDATA ?? '', 'Programs', 'GitHub CLI', 'gh.exe'),
+  ]
+  for (const jelolt of jeloltek) {
+    const p = spawnSync(jelolt, ['--version'], { windowsHide: true, encoding: 'utf8' })
+    if (p.status === 0) {
+      ghGyorsitotar = jelolt
+      return jelolt
+    }
+  }
+  ghGyorsitotar = null
+  return null
 }
 
 /* ------------------------------------------------------------------ */
@@ -462,6 +685,24 @@ const szerver = http.createServer(async (req, res) => {
     }
     // a szerkesztőben megjelenő képek a projekt public mappájából jönnek
     if (ut.startsWith('/images/')) return statikus(res, kepDir, ut.slice('/images'.length))
+
+    /* --- kiadásra váró modfájlok --- */
+    if (ut === '/api/modfajlok' && req.method === 'GET') {
+      return json(res, 200, { fajlok: await varakozoFajlok(), vanGh: Boolean(ghKeres()) })
+    }
+    if (ut === '/api/modfajl' && req.method === 'POST') {
+      const modId = url.searchParams.get('mod') ?? ''
+      const verzio = url.searchParams.get('verzio') ?? ''
+      const nev = url.searchParams.get('nev') ?? ''
+      const mentve = await modFajlMentes(modId, verzio, nev, await testOlvas(req))
+      return json(res, 200, { ok: true, ...mentve })
+    }
+    if (ut === '/api/modfajl-torles' && req.method === 'POST') {
+      const modId = url.searchParams.get('mod') ?? ''
+      const verzio = url.searchParams.get('verzio') ?? ''
+      await fsp.rm(verzioMappa(modId, verzio), { recursive: true, force: true })
+      return json(res, 200, { ok: true })
+    }
 
     /* --- műveletek --- */
     if (ut === '/api/naplo') {

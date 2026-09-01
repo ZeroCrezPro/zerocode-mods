@@ -984,6 +984,57 @@ textarea.hibas {
   font-weight: 700;
 }
 
+/* Kiadásra váró modfájl sávja */
+.modfajl {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(214, 31, 39, 0.45);
+  background: rgba(214, 31, 39, 0.07);
+}
+
+.modfajl.fent {
+  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(52, 211, 153, 0.07);
+}
+
+.modfajl-jel {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--blood-600);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.modfajl.fent .modfajl-jel {
+  background: var(--zold);
+  color: var(--ink-950);
+}
+
+.modfajl-nev {
+  display: block;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ash-100);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modfajl-allapot {
+  display: block;
+  font-size: 11px;
+  color: var(--ash-400);
+}
+
 .kep-elonezet {
   display: flex;
   align-items: center;

@@ -79,20 +79,48 @@ A jelzés gépelés közben frissül, tehát azonnal látszik, ha egy mező már
 ha valami hiányzik vagy hibás. Minden mentésről biztonsági másolat készül a `.szerkeszto-mentes` mappába
 (a legutóbbi 40 megmarad). Ez a mappa nem kerül fel GitHubra – csak a te gépeden van.
 
-**Frissítés** – ez teszi ki a módosításokat az élő weboldalra. Négy lépést futtat le,
+**Frissítés** – ez teszi ki a módosításokat az élő weboldalra. Öt lépést futtat le,
 és a naplóban élőben mutatja, hol tart:
 
-1. legyártja a weboldalt (`npm run build`),
-2. elmenti a változásokat a verziókövetőbe (`git commit`),
-3. feltölti GitHubra (`git push`),
-4. publikálja a Cloudflare Pages-re.
+1. feltölti a kiadásra váró **modfájlokat** a GitHub Releases-be,
+2. legyártja a weboldalt (`npm run build`),
+3. elmenti a változásokat a verziókövetőbe (`git commit`),
+4. feltölti GitHubra (`git push`),
+5. publikálja a Cloudflare Pages-re.
+
+A modfájlok szándékosan előbb mennek fel, mint az oldal – így nincs olyan pillanat,
+amikor az oldal már hirdet egy letöltést, ami még nem létezik. A képek az oldallal
+együtt kerülnek ki, azokkal nincs külön teendő.
 
 Ha bármelyik lépés hibára fut, a napló pontosan megmutatja, melyik és miért – a
 korábbi élő oldal ilyenkor változatlan marad.
 
+### A modfájlok útja
+
+A telepítők és ZIP fájlok nem kerülnek a weboldal repójába (nagyok, és nem is oda
+valók). Az útjuk:
+
+1. a szerkesztőben megadod a fájlt a verziónál;
+2. a program a `kiadasok/<mod azonosító>/<verzió>/` mappába teszi (ez nem kerül GitHubra);
+3. a **Frissítés** feltölti a `zerocode-mods-releases` repó megfelelő kiadásába;
+4. az oldal letöltés gombja erre a fájlra mutat.
+
+A kiadás címkéje (tag) automatikusan `<mod-azonosító>-v<verzió>` lesz, kivéve, ha a
+*Honnan töltsön le?* mezőben konkrét címkét adtál meg. Ha a kiadás már létezik, a
+program csak lecseréli benne a fájlt.
+
+Ami már fent van, azt nem tölti fel újra: a sávban zölden látszik, hogy kész.
+
+> **Több mod egy repóban:** a *„Mindig a legfrissebb GitHub kiadás"* beállítás a repó
+> legutolsó kiadására mutat, nem az adott modéra. Ha egy repóban több modod van, csak
+> az egyiknél hagyd ezt – a többinél válaszd az *„Egy konkrét GitHub kiadás"* opciót.
+> A program a Frissítéskor figyelmeztet, ha ez az ütközés fennáll.
+
 ### Mire van szükség?
 
 - **Node.js 20+** – enélkül a program nem tud buildelni (https://nodejs.org, LTS).
+- **GitHub CLI** – a modfájlok feltöltéséhez (https://cli.github.com, majd egyszer
+  `gh auth login`). Enélkül a weboldal frissítése működik, csak a modfájl nem megy fel.
 - **.NET 10 asztali futtatókörnyezet** – az EXE ezzel indul.
 - A Frissítés gombhoz **bejelentkezett `git` és `wrangler`** (ezt egyszer kell beállítani).
 
@@ -287,9 +315,10 @@ napló** panelben a **+ Új bejegyzés** gombot.
 
 A verzión belül két gomb segít kitölteni a letöltési adatokat:
 
-- **Mod fájljának kiválasztása** – kiválasztod a gépeden a mod telepítőjét vagy ZIP
-  fájlját, és a program kitölti belőle a *Fájlnév a kiadásban* és a *Fájlméret* mezőt.
-  A fájl nem töltődik fel sehová, csak az adatait olvassa ki.
+- **Mod fájljának megadása** – kiválasztod a gépeden a mod telepítőjét vagy ZIP fájlját.
+  A program kitölti belőle a *Fájlnév a kiadásban* és a *Fájlméret* mezőt, a fájlt pedig
+  félreteszi a `kiadasok` mappába. A következő **Frissítés** feltölti a GitHub
+  Releases-be – neked nem kell külön feltöltened sehova.
 - **Méret lekérdezése a GitHubról** – ha a kiadás már fent van a GitHubon, onnan olvassa
   be a pontos méretet. Hasznos, ha később kicseréled a fájlt a release-ben.
 

@@ -46,7 +46,28 @@ const allapot = {
   modIndex: 0,
   jatekIndex: 0,
   kepek: [],
+  modfajlok: [],
   hibak: [],
+}
+
+/** Melyik mod van épp megnyitva (a verziómezőknek kell). */
+function aktualisMod() {
+  return allapot.adatok?.mods?.[allapot.modIndex]
+}
+
+/** A megadott verzióhoz tartozó, kiadásra váró fájl (vagy null). */
+function varakozoModFajl(modId, verzio) {
+  return allapot.modfajlok.find((f) => f.modId === modId && f.verzio === verzio) ?? null
+}
+
+async function modFajlokBetolt() {
+  try {
+    const v = await api('/api/modfajlok')
+    allapot.modfajlok = v.fajlok ?? []
+    allapot.vanGh = v.vanGh
+  } catch {
+    allapot.modfajlok = []
+  }
 }
 
 function jelolValtozas() {
@@ -900,8 +921,9 @@ function mezoRajz(objektum, mezo) {
     }
 
     case 'fajlbol': {
-      // A mod telepítőjéből/ZIP-jéből olvassuk ki a fájlnevet és a méretet.
-      // A fájl a gépen marad, csak a böngésző olvassa ki az adatait.
+      const mod = aktualisMod()
+      const varakozo = mod ? varakozoModFajl(mod.id, objektum.version) : null
+
       const be = el('input', {
         type: 'file',
         accept: '.zip,.7z,.rar,.exe,.msi',
@@ -909,38 +931,64 @@ function mezoRajz(objektum, mezo) {
         onChange: (e) => {
           const fajl = e.target.files?.[0]
           e.target.value = ''
-          if (!fajl) return
-
-          objektum.size = meretSzoveg(fajl.size)
-          if (typeof objektum.download !== 'object' || objektum.download === null) {
-            objektum.download = { kind: 'github-latest', file: '' }
-          }
-          if (objektum.download.kind !== 'url') objektum.download.file = fajl.name
-
-          jelolValtozas()
-          ujraRajzol()
-          pirit(`Kitöltve a fájlból: ${fajl.name} - ${objektum.size}`, 'jo')
+          if (fajl) modFajlAtvetel(objektum, fajl)
         },
       })
 
-      const gombok = el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;align-items:center' }, [
-        be,
-        el('button', {
-          type: 'button',
-          class: 'gomb gomb-masodlagos gomb-apro',
-          text: 'Mod fájljának kiválasztása',
-          onClick: () => be.click(),
-        }),
-        el('button', {
-          type: 'button',
-          class: 'gomb gomb-halvany gomb-apro',
-          text: 'Méret lekérdezése a GitHubról',
-          title: 'Ha a kiadás már fent van a GitHubon, onnan is beolvasható a méret.',
-          onClick: (e) => githubMeret(objektum, e.target),
-        }),
-      ])
+      const doboz = el('div', {})
 
-      return mezoBurok(mezo, gombok)
+      if (varakozo) {
+        const fent = Boolean(varakozo.feltoltve)
+        doboz.append(
+          el('div', { class: 'modfajl' + (fent ? ' fent' : '') }, [
+            el('span', { class: 'modfajl-jel', text: fent ? '✓' : '↑' }),
+            el('span', { style: 'min-width:0;flex:1' }, [
+              el('span', { class: 'modfajl-nev', text: varakozo.nev }),
+              el('span', {
+                class: 'modfajl-allapot',
+                text: fent
+                  ? `${meretSzoveg(varakozo.meret)} - fent van a GitHubon (${varakozo.feltoltve})`
+                  : `${meretSzoveg(varakozo.meret)} - a következő Frissítéskor feltöltődik`,
+              }),
+            ]),
+            el('button', {
+              type: 'button',
+              class: 'gomb gomb-masodlagos gomb-apro',
+              text: 'Csere',
+              onClick: () => be.click(),
+            }),
+            el('button', {
+              type: 'button',
+              class: 'gomb gomb-veszely gomb-apro',
+              text: 'Eltávolítás',
+              onClick: () => modFajlTorles(mod, objektum),
+            }),
+          ]),
+        )
+      }
+
+      doboz.append(
+        el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;align-items:center' }, [
+          be,
+          varakozo
+            ? null
+            : el('button', {
+                type: 'button',
+                class: 'gomb gomb-elsodleges gomb-apro',
+                text: 'Mod fájljának megadása',
+                onClick: () => be.click(),
+              }),
+          el('button', {
+            type: 'button',
+            class: 'gomb gomb-halvany gomb-apro',
+            text: 'Méret lekérdezése a GitHubról',
+            title: 'Ha a kiadás már fent van a GitHubon, onnan is beolvasható a méret.',
+            onClick: (e) => githubMeret(objektum, e.target),
+          }),
+        ]),
+      )
+
+      return mezoBurok(mezo, doboz)
     }
 
     case 'kep': {
@@ -1198,6 +1246,61 @@ function hianyOsszegzo(objektum, szakaszok) {
       }),
     ],
   )
+}
+
+/**
+ * A kiválasztott modfájl átvétele: a fájlnév és a méret bekerül az adatokba,
+ * a fájl maga pedig a "kiadasok" mappába, ahonnan a Frissítés felteszi a
+ * GitHub Releases-be.
+ */
+async function modFajlAtvetel(verzio, fajl) {
+  const mod = aktualisMod()
+  if (!mod) return
+
+  if (!verzio.version?.trim()) {
+    pirit('Előbb add meg a verziószámot - az alapján kerül a fájl a kiadásba.', 'rossz')
+    return
+  }
+
+  // Az adatok azonnal frissülnek, hogy a mentés már ezekkel menjen
+  verzio.size = meretSzoveg(fajl.size)
+  if (typeof verzio.download !== 'object' || verzio.download === null) {
+    verzio.download = { kind: 'github-latest', file: '' }
+  }
+  if (verzio.download.kind !== 'url') verzio.download.file = fajl.name
+  jelolValtozas()
+  ujraRajzol()
+
+  pirit(`${fajl.name} átvétele… (${meretSzoveg(fajl.size)})`)
+  try {
+    await api(
+      `/api/modfajl?mod=${encodeURIComponent(mod.id)}&verzio=${encodeURIComponent(verzio.version)}&nev=${encodeURIComponent(fajl.name)}`,
+      { method: 'POST', body: await fajl.arrayBuffer() },
+    )
+    await modFajlokBetolt()
+    ujraRajzol()
+    pirit(`${fajl.name} készen áll a feltöltésre.`, 'jo')
+  } catch (hiba) {
+    pirit(`Nem sikerült átvenni a fájlt: ${hiba.message}`, 'rossz')
+  }
+}
+
+/** A kiadásra váró fájl eltávolítása (a GitHubról nem töröl semmit). */
+async function modFajlTorles(mod, verzio) {
+  if (!confirm(`Eltávolítod a feltöltésre kijelölt fájlt?\n\nA GitHubra már felkerült kiadást ez nem törli.`)) {
+    return
+  }
+  try {
+    await api(
+      `/api/modfajl-torles?mod=${encodeURIComponent(mod.id)}&verzio=${encodeURIComponent(verzio.version)}`,
+      { method: 'POST' },
+    )
+    await modFajlokBetolt()
+    ujraRajzol()
+    pirit('A fájl eltávolítva a feltöltési sorból.', 'jo')
+  } catch (hiba) {
+    pirit(`Nem sikerült eltávolítani: ${hiba.message}`, 'rossz')
+  }
 }
 
 /**
@@ -1895,6 +1998,10 @@ function naploCsatlakoz(naploDoboz) {
     if (esemeny.tipus === 'kesz') {
       pirit(esemeny.szoveg, 'jo')
       $('#gombFrissites').disabled = false
+      // A feltöltött modfájlok állapota megváltozott
+      modFajlokBetolt().then(() => {
+        if (allapot.lap === 'modok') ujraRajzol()
+      })
       // A friss build azonnal látszódjon az előnézetben.
       if (allapot.lap === 'elonezet') elonezetUjratolt()
     }
@@ -1942,6 +2049,19 @@ async function frissitesInditas() {
     type: 'text',
     value: `Tartalom frissítése (${new Date().toLocaleDateString('hu-HU')})`,
   })
+
+  // Mi vár feltöltésre?
+  const varakozoFajlok = allapot.modfajlok.filter((f) => !f.feltoltve)
+  if (varakozoFajlok.length) {
+    test.append(
+      el('div', { class: 'uzenet' }, [
+        el('div', {}, [
+          el('strong', { text: varakozoFajlok.length + ' modfájl kerül fel a GitHub Releases-be: ' }),
+          varakozoFajlok.map((f) => f.nev + ' (' + meretSzoveg(f.meret) + ')').join(', '),
+        ]),
+      ]),
+    )
+  }
 
   test.append(
     el('div', { class: 'uzenet' }, [
@@ -2075,6 +2195,7 @@ async function indul() {
   try {
     allapot.adatok = await api('/api/adatok')
     await kepekBetolt()
+    await modFajlokBetolt()
     frissitMentesAllapot()
     ujraRajzol()
   } catch (hiba) {

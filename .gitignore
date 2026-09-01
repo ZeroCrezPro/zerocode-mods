@@ -53,3 +53,6 @@ eszkoz/szerkeszto/program/ikon.ico
 
 # Ideiglenes parancsikon-szkript
 .szerkeszto-parancsikon.ps1
+
+# Kiadasra varo modfajlok (nem valok a repoba)
+kiadasok/
