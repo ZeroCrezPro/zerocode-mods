@@ -275,9 +275,10 @@ Kézzel, fájlból:
 A mod adatlapján a letöltés gomb és a leírás között megjelenik egy diavetítő: egy nagy
 kép, két oldalán nyíllal, alatta ponttal minden képhez. Ez a mod gyors bemutatására való.
 
-A képeket a szerkesztő **Diavetítés (a letöltés gomb alatt)** paneljében lehet megadni,
-a lentebbi Képek galériától függetlenül – így külön válogathatod, mi kerüljön rögtön a
-látogató szeme elé, és mi maradjon a részletes galériába.
+A képeket a szerkesztőben a **Képek** panelben, a borító / banner / ikon alatt, a
+**Lapozható képek** résznél lehet megadni – a lentebbi Képernyőképek galériától
+függetlenül. Így külön válogathatod, mi kerüljön rögtön a látogató szeme elé, és mi
+maradjon a részletes galériába.
 
 Ha nem adsz meg egyetlen képet sem, a diavetítő nem jelenik meg.
 

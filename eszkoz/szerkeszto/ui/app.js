@@ -427,6 +427,26 @@ const MOD_SZAKASZOK = [
         mappa: 'mods',
         sugo: 'Négyzetes, 1:1 - ajánlott 256x256. A keresőben és a Legújabb lapon látszik.',
       },
+      {
+        k: 'slideshow',
+        cim: 'Lapozható képek (diavetítő a letöltés gomb alatt)',
+        tipus: 'blokkok',
+        teljes: true,
+        cimke: 'Kép',
+        cimMezo: 'caption',
+        sugo: 'Ezek a képek a mod adatlapján, a letöltés gomb és a leírás között jelennek meg, két oldalt nyilakkal lapozva. Egynél több képnél jelennek meg a nyilak.',
+        mezok: [
+          { k: 'src', cim: 'Kép', tipus: 'kep', mappa: 'screenshots', teljes: true },
+          {
+            k: 'alt',
+            cim: 'Képleírás (ALT)',
+            tipus: 'szoveg',
+            teljes: true,
+            sugo: 'Kötelező: ezt olvassa fel a képernyőolvasó, és ezt látja a kereső.',
+          },
+          { k: 'caption', cim: 'Felirat a kép alatt', tipus: 'szoveg', teljes: true },
+        ],
+      },
     ],
   },
   {
@@ -494,35 +514,6 @@ const MOD_SZAKASZOK = [
           { k: 'label', cim: 'Kiadás neve', tipus: 'szoveg' },
           { k: 'state', cim: 'Állapot', tipus: 'valaszto', valasztek: KOMPAT_VALASZTEK },
           { k: 'note', cim: 'Megjegyzés', tipus: 'szoveg', teljes: true },
-        ],
-      },
-    ],
-  },
-  {
-    cim: 'Diavetítés (a letöltés gomb alatt)',
-    mezok: [
-      {
-        k: 'slideshow',
-        cim: 'Képek a diavetítőben',
-        tipus: 'blokkok',
-        teljes: true,
-        cimke: 'Kép',
-        cimMezo: 'caption',
-        mezok: [
-          { k: 'src', cim: 'Kép', tipus: 'kep', mappa: 'screenshots', teljes: true },
-          {
-            k: 'alt',
-            cim: 'Képleírás (ALT)',
-            tipus: 'szoveg',
-            teljes: true,
-            sugo: 'Kötelező: ezt olvassa fel a képernyőolvasó, és ezt látja a kereső.',
-          },
-          {
-            k: 'caption',
-            cim: 'Felirat a kép alatt',
-            tipus: 'szoveg',
-            teljes: true,
-          },
         ],
       },
     ],
