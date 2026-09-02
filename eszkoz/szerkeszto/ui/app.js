@@ -371,13 +371,12 @@ function kepHasznalata(utvonal) {
 /** Kép végleges törlése a lemezről, előtte figyelmeztetéssel. */
 async function kepetTorol(k, honnan) {
   const hol = kepHasznalata(k.utvonal)
-  const sorok = [`${k.nev} – a fájl véglegesen törlődik.`]
-  if (hol.length) {
-    sorok.push({
-      kiemelt: true,
-      szoveg: `Most itt használod: ${hol.join(', ')}. Törlés után ott nem lesz kép.`,
-    })
-  }
+
+  // A kérdés maga elég. Csak akkor írunk mellé, ha a kép használatban van -
+  // ott a figyelmeztetés valódi hibától véd meg.
+  const sorok = hol.length
+    ? [{ kiemelt: true, szoveg: `Most itt használod: ${hol.join(', ')}.` }]
+    : []
 
   const rendben = await megerositSav(megerositoGazdaja(honnan), {
     cim: 'Törlöd ezt a képet?',
