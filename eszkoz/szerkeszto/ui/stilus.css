@@ -1233,3 +1233,387 @@ textarea.hibas {
 .pirit.rossz {
   border-color: rgba(214, 31, 39, 0.6);
 }
+
+/* ==================================================================
+   Szövegformázó - jobb oldali panel
+   ------------------------------------------------------------------
+   A panel a jobb szélen áll. Nyitott állapotban a tartalomterület jobb
+   széle húzódik beljebb - a bal oldali listát és a fejlécet nem mozdítja.
+   ================================================================== */
+
+.formazo {
+  position: fixed;
+  top: 62px;
+  right: 0;
+  bottom: 0;
+  z-index: 25;
+  width: 300px;
+  display: flex;
+  border-left: 1px solid var(--ink-600);
+  background: var(--ink-900);
+  transition: transform 0.18s ease;
+}
+
+.formazo.csukva {
+  transform: translateX(300px);
+}
+
+/* Összecsukott állapotban is elérhető marad egy függőleges fül */
+.formazo-ful {
+  position: absolute;
+  top: 14px;
+  left: -30px;
+  width: 30px;
+  height: 168px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ink-600);
+  border-right: 0;
+  background: var(--ink-800);
+  color: var(--ash-300);
+  cursor: pointer;
+  padding: 0;
+}
+
+.formazo-ful:hover {
+  border-color: var(--blood-600);
+  color: var(--ash-100);
+}
+
+.formazo-ful-szoveg {
+  writing-mode: vertical-rl;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.formazo-test {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 0 0 30px;
+}
+
+.formazo-fej {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ink-600);
+  background:
+    linear-gradient(90deg, rgba(179, 22, 31, 0.18) 0%, rgba(179, 22, 31, 0) 45%),
+    var(--ink-800);
+}
+
+.formazo-fej::before {
+  content: '';
+  width: 4px;
+  height: 19px;
+  background: var(--blood-500);
+  flex-shrink: 0;
+}
+
+.formazo-fej h2 {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ash-100);
+}
+
+.formazo-blokk {
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--ink-800);
+}
+
+.formazo-cimke {
+  margin: 0 0 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash-300);
+}
+
+.formazo-kijeloles {
+  margin: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--ink-700);
+  background: var(--ink-850);
+  font-size: 12px;
+  color: var(--ash-200);
+  word-break: break-word;
+}
+
+.formazo.nincs-kijeloles .formazo-kijeloles {
+  color: var(--ash-400);
+  font-style: italic;
+}
+
+/* Kijelölés nélkül a formázó vezérlők halványak */
+.formazo.nincs-kijeloles .formazo-blokk:not(:first-of-type) {
+  opacity: 0.55;
+}
+
+.formazo-szinsor {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.formazo-szinsor input[type='color'] {
+  width: 46px;
+  height: 34px;
+  padding: 2px;
+  border: 1px solid var(--ink-600);
+  background: var(--ink-850);
+  cursor: pointer;
+}
+
+.formazo-szinsor input[type='text'] {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+}
+
+.formazo-paletta {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.formazo-szin {
+  height: 24px;
+  border: 1px solid var(--ink-600);
+  cursor: pointer;
+  padding: 0;
+}
+
+.formazo-szin:hover {
+  border-color: var(--ash-200);
+}
+
+.formazo-blokk select {
+  margin-bottom: 9px;
+}
+
+.formazo-blokk .gomb {
+  width: 100%;
+}
+
+.formazo-blokk .sugo {
+  margin-top: 8px;
+}
+
+/* A tartalomterület jobb széle húzódik be - a bal oldal nem mozdul */
+body.formazo-nyitva .tartalom {
+  right: 300px;
+}
+
+/* ---------------- Formázható szövegdoboz ---------------- */
+
+.gazdag-szoveg {
+  min-height: 150px;
+  padding: 10px 12px;
+  border: 1px solid var(--ink-600);
+  background: var(--ink-850);
+  color: var(--ash-100);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-y: auto;
+  max-height: 420px;
+}
+
+.gazdag-szoveg:focus {
+  border-color: var(--blood-600);
+  outline: none;
+}
+
+.gazdag-szoveg.ajanlott {
+  border-color: rgba(251, 191, 36, 0.55);
+}
+
+.gazdag-szoveg p {
+  margin: 0 0 0.9em;
+}
+
+.gazdag-szoveg p:last-child {
+  margin-bottom: 0;
+}
+
+/* A weboldal animációi a szerkesztőben is látszanak */
+.gazdag-szoveg [class*='zc-anim-'] {
+  display: inline-block;
+}
+
+/* ==================================================================
+   Szöveganimációk - ugyanazok, mint a weboldalon (src/index.css).
+   Így a szerkesztőben pontosan az látszik, ami az éles oldalon lesz.
+   ================================================================== */
+
+@keyframes zc-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zc-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes zc-fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-0.6em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes zc-fade-left {
+  from {
+    opacity: 0;
+    transform: translateX(0.8em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes zc-fade-right {
+  from {
+    opacity: 0;
+    transform: translateX(-0.8em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes zc-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes zc-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.09);
+  }
+}
+
+@keyframes zc-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.28em);
+  }
+}
+
+@keyframes zc-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 0 currentColor;
+  }
+  50% {
+    text-shadow:
+      0 0 10px currentColor,
+      0 0 22px currentColor;
+  }
+}
+
+@keyframes zc-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-0.16em);
+  }
+  40% {
+    transform: translateX(0.16em);
+  }
+  60% {
+    transform: translateX(-0.1em);
+  }
+  80% {
+    transform: translateX(0.1em);
+  }
+}
+
+@keyframes zc-typewriter {
+  from {
+    max-width: 0;
+  }
+  to {
+    max-width: 100%;
+  }
+}
+
+.zc-anim-fade-in {
+  animation: zc-fade-in 0.9s ease both;
+}
+.zc-anim-fade-up {
+  animation: zc-fade-up 0.9s ease both;
+}
+.zc-anim-fade-down {
+  animation: zc-fade-down 0.9s ease both;
+}
+.zc-anim-fade-left {
+  animation: zc-fade-left 0.9s ease both;
+}
+.zc-anim-fade-right {
+  animation: zc-fade-right 0.9s ease both;
+}
+.zc-anim-zoom-in {
+  animation: zc-zoom-in 0.8s ease both;
+}
+.zc-anim-pulse {
+  animation: zc-pulse 1.8s ease-in-out infinite;
+}
+.zc-anim-float {
+  animation: zc-float 3s ease-in-out infinite;
+}
+.zc-anim-glow {
+  animation: zc-glow 2.4s ease-in-out infinite;
+}
+.zc-anim-shake {
+  animation: zc-shake 1.6s ease-in-out infinite;
+}
+
+.zc-anim-typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
+  animation: zc-typewriter 2.2s steps(40, end) both;
+}

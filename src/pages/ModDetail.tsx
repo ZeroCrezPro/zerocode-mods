@@ -4,6 +4,7 @@ import { getModBySlug, latestVersion, olderVersions, site } from '@/data'
 import { formatDate, vLabel } from '@/lib/format'
 import { statusLabel, statusTextClass } from '@/lib/labels'
 import { downloadUrl } from '@/lib/download'
+import { tisztitHtml } from '@/lib/gazdagSzoveg'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { SmartImage } from '@/components/SmartImage'
@@ -193,9 +194,13 @@ export default function ModDetail() {
           <Panel title="Leírás">
             <div className="space-y-4">
               {mod.description.map((para) => (
-                <p key={para.slice(0, 40)} className="text-sm leading-relaxed text-ash-300">
-                  {para}
-                </p>
+                <p
+                  key={para.slice(0, 40)}
+                  className="text-sm leading-relaxed text-ash-300"
+                  // A szerkesztőben megadott színek és animációk <span> elemekként
+                  // vannak a szövegben; a tisztitHtml minden mást kiszűr.
+                  dangerouslySetInnerHTML={{ __html: tisztitHtml(para) }}
+                />
               ))}
             </div>
           </Panel>

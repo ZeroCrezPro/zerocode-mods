@@ -150,3 +150,187 @@
     text-transform: uppercase;
   }
 }
+
+/* ==================================================================
+   Szövegkiemelések és animációk
+   ------------------------------------------------------------------
+   Ezeket az osztályokat a ZeroCode Szerkesztő jobb oldali
+   szövegformázó panelje teszi a kijelölt szövegrészekre. A szöveg
+   valódi HTML marad, csak <span> elemekbe kerül.
+   ================================================================== */
+
+/* A formázott részek soron belül maradnak, hogy a szöveg ne törjön szét. */
+[class*='zc-anim-'] {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*='zc-anim-'] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+@keyframes zc-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zc-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes zc-fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-0.6em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes zc-fade-left {
+  from {
+    opacity: 0;
+    transform: translateX(0.8em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes zc-fade-right {
+  from {
+    opacity: 0;
+    transform: translateX(-0.8em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes zc-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes zc-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.09);
+  }
+}
+
+@keyframes zc-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.28em);
+  }
+}
+
+@keyframes zc-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 0 currentColor;
+  }
+  50% {
+    text-shadow:
+      0 0 10px currentColor,
+      0 0 22px currentColor;
+  }
+}
+
+@keyframes zc-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-0.16em);
+  }
+  40% {
+    transform: translateX(0.16em);
+  }
+  60% {
+    transform: translateX(-0.1em);
+  }
+  80% {
+    transform: translateX(0.1em);
+  }
+}
+
+@keyframes zc-typewriter {
+  from {
+    max-width: 0;
+  }
+  to {
+    max-width: 100%;
+  }
+}
+
+.zc-anim-fade-in {
+  animation: zc-fade-in 0.9s ease both;
+}
+.zc-anim-fade-up {
+  animation: zc-fade-up 0.9s ease both;
+}
+.zc-anim-fade-down {
+  animation: zc-fade-down 0.9s ease both;
+}
+.zc-anim-fade-left {
+  animation: zc-fade-left 0.9s ease both;
+}
+.zc-anim-fade-right {
+  animation: zc-fade-right 0.9s ease both;
+}
+.zc-anim-zoom-in {
+  animation: zc-zoom-in 0.8s ease both;
+}
+.zc-anim-pulse {
+  animation: zc-pulse 1.8s ease-in-out infinite;
+}
+.zc-anim-float {
+  animation: zc-float 3s ease-in-out infinite;
+}
+.zc-anim-glow {
+  animation: zc-glow 2.4s ease-in-out infinite;
+}
+.zc-anim-shake {
+  animation: zc-shake 1.6s ease-in-out infinite;
+}
+
+.zc-anim-typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
+  animation: zc-typewriter 2.2s steps(40, end) both;
+}

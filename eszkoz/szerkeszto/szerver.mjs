@@ -121,6 +121,113 @@ async function regiMentesekTakaritasa(dir) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Formázott szöveg szűrése                                            */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A leírás bekezdései tartalmazhatnak formázást: a szerkesztő <span>
+ * elemekbe teszi a színezett és animált részeket. Mentéskor mindent
+ * kiszűrünk, ami ezen kívül esik - így akkor sem kerülhet idegen kód az
+ * adatfájlba, ha az adat máshonnan érkezik.
+ */
+
+const ENGEDETT_ANIMACIOK = new Set([
+  'fade-in',
+  'fade-up',
+  'fade-down',
+  'fade-left',
+  'fade-right',
+  'zoom-in',
+  'pulse',
+  'float',
+  'typewriter',
+  'glow',
+  'shake',
+])
+
+const SZIN_MINTA = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
+
+/** A böngésző rgb(...) alakban is küldheti a színt; hexre hozzuk. */
+function szinNormalizal(ertek) {
+  const t = String(ertek ?? '').trim()
+  if (SZIN_MINTA.test(t)) return t.toLowerCase()
+  const m = /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*[\d.]+\s*)?\)$/i.exec(t)
+  if (!m) return ''
+  const sz = [m[1], m[2], m[3]].map(Number)
+  if (sz.some((n) => n > 255)) return ''
+  return '#' + sz.map((n) => n.toString(16).padStart(2, '0')).join('')
+}
+
+/** A <span> engedélyezett tulajdonságainak átemelése. */
+function nyitoSpan(cimke) {
+  const osztalyok = []
+  const classTalalat = /class\s*=\s*"([^"]*)"/i.exec(cimke) ?? /class\s*=\s*'([^']*)'/i.exec(cimke)
+  if (classTalalat) {
+    for (const o of classTalalat[1].split(/\s+/)) {
+      if (o.startsWith('zc-anim-') && ENGEDETT_ANIMACIOK.has(o.slice('zc-anim-'.length))) {
+        osztalyok.push(o)
+      }
+    }
+  }
+
+  let szin = ''
+  const styleTalalat = /style\s*=\s*"([^"]*)"/i.exec(cimke) ?? /style\s*=\s*'([^']*)'/i.exec(cimke)
+  if (styleTalalat) {
+    const t = /(?:^|;)\s*color\s*:\s*([^;]+)/i.exec(styleTalalat[1])
+    if (t) szin = szinNormalizal(t[1])
+  }
+
+  if (!osztalyok.length && !szin) return '<span>'
+  const c = osztalyok.length ? ` class="${osztalyok.join(' ')}"` : ''
+  const st = szin ? ` style="color:${szin}"` : ''
+  return `<span${c}${st}>`
+}
+
+/** Csak a saját formázásunkat engedjük át; minden más elem kiesik. */
+function tisztitHtml(nyers) {
+  const forras = String(nyers ?? '').replace(/\r\n?|\n/g, '<br />')
+  let ki = ''
+  let i = 0
+  const esc = (t) => t.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+  while (i < forras.length) {
+    const nyit = forras.indexOf('<', i)
+    if (nyit === -1) {
+      ki += forras.slice(i)
+      break
+    }
+    ki += forras.slice(i, nyit)
+
+    const zar = forras.indexOf('>', nyit)
+    if (zar === -1) {
+      ki += esc(forras.slice(nyit))
+      break
+    }
+
+    const cimke = forras.slice(nyit + 1, zar).trim()
+    i = zar + 1
+
+    if (/^br\s*\/?$/i.test(cimke)) ki += '<br />'
+    else if (/^\/?(strong|b)$/i.test(cimke)) ki += cimke.startsWith('/') ? '</strong>' : '<strong>'
+    else if (/^\/?(em|i)$/i.test(cimke)) ki += cimke.startsWith('/') ? '</em>' : '<em>'
+    else if (/^\/span$/i.test(cimke)) ki += '</span>'
+    else if (/^span(\s|$)/i.test(cimke)) ki += nyitoSpan(cimke)
+    // minden más elem elmarad, a szövege megmarad
+  }
+  return ki
+}
+
+/** A formázható mezők átszűrése mentés előtt. */
+function formazasSzures(adatok) {
+  for (const m of adatok.mods ?? []) {
+    if (Array.isArray(m.description)) {
+      m.description = m.description.map((b) => tisztitHtml(b)).filter((b) => b.trim())
+    }
+  }
+  return adatok
+}
+
+/* ------------------------------------------------------------------ */
 /* Ellenőrzés mentés előtt                                             */
 /* ------------------------------------------------------------------ */
 
@@ -635,7 +742,7 @@ const szerver = http.createServer(async (req, res) => {
       return json(res, 200, await adatokBeolvas())
     }
     if (ut === '/api/adatok' && req.method === 'POST') {
-      const test = JSON.parse((await testOlvas(req)).toString('utf8'))
+      const test = formazasSzures(JSON.parse((await testOlvas(req)).toString('utf8')))
       const hibak = ellenoriz(test)
       if (hibak.length) return json(res, 400, { ok: false, hibak })
       for (const kulcsNev of Object.keys(ADATFAJLOK)) {

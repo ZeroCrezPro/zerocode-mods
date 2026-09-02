@@ -6,6 +6,13 @@
  * publikálja a Cloudflare Pages-re.
  */
 
+import {
+  bekezdesekBeir,
+  bekezdesekBeolvas,
+  formazoPanel,
+  tisztitHtml as formazoTisztit,
+} from './formazo.js'
+
 const KULCS = window.ZC_KULCS
 const ELONEZET = window.ZC_ELONEZET
 
@@ -381,10 +388,10 @@ const MOD_SZAKASZOK = [
       {
         k: 'description',
         cim: 'Részletes leírás',
-        tipus: 'bekezdesek',
+        tipus: 'gazdagSzoveg',
         teljes: true,
         ajanlott: true,
-        sugo: 'Üres sorral válaszd el a bekezdéseket.',
+        sugo: 'Enter = új bekezdés. Jelölj ki egy szövegrészt, és a jobb oldali panelen adhatsz neki színt vagy animációt.',
       },
     ],
   },
@@ -703,6 +710,34 @@ function mezoRajz(objektum, mezo) {
       })
       be.value = ertek ?? ''
       return mezoBurok(mezo, be, hiany)
+    }
+
+    case 'gazdagSzoveg': {
+      // Formázható szöveg: a kijelölt részekhez a jobb oldali panel ad
+      // színt és animációt. A tartalom valódi HTML marad.
+      const doboz = el('div', {
+        class: 'gazdag-szoveg' + (hiany === 'ajanlott' ? ' ajanlott' : ''),
+        contenteditable: 'true',
+        role: 'textbox',
+        'aria-multiline': 'true',
+        'aria-label': mezo.cim,
+      })
+      bekezdesekBeir(doboz, ertek)
+
+      doboz.addEventListener('input', () => {
+        objektum[mezo.k] = bekezdesekBeolvas(doboz).map(formazoTisztit)
+        jelolValtozas()
+      })
+
+      // Beillesztéskor csak a sima szöveget vesszük át, hogy ne kerüljön
+      // idegen HTML (például Wordből) a leírásba.
+      doboz.addEventListener('paste', (e) => {
+        e.preventDefault()
+        const szoveg = e.clipboardData?.getData('text/plain') ?? ''
+        document.execCommand('insertText', false, szoveg)
+      })
+
+      return mezoBurok(mezo, doboz, hiany)
     }
 
     case 'bekezdesek': {
@@ -2126,6 +2161,9 @@ window.addEventListener('beforeunload', (e) => {
 })
 
 async function indul() {
+  // A jobb oldali szövegformázó panel - a bal oldali felülethez nem nyúl.
+  formazoPanel({ piritFn: pirit })
+
   try {
     allapot.adatok = await api('/api/adatok')
     await kepekBetolt()
