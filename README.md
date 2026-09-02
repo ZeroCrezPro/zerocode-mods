@@ -17,6 +17,7 @@ React + TypeScript + Vite + Tailwind CSS, statikusan előrenderelve, Cloudflare 
 2. [Gyors indítás](#gyors-indítás)
 3. [Könyvtárszerkezet](#könyvtárszerkezet)
 4. [Hogyan adok hozzá új modot?](#hogyan-adok-hozzá-új-modot)
+5. [Szövegformázás: szín és animáció](#szövegformázás-szín-és-animáció)
 6. [Hogyan adok ki új verziót?](#hogyan-adok-ki-új-verziót)
 7. [Hogyan működik a letöltés (GitHub Releases)?](#hogyan-működik-a-letöltés-github-releases)
 8. [Hogyan változtatom meg a letöltési URL-t?](#hogyan-változtatom-meg-a-letöltési-url-t)
@@ -275,11 +276,61 @@ Csak a képet kell megadni – se cím, se felirat. A képleírás (amit a képe
 felolvas és a kereső lát) magától elkészül a mod nevéből.
 
 A képeket a szerkesztőben a **Képek** panelben, a borító / banner / ikon alatt, a
-**Lapozható képek** résznél lehet megadni – a lentebbi Képernyőképek galériától
-függetlenül. Így külön válogathatod, mi kerüljön rögtön a látogató szeme elé, és mi
-maradjon a részletes galériába.
+**Lapozható képek** résznél lehet megadni. Annyi kép kerül a diavetítőbe, amennyit
+itt felsorolsz, és abban a sorrendben.
 
 Ha nem adsz meg egyetlen képet sem, a diavetítő nem jelenik meg.
+
+## Szövegformázás: szín és animáció
+
+A szerkesztő **Leírás** paneljében a szöveg nem sima beviteli mező, hanem formázható
+doboz. A jobb szélén ott a **Formázás** panel, amivel a *kijelölt* szövegrésznek adhatsz
+színt és animációt. A bal oldali felület nem változik: a panel a jobb szélen ül, és a
+függőleges fülével be- és kicsukható (a program megjegyzi, hogyan hagytad).
+
+### Hogyan használd?
+
+1. Jelöld ki egérrel azt a szót vagy mondatrészt, amit ki akarsz emelni.
+   A panel tetején megjelenik, mit jelöltél ki – így látod, jó helyen jársz-e.
+2. **Szövegszín**: válassz a színválasztóból, írd be a kódot `#rrggbb` alakban,
+   vagy kattints a paletta egyik négyzetére. A szín azonnal látszik a dobozban.
+3. **Animáció**: a legördülőből válaszd ki, hogyan mozogjon a szöveg
+   (Fade In / Up / Down / Left / Right, Zoom In, Pulse, Float, Typewriter, Glow, Shake).
+4. **Animáció lejátszása**: újra lefuttatja a mozgást, hogy lásd, milyen lesz –
+   nem kell hozzá se mentés, se újratöltés.
+5. **Eredeti állapot**: a kijelölt részről leszedi a színt és az animációt.
+   Csak a kijelölésre hat; ha nincs kijelölés, nem csinál semmit, tehát nem tudja
+   véletlenül letörölni az egész oldal formázását.
+
+Egy szövegrésznek egyszerre lehet színe és animációja is. Az egymásba ágyazott
+formázások nem tördelik szét a szöveget: a program magától összevonja őket.
+
+### Mi kerül a mentésbe?
+
+Valódi HTML szöveg – neked soha nem kell HTML-t írni, a program állítja elő:
+
+```html
+<span class="zc-anim-glow" style="color:#d61f27">MP2 Mod Panel</span> – csaláspanel a…
+```
+
+Ez ugyanúgy a `src/data/mods.json` fájlba kerül, mint minden más módosítás, tehát a
+program bezárása után is megmarad, és a **Frissítés** gomb után az éles weboldalon is
+így jelenik meg.
+
+### Biztonság
+
+A formázás három helyen is át van szűrve: a szerkesztőben mentés előtt, a kiszolgálón
+mentéskor, és a weboldalon megjelenítéskor. Csak a `<br>`, `<strong>`, `<em>` és a
+saját `<span>`-jeink mennek át, azokban is csak a `zc-anim-*` osztály és egy egyszerű
+szín. Minden más (szkript, esemény-attribútum, idegen elem) kiesik, a szövege viszont
+megmarad.
+
+### Kinek nem mozog?
+
+Aki a rendszerében kikapcsolta a mozgó tartalmat (`prefers-reduced-motion`), annak az
+animációk nem futnak le – a szöveg és a szín viszont ugyanúgy látszik.
+
+---
 
 ## Hogyan adok ki új verziót?
 
