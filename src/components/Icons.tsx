@@ -61,12 +61,6 @@ export const IconMenu = (s: SVGProps<SVGSVGElement>) => (
   </svg>
 )
 
-export const IconGithub = (s: SVGProps<SVGSVGElement>) => (
-  <svg {...p(s)} strokeWidth={1.6}>
-    <path d="M9 19c-4.3 1.3-4.3-2.2-6-2.7m12 5v-3.6a3.1 3.1 0 0 0-.9-2.4c2.9-.3 6-1.4 6-6.4a5 5 0 0 0-1.4-3.4 4.6 4.6 0 0 0-.1-3.5S17.4 1.9 15 3.6a12 12 0 0 0-6.4 0C6.2 1.9 5.3 2 5.3 2a4.6 4.6 0 0 0-.1 3.5A5 5 0 0 0 3.8 9c0 4.9 3 6 5.9 6.4a3.1 3.1 0 0 0-.9 2.4V21" />
-  </svg>
-)
-
 export const IconExternal = (s: SVGProps<SVGSVGElement>) => (
   <svg {...p(s)}>
     <path d="M14 4h6v6" />
@@ -78,14 +72,6 @@ export const IconExternal = (s: SVGProps<SVGSVGElement>) => (
 export const IconCheck = (s: SVGProps<SVGSVGElement>) => (
   <svg {...p(s)}>
     <path d="m4 12 5 5L20 6" />
-  </svg>
-)
-
-export const IconWarning = (s: SVGProps<SVGSVGElement>) => (
-  <svg {...p(s)}>
-    <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
-    <path d="M12 9v4" />
-    <path d="M12 17h.01" />
   </svg>
 )
 

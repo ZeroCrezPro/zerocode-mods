@@ -9,12 +9,6 @@
 /** Mod állapota. A megjelenő címke a src/lib/labels.ts-ben van. */
 export type ModStatus = 'aktiv' | 'beta' | 'fejlesztes' | 'archivalt'
 
-/** Kompatibilitási állapot egy adott játékkiadáshoz. */
-export type CompatState = 'tesztelve' | 'reszben' | 'nem-tesztelt' | 'nem-tamogatott'
-
-/** Changelog bejegyzés-csoport típusa. */
-export type ChangeKind = 'uj' | 'javitva' | 'modositva' | 'eltavolitva'
-
 /** Mod fájltípusa a letöltési kártyán. */
 export type ReleaseKind = 'Installer' | 'ZIP' | 'Patch' | 'Eszköz' | 'Forráskód'
 
@@ -25,42 +19,14 @@ export interface ExternalLink {
   primary?: boolean
 }
 
-export interface Screenshot {
-  src: string
-  alt: string
-  caption?: string
-}
-
-export interface Requirement {
-  label: string
-  value: string
-}
-
 export interface InstallStep {
   title: string
   detail?: string
 }
 
-export interface Compatibility {
-  label: string
-  state: CompatState
-  note?: string
-}
-
 export interface FaqItem {
   question: string
   answer: string
-}
-
-export interface ChangeGroup {
-  kind: ChangeKind
-  items: string[]
-}
-
-export interface ChangelogEntry {
-  version: string
-  date: string // ISO: 2026-08-31
-  groups: ChangeGroup[]
 }
 
 /**
@@ -112,9 +78,7 @@ export interface Mod {
   status: ModStatus
   tags: string[]
   features: string[]
-  requirements: Requirement[]
   installationSteps: InstallStep[]
-  compatibility: Compatibility[]
   /** Diavetítő a letöltés gomb alatt: csak képútvonalak, a felirat magától készül */
   slideshow?: string[]
   /** Verziók - a legfrissebb kerüljön elsőnek */

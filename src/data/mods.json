@@ -32,20 +32,12 @@
       "Maximális lőszer (egy gombra teletölti a lőszered)",
       "Sarok súgó (a sarokban lévő emlékeztető ki/be)"
     ],
-    "requirements": [
-      {
-        "label": "Legyen meg az alapjáték",
-        "value": "Játék"
-      }
-    ],
     "installationSteps": [
       {
         "title": "A mod telepítése",
         "detail": "Töltsd le és indítsd el az MP2Mod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot: ZeroCode (a kis- és nagybetű számít), ekkor megjelenik a TELEPÍTÉS gomb. A telepítő magától megkeresi a Max Payne 2 mappáját – ha nem találná, a Tallózás gombbal add meg kézzel. Kattints a TELEPÍTÉS gombra: a mod a scripts mappába kerül, a meglévő fájlokat nem írja felül (később a TÖRLÉS gombbal eltávolítható). Végül indítsd a játékot a Steamről, és játék közben nyomd meg az ALT + E-t a panel előhívásához.\n"
       }
     ],
-    "compatibility": [],
-    "screenshots": [],
     "versions": [
       {
         "version": "1.8.1",
@@ -61,20 +53,6 @@
           "kind": "github-latest",
           "file": "MP2Mod.exe"
         }
-      }
-    ],
-    "changelog": [
-      {
-        "version": "1.0.0",
-        "date": "2026-09-01",
-        "groups": [
-          {
-            "kind": "uj",
-            "items": [
-              "Első kiadás"
-            ]
-          }
-        ]
       }
     ],
     "faq": [],

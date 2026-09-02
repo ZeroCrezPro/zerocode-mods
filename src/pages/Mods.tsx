@@ -184,7 +184,7 @@ export default function Mods() {
 
       {!vanTartalom ? (
         <Empty title="Még nincs közzétett mod.">
-          Az első ZeroCode mod hamarosan érkezik. Nézz vissza később, vagy kövesd a GitHub oldalt.
+          Az első ZeroCode mod hamarosan érkezik. Nézz vissza később.
         </Empty>
       ) : list.length === 0 ? (
         <Empty title="Nincs a keresésnek megfelelő mod.">

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getModBySlug, latestVersion, olderVersions, site } from '@/data'
 import { formatDate, vLabel } from '@/lib/format'
-import { compatClass, compatLabel, statusLabel, statusTextClass } from '@/lib/labels'
+import { statusLabel, statusTextClass } from '@/lib/labels'
 import { downloadUrl } from '@/lib/download'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -239,33 +239,6 @@ export default function ModDetail() {
               ))}
             </ol>
           </Panel>
-
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Panel title="Követelmények">
-              <dl className="divide-y divide-ink-800">
-                {mod.requirements.map((r) => (
-                  <div key={r.label} className="flex justify-between gap-4 py-2.5 first:pt-0">
-                    <dt className="text-sm text-ash-400">{r.label}</dt>
-                    <dd className="text-right text-sm font-semibold text-ash-100">{r.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </Panel>
-
-            <Panel title="Kompatibilitás">
-              <ul className="divide-y divide-ink-800">
-                {mod.compatibility.map((c) => (
-                  <li key={c.label} className="flex items-center justify-between gap-3 py-2.5 first:pt-0">
-                    <span className="min-w-0">
-                      <span className="block text-sm text-ash-100">{c.label}</span>
-                      {c.note && <span className="block text-xs text-ash-400">{c.note}</span>}
-                    </span>
-                    <Badge className={compatClass[c.state]}>{compatLabel[c.state]}</Badge>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-          </div>
 
           {/* Letöltések */}
           <Panel title="Letölthető verziók" id="letoltesek" bodyClassName="space-y-4">

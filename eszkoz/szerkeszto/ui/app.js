@@ -253,13 +253,6 @@ const ALLAPOT_VALASZTEK = [
   ['archivalt', 'Archivált'],
 ]
 
-const KOMPAT_VALASZTEK = [
-  ['tesztelve', 'Tesztelve'],
-  ['reszben', 'Részben működik'],
-  ['nem-tesztelt', 'Nem tesztelt'],
-  ['nem-tamogatott', 'Nem támogatott'],
-]
-
 const TIPUS_VALASZTEK = [
   ['Installer', 'Installer'],
   ['ZIP', 'ZIP'],
@@ -445,25 +438,6 @@ const MOD_SZAKASZOK = [
     ],
   },
   {
-    cim: 'Követelmények',
-    mezok: [
-      {
-        k: 'requirements',
-        cim: 'Követelmények',
-        tipus: 'blokkok',
-        teljes: true,
-        ajanlott: true,
-        cimke: 'Sor',
-        cimMezo: 'label',
-        soros: true,
-        mezok: [
-          { k: 'label', cim: 'Megnevezés', tipus: 'szoveg' },
-          { k: 'value', cim: 'Érték', tipus: 'szoveg' },
-        ],
-      },
-    ],
-  },
-  {
     cim: 'Telepítés',
     mezok: [
       {
@@ -477,24 +451,6 @@ const MOD_SZAKASZOK = [
         mezok: [
           { k: 'title', cim: 'Lépés címe', tipus: 'szoveg', teljes: true },
           { k: 'detail', cim: 'Magyarázat', tipus: 'hosszu', teljes: true },
-        ],
-      },
-    ],
-  },
-  {
-    cim: 'Kompatibilitás',
-    mezok: [
-      {
-        k: 'compatibility',
-        cim: 'Kiadások',
-        tipus: 'blokkok',
-        teljes: true,
-        cimke: 'Kiadás',
-        cimMezo: 'label',
-        mezok: [
-          { k: 'label', cim: 'Kiadás neve', tipus: 'szoveg' },
-          { k: 'state', cim: 'Állapot', tipus: 'valaszto', valasztek: KOMPAT_VALASZTEK },
-          { k: 'note', cim: 'Megjegyzés', tipus: 'szoveg', teljes: true },
         ],
       },
     ],
@@ -1561,9 +1517,7 @@ function ujMod() {
     icon: '',
     tags: [],
     features: [],
-    requirements: [],
     installationSteps: [],
-    compatibility: [],
     slideshow: [],
     versions: [
       {

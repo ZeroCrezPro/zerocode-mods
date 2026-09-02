@@ -23,17 +23,6 @@ export function downloadUrl(src: DownloadSource): string {
   return `https://github.com/${owner}/${repo}/releases/download/${src.tag}/${src.file}`
 }
 
-/** A release oldala (nem a fájl) - a "Részletek a GitHubon" linkhez. */
-export function releasePageUrl(src: DownloadSource): string | null {
-  if (src.kind === 'url') return null
-  const owner = src.owner ?? site.githubUser
-  const repo = src.repo ?? site.releasesRepo
-  if (src.kind === 'github-latest') {
-    return `https://github.com/${owner}/${repo}/releases/latest`
-  }
-  return `https://github.com/${owner}/${repo}/releases/tag/${src.tag}`
-}
-
 /** A letöltendő fájl neve, ha ismert. */
 export function downloadFileName(src: DownloadSource): string | null {
   if (src.kind === 'url') {

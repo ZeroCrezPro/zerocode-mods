@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 import { mods, site, totalReleases } from '@/data'
 import { Seo, pageTitle } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Panel, ExternalButton } from '@/components/ui'
-import { IconGithub, IconExternal } from '@/components/Icons'
+import { Panel } from '@/components/ui'
+
 
 /** Közös keret a szöveges oldalakhoz. */
 function Page({
@@ -64,37 +64,10 @@ export function About() {
       </Panel>
 
       <Panel title="Hogyan működnek a letöltések?">
-        <div className="space-y-4">
-          <p className={proseText}>
-            Minden fájl a GitHub Releases oldaláról töltődik le. Ez azt jelenti, hogy nincs
-            regisztráció, nincs reklámoldal, nincs linkrövidítő és nincs várakozási idő - a letöltés
-            gombra kattintva azonnal az igazi fájl indul el.
-          </p>
-          <p className={proseText}>
-            A weboldal maga is nyílt: a forráskód GitHubon érhető el, és a Cloudflare Pages
-            szolgáltatásán fut.
-          </p>
-          <div className="flex flex-wrap gap-2.5 pt-1">
-            <ExternalButton
-              href={`https://github.com/${site.githubUser}/${site.githubRepo}`}
-              target="_blank"
-              variant="secondary"
-              size="sm"
-            >
-              <IconGithub width={14} height={14} />
-              Weboldal forráskódja
-            </ExternalButton>
-            <ExternalButton
-              href={`https://github.com/${site.githubUser}/${site.releasesRepo}/releases`}
-              target="_blank"
-              variant="secondary"
-              size="sm"
-            >
-              <IconExternal width={14} height={14} />
-              Összes kiadás
-            </ExternalButton>
-          </div>
-        </div>
+        <p className={proseText}>
+          Nincs regisztráció, nincs reklámoldal, nincs linkrövidítő és nincs várakozási idő - a
+          letöltés gombra kattintva azonnal az igazi fájl indul el.
+        </p>
       </Panel>
 
       <Panel title="Alapelvek">
@@ -132,25 +105,15 @@ export function Contact() {
 
       <Panel title="Hibabejelentés">
         <p className={proseText}>
-          Modokkal kapcsolatos hibákat a GitHub Issues felületen érdemes jelezni. Írd le, melyik
-          modról és melyik verzióról van szó, milyen játékkiadást használsz (Steam / GOG / retail),
-          és mi történik pontosan.
+          Ha hibát találsz, írd le, melyik modról és melyik verzióról van szó, milyen
+          játékkiadást használsz (Steam / GOG / retail), és mi történik pontosan. Így sokkal
+          gyorsabban megtalálom a hiba okát.
         </p>
-        <div className="mt-4">
-          <ExternalButton
-            href={`https://github.com/${site.githubUser}/${site.releasesRepo}/issues`}
-            target="_blank"
-            size="sm"
-          >
-            <IconGithub width={14} height={14} />
-            Hibabejelentés a GitHubon
-          </ExternalButton>
-        </div>
       </Panel>
 
       <Panel title="E-mail">
         <p className={proseText}>
-          Ha nem GitHub-ügyről van szó, írhatsz e-mailt is. A válasz néha eltarthat pár napig.
+          Írhatsz e-mailt. A válasz néha eltarthat pár napig.
         </p>
         <p className="mt-3">
           <a
@@ -208,8 +171,8 @@ export function Legal() {
         <div className="space-y-4">
           <p className={proseText}>
             A modok szabadon letölthetők és használhatók személyes célra. Kérlek, ne tükrözd a
-            fájlokat más letöltőoldalakra, hanem erre az oldalra vagy a GitHub Releases oldalra
-            hivatkozz - így mindenki mindig a legfrissebb és sértetlen verziót kapja.
+            fájlokat más letöltőoldalakra, hanem erre az oldalra hivatkozz - így mindenki mindig
+            a legfrissebb és sértetlen verziót kapja.
           </p>
           <p className={proseText}>
             Ha egy modot beépítenél a saját munkádba, előtte írj a kapcsolati oldalon megadott
@@ -256,8 +219,8 @@ export function Privacy() {
             kiszűrése céljából.
           </p>
           <p className={proseText}>
-            A letöltés gombra kattintva a GitHub szervereire kerülsz át, ahol a GitHub saját
-            adatkezelési szabályzata érvényes.
+            A letöltés gombra kattintva a fájlt kiszolgáló szolgáltatóhoz kerülsz át, ahol az ő
+            saját adatkezelési szabályzata érvényes.
           </p>
         </div>
       </Panel>

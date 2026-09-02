@@ -69,7 +69,7 @@ function Hero() {
         <p className="mt-6 max-w-xl text-base text-ash-300 sm:text-lg">{site.tagline}</p>
         <p className="mt-3 max-w-2xl text-sm text-ash-400">
           Saját készítésű modok, trainerek és eszközök - ingyenesen, reklám és linkrövidítő nélkül.
-          Minden letöltés közvetlenül a GitHub Releases oldalról érkezik.
+          A letöltés gomb egy kattintással indítja a fájlt.
         </p>
 
         <div className="mt-9 flex flex-col gap-3 sm:flex-row">

@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { site } from '@/data/site'
 import { quickSearch } from '@/lib/search'
 import { cx } from '@/lib/format'
-import { IconClose, IconGithub, IconGlobe, IconMenu, IconSearch } from './Icons'
+import { IconClose, IconGlobe, IconMenu, IconSearch } from './Icons'
 import { SmartImage } from './SmartImage'
 
 const nav = [
@@ -226,17 +226,6 @@ export function Header() {
             {mobileSearch ? <IconClose /> : <IconSearch />}
           </button>
 
-          <a
-            href={`https://github.com/${site.githubUser}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="ZeroCode a GitHubon"
-            title="GitHub"
-            className="hidden h-10 w-10 items-center justify-center border border-ink-700 text-ash-300 transition-colors hover:border-blood-600 hover:text-ash-100 sm:flex"
-          >
-            <IconGithub width={18} height={18} />
-          </a>
-
           <button
             type="button"
             title="Nyelv: magyar (további nyelvek hamarosan)"
@@ -289,16 +278,6 @@ export function Header() {
                 </NavLink>
               </li>
             ))}
-            <li>
-              <a
-                href={`https://github.com/${site.githubUser}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 py-3.5 text-sm font-bold tracking-[0.08em] text-ash-200 uppercase"
-              >
-                <IconGithub width={16} height={16} /> GitHub
-              </a>
-            </li>
           </ul>
         </nav>
       )}

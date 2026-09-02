@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { site } from '@/data/site'
-import { IconGithub } from './Icons'
 
 const columns: { title: string; links: { label: string; to?: string; href?: string }[] }[] = [
   {
@@ -14,7 +13,6 @@ const columns: { title: string; links: { label: string; to?: string; href?: stri
     links: [
       { label: 'Névjegy', to: '/nevjegy' },
       { label: 'Kapcsolat', to: '/kapcsolat' },
-      { label: 'GitHub', href: `https://github.com/${site.githubUser}` },
     ],
   },
   {
@@ -39,14 +37,6 @@ export function Footer() {
             {site.brandBottom}
           </p>
           <p className="mt-4 max-w-sm text-sm text-ash-400">{site.tagline}</p>
-          <a
-            href={`https://github.com/${site.githubUser}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-5 inline-flex items-center gap-2 border border-ink-600 px-3 py-2 text-xs font-bold tracking-widest text-ash-300 uppercase transition-colors hover:border-blood-600 hover:text-ash-100"
-          >
-            <IconGithub width={16} height={16} /> GitHub
-          </a>
         </div>
 
         {columns.map((col) => (

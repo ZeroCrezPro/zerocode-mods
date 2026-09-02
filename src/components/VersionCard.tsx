@@ -1,8 +1,8 @@
 import type { Mod, ModVersion } from '@/data/types'
 import { formatDate, formatNumber, vLabel } from '@/lib/format'
-import { downloadFileName, downloadUrl, releasePageUrl } from '@/lib/download'
+import { downloadFileName, downloadUrl } from '@/lib/download'
 import { Badge, btnClass } from './ui'
-import { IconDownload, IconExternal } from './Icons'
+import { IconDownload } from './Icons'
 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
@@ -23,7 +23,6 @@ export function VersionCard({
   latest?: boolean
 }) {
   const url = downloadUrl(version.download)
-  const page = releasePageUrl(version.download)
   const file = downloadFileName(version.download)
 
   return (
@@ -87,17 +86,6 @@ export function VersionCard({
             <IconDownload width={16} height={16} />
             Letöltés
           </a>
-          {page && (
-            <a
-              href={page}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={btnClass('ghost', 'md')}
-            >
-              <IconExternal width={14} height={14} />
-              Release a GitHubon
-            </a>
-          )}
           <p className="text-xs text-ash-400 sm:ml-auto">
             Készítő: <span className="text-ash-200">{version.author ?? mod.author}</span>
             {file && (
