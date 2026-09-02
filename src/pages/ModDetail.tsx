@@ -2,30 +2,16 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getModBySlug, latestVersion, olderVersions, site } from '@/data'
 import { formatDate, vLabel } from '@/lib/format'
-import {
-  changeClass,
-  changeLabel,
-  compatClass,
-  compatLabel,
-  statusLabel,
-  statusTextClass,
-} from '@/lib/labels'
+import { compatClass, compatLabel, statusLabel, statusTextClass } from '@/lib/labels'
 import { downloadUrl } from '@/lib/download'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { SmartImage } from '@/components/SmartImage'
-import { Gallery } from '@/components/Lightbox'
 import { Diavetites } from '@/components/Diavetites'
 import { AccordionItem } from '@/components/Accordion'
 import { VersionCard } from '@/components/VersionCard'
 import { Badge, ExternalButton, Panel, btnClass } from '@/components/ui'
-import {
-  IconCheck,
-  IconChevronDown,
-  IconDownload,
-  IconExternal,
-  IconWarning,
-} from '@/components/Icons'
+import { IconCheck, IconChevronDown, IconDownload, IconExternal } from '@/components/Icons'
 import NotFound from './NotFound'
 
 export default function ModDetail() {
@@ -230,10 +216,6 @@ export default function ModDetail() {
             </ul>
           </Panel>
 
-          <Panel title="Képek" id="kepek">
-            <Gallery images={mod.screenshots} />
-          </Panel>
-
           <Panel title="Telepítés" id="telepites">
             <ol className="space-y-3">
               {mod.installationSteps.map((step, i) => (
@@ -285,24 +267,6 @@ export default function ModDetail() {
             </Panel>
           </div>
 
-          {/* Figyelmeztetés */}
-          <aside className="flex gap-4 border border-amber-600/40 bg-amber-500/8 p-4 sm:p-5">
-            <IconWarning
-              width={22}
-              height={22}
-              className="mt-0.5 shrink-0 text-amber-400"
-              aria-hidden
-            />
-            <div>
-              <h2 className="zc-label text-amber-300">Fontos</h2>
-              <p className="mt-2 text-sm leading-relaxed text-ash-300">
-                Mindig ellenőrizd, hogy a mod verziója kompatibilis-e a telepített
-                játékverzióddal. Javasolt biztonsági másolatot készíteni a módosított
-                játékfájlokról, mielőtt bármit telepítesz.
-              </p>
-            </div>
-          </aside>
-
           {/* Letöltések */}
           <Panel title="Letölthető verziók" id="letoltesek" bodyClassName="space-y-4">
             {latest && <VersionCard mod={mod} version={latest} latest />}
@@ -333,42 +297,6 @@ export default function ModDetail() {
                 </div>
               </div>
             )}
-
-            <p className="text-xs text-ash-400">
-              Minden fájl a GitHub Releases oldaláról töltődik le. Nincs regisztráció, reklámoldal
-              vagy linkrövidítő.
-            </p>
-          </Panel>
-
-          {/* Changelog */}
-          <Panel title="Változási napló" id="valtozasok" bodyClassName="space-y-5">
-            {mod.changelog.map((entry) => (
-              <article key={entry.version} className="border-l-2 border-blood-600/50 pl-4">
-                <header className="flex flex-wrap items-baseline gap-3">
-                  <h3 className="font-mono text-base font-black text-ash-100">
-                    {vLabel(entry.version)}
-                  </h3>
-                  <time dateTime={entry.date} className="text-xs text-ash-400">
-                    {formatDate(entry.date)}
-                  </time>
-                </header>
-                <div className="mt-3 space-y-3">
-                  {entry.groups.map((g) => (
-                    <div key={g.kind}>
-                      <Badge className={changeClass[g.kind]}>{changeLabel[g.kind]}</Badge>
-                      <ul className="mt-2 space-y-1.5">
-                        {g.items.map((it) => (
-                          <li key={it} className="flex gap-2.5 text-sm text-ash-300">
-                            <span aria-hidden className="mt-2 block h-1 w-1 shrink-0 bg-ink-500" />
-                            {it}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </article>
-            ))}
           </Panel>
 
           {/* GYIK */}
@@ -403,30 +331,6 @@ export default function ModDetail() {
               </a>
             </div>
           )}
-
-          <nav aria-label="Oldalon belüli navigáció" className="border border-ink-700 bg-ink-900">
-            <p className="zc-label border-b border-ink-700 bg-ink-850 px-4 py-3 text-ash-100">
-              Ezen az oldalon
-            </p>
-            <ul className="p-2">
-              {[
-                { href: '#telepites', label: 'Telepítés' },
-                { href: '#kepek', label: 'Képek' },
-                { href: '#letoltesek', label: 'Letölthető verziók' },
-                { href: '#valtozasok', label: 'Változási napló' },
-                { href: '#gyik', label: 'Gyakori kérdések' },
-              ].map((l) => (
-                <li key={l.href}>
-                  <a
-                    href={l.href}
-                    className="block px-2 py-2 text-sm text-ash-400 transition-colors hover:text-blood-400"
-                  >
-                    {l.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
 
           {mod.game && (
             <div className="border border-ink-700 bg-ink-900 p-4">

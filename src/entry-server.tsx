@@ -10,7 +10,6 @@ export function allRoutes(): string[] {
   return [
     '/',
     '/modok',
-    '/legujabb',
     '/nevjegy',
     '/kapcsolat',
     '/jogi-informaciok',

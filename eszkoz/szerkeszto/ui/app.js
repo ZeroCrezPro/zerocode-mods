@@ -260,13 +260,6 @@ const KOMPAT_VALASZTEK = [
   ['nem-tamogatott', 'Nem támogatott'],
 ]
 
-const VALTOZAS_VALASZTEK = [
-  ['uj', 'Új'],
-  ['javitva', 'Javítva'],
-  ['modositva', 'Módosítva'],
-  ['eltavolitva', 'Eltávolítva'],
-]
-
 const TIPUS_VALASZTEK = [
   ['Installer', 'Installer'],
   ['ZIP', 'ZIP'],
@@ -507,30 +500,6 @@ const MOD_SZAKASZOK = [
     ],
   },
   {
-    cim: 'Képernyőképek',
-    mezok: [
-      {
-        k: 'screenshots',
-        cim: 'Képek',
-        tipus: 'blokkok',
-        teljes: true,
-        cimke: 'Kép',
-        cimMezo: 'caption',
-        mezok: [
-          { k: 'src', cim: 'Kép', tipus: 'kep', mappa: 'screenshots', teljes: true },
-          {
-            k: 'alt',
-            cim: 'Képleírás (ALT)',
-            tipus: 'szoveg',
-            teljes: true,
-            sugo: 'Kötelező: ezt olvassa fel a képernyőolvasó, és ezt látja a kereső.',
-          },
-          { k: 'caption', cim: 'Felirat', tipus: 'szoveg', teljes: true },
-        ],
-      },
-    ],
-  },
-  {
     cim: 'Letölthető verziók',
     mezok: [
       {
@@ -543,36 +512,6 @@ const MOD_SZAKASZOK = [
         cimMezo: 'version',
         cimElotag: 'v',
         mezok: VERZIO_MEZOK,
-      },
-    ],
-  },
-  {
-    cim: 'Változási napló',
-    mezok: [
-      {
-        k: 'changelog',
-        cim: 'Bejegyzések',
-        tipus: 'blokkok',
-        teljes: true,
-        cimke: 'Bejegyzés',
-        cimMezo: 'version',
-        cimElotag: 'v',
-        mezok: [
-          { k: 'version', cim: 'Verzió', tipus: 'szoveg', mono: true },
-          { k: 'date', cim: 'Dátum', tipus: 'datum' },
-          {
-            k: 'groups',
-            cim: 'Csoportok',
-            tipus: 'blokkok',
-            teljes: true,
-            cimke: 'Csoport',
-            cimMezo: 'kind',
-            mezok: [
-              { k: 'kind', cim: 'Típus', tipus: 'valaszto', valasztek: VALTOZAS_VALASZTEK },
-              { k: 'items', cim: 'Tételek', tipus: 'lista', teljes: true },
-            ],
-          },
-        ],
       },
     ],
   },
@@ -1626,7 +1565,6 @@ function ujMod() {
     installationSteps: [],
     compatibility: [],
     slideshow: [],
-    screenshots: [],
     versions: [
       {
         version: '1.0.0',
@@ -1638,9 +1576,6 @@ function ujMod() {
         changes: ['Első kiadás'],
         download: { kind: 'github-latest', file: '' },
       },
-    ],
-    changelog: [
-      { version: '1.0.0', date: maiDatum(), groups: [{ kind: 'uj', items: ['Első kiadás'] }] },
     ],
     faq: [],
     externalLinks: [],

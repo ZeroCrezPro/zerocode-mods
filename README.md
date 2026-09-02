@@ -54,7 +54,6 @@ weboldal projektmappáját. A parancsikon viszont bárhonnan indíthatja.
 | **Modok** | Minden mod minden mezője: leírás, funkciók, telepítési lépések, követelmények, kompatibilitás, képek, verziók, változási napló, GYIK |
 | **Beállítások** | Oldal neve, mottó, éles cím, GitHub felhasználó és repók |
 | **Képek** | Képek feltöltése a `public/images` alá, azonnal használhatók; a méret is látszik (600 kB fölött sárgával, mert lassítja az oldalt) |
-| **Előnézet** | A kész oldal megtekintése a programon belül, asztali / tablet / mobil méretben |
 
 ### Mi hiányzik még?
 
@@ -223,7 +222,6 @@ zerocode-mods/
 | `/` | Főoldal (hero, statisztika, kiemelt modok, legújabb frissítések) |
 | `/modok` | Mod katalógus (keresés, rendezés, címkeszűrés) |
 | `/modok/<slug>` | Mod adatlap (leírás, funkciók, képek, telepítés, letöltések, changelog, GYIK) |
-| `/legujabb` | Összes kiadás időrendben |
 | `/nevjegy`, `/kapcsolat`, `/jogi-informaciok`, `/adatvedelem` | Szöveges oldalak |
 | bármi más | 404 oldal |
 
@@ -257,11 +255,9 @@ Kézzel, fájlból:
 | `features` | Funkciólista (szövegek tömbje) |
 | `requirements` | `{ label, value }` párok a Követelmények panelre |
 | `installationSteps` | `{ title, detail? }` – számozott lépések |
+| `slideshow` | Lapozható képek a letöltés gomb alatt: képútvonalak listája |
 | `compatibility` | `{ label, state, note? }`, state: `'tesztelve'` \| `'reszben'` \| `'nem-tesztelt'` \| `'nem-tamogatott'` |
-| `slideshow` | Diavetítő a letöltés gomb alatt: `{ src, alt, caption? }` |
-| `screenshots` | Képgaléria lentebb: `{ src, alt, caption? }` – az `alt` kötelező |
 | `versions` | Letölthető verziók, a legfrissebb elöl |
-| `changelog` | Változási napló verziónként |
 | `faq` | `{ question, answer }` párok |
 | `featured` | `true` esetén megjelenik a főoldal Kiemelt modok között |
 | `createdAt` | Az első kiadás dátuma, ISO formában (`2026-06-14`) |

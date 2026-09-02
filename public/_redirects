@@ -1,7 +1,8 @@
 # Angol nyelvű útvonalak a magyar megfelelőre
 /mods         /modok              301
 /mods/*       /modok/:splat       301
-/latest       /legujabb           301
+/latest       /modok              301
+/legujabb     /modok              301
 /about        /nevjegy            301
 
 # A játékok szekció megszűnt - a régi címek a modokra mutatnak

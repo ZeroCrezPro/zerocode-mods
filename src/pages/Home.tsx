@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
-import { featuredMods, mods, releaseFeed, site, totalDownloads, totalReleases } from '@/data'
-import { formatDate, formatNumber, vLabel } from '@/lib/format'
+import { featuredMods, mods, site, totalDownloads, totalReleases } from '@/data'
+import { formatNumber } from '@/lib/format'
 import { Seo, pageTitle } from '@/components/Seo'
 import { ModCard } from '@/components/ModCard'
-import { Badge, LinkButton, SectionHead, btnClass } from '@/components/ui'
-import { IconArrowRight, IconClock, IconDownload, IconGamepad, IconPackage } from '@/components/Icons'
+import { LinkButton, SectionHead } from '@/components/ui'
+import { IconArrowRight, IconDownload, IconGamepad, IconPackage } from '@/components/Icons'
 import { Empty } from '@/components/Empty'
 
 function Stats() {
@@ -77,67 +77,9 @@ function Hero() {
             Modok böngészése
             <IconArrowRight width={16} height={16} />
           </LinkButton>
-          <LinkButton to="/legujabb" variant="secondary" size="lg">
-            <IconClock width={16} height={16} />
-            Legújabb kiadások
-          </LinkButton>
         </div>
       </div>
     </section>
-  )
-}
-
-function LatestUpdates() {
-  const feed = releaseFeed(6)
-
-  if (!feed.length) {
-    return (
-      <Empty title="Még nincs kiadás.">
-        Amint megjelenik az első mod, itt fog látszani időrendben.
-      </Empty>
-    )
-  }
-
-  return (
-    <ul className="divide-y divide-ink-800 border border-ink-700 bg-ink-900">
-      {feed.map(({ mod, version }) => (
-        <li
-          key={`${mod.id}-${version.version}`}
-          className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-ink-850 sm:flex-row sm:items-center sm:gap-5 sm:px-5"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="flex flex-wrap items-center gap-2">
-              <Link
-                to={`/modok/${mod.slug}`}
-                className="text-sm font-bold text-ash-100 transition-colors hover:text-blood-400"
-              >
-                {mod.name}
-              </Link>
-              <span className="font-mono text-xs font-bold text-blood-400">
-                {vLabel(version.version)}
-              </span>
-            </p>
-            <p className="mt-1 truncate text-xs text-ash-400">
-              {version.changes?.[0] ?? mod.shortDescription}
-            </p>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-3">
-            <span className="text-xs text-ash-400">{formatDate(version.releaseDate)}</span>
-            <Badge className="border-emerald-500/40 bg-emerald-500/10 text-emerald-300">
-              Megjelent
-            </Badge>
-            <Link
-              to={`/modok/${mod.slug}#letoltesek`}
-              className={btnClass('secondary', 'sm')}
-              aria-label={`${mod.name} ${vLabel(version.version)} megtekintése`}
-            >
-              Megnézem
-            </Link>
-          </div>
-        </li>
-      ))}
-    </ul>
   )
 }
 
@@ -197,24 +139,6 @@ export default function Home() {
             ))}
           </div>
         )}
-      </section>
-
-      <section className="border-y border-ink-800 bg-ink-900/40 py-16 sm:py-20">
-        <div className="zc-container">
-          <SectionHead
-            eyebrow="Időrendben"
-            title="Legújabb frissítések"
-            action={
-              <Link
-                to="/legujabb"
-                className="zc-label flex items-center gap-2 text-ash-400 transition-colors hover:text-blood-400"
-              >
-                Teljes lista <IconArrowRight width={14} height={14} />
-              </Link>
-            }
-          />
-          <LatestUpdates />
-        </div>
       </section>
 
       <section className="zc-container pb-16 sm:pb-20">

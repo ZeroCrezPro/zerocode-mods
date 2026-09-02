@@ -117,10 +117,8 @@ export interface Mod {
   compatibility: Compatibility[]
   /** Diavetítő a letöltés gomb alatt: csak képútvonalak, a felirat magától készül */
   slideshow?: string[]
-  screenshots: Screenshot[]
   /** Verziók - a legfrissebb kerüljön elsőnek */
   versions: ModVersion[]
-  changelog: ChangelogEntry[]
   faq: FaqItem[]
   externalLinks?: ExternalLink[]
   /** Megjelenjen-e a főoldal "Kiemelt modok" szekciójában */
