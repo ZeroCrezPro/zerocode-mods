@@ -528,8 +528,8 @@ kép 600 kB fölött van – az már lassítja az oldal betöltését.
 ### Kép törlése
 
 Minden kép jobb felső sarkában van egy piros **×** gomb – a **Képek** lapon és a
-képválasztó ablakban is. Rákattintva a program megkérdezi, biztosan törlöd-e, és
-**kiírja, hol használod jelenleg** azt a képet (melyik mod borítója, bannere, ikonja
+képválasztó ablakban is. Rákattintva a kérdés az **ablak alsó éle mögül csúszik elő**
+(nem a böngésző szürke kérdőablaka ugrik fel), és **kiírja, hol használod jelenleg** azt a képet (melyik mod borítója, bannere, ikonja
 vagy diavetítő képe). Ha megerősíted, a fájl véglegesen törlődik a
 `public/images/` mappából.
 

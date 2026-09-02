@@ -263,11 +263,89 @@ function kepCsempe(k, kattintasra) {
     text: '×',
     onClick: (e) => {
       e.stopPropagation()
-      kepetTorol(k)
+      kepetTorol(k, e.currentTarget)
     },
   })
 
   return el('div', { class: 'kepgomb-burok' }, [csempe, torlo])
+}
+
+/**
+ * Megerősítő sáv, ami az ablak (vagy panel) aljából csúszik elő.
+ *
+ * A böngésző beépített kérdőablaka helyett használjuk: az a képernyő
+ * tetején jelenik meg, idegen kinézettel, és kiírja a gép címét is.
+ *
+ * @returns Promise<boolean> - igaz, ha a felhasználó megerősítette
+ */
+function megerositSav(gazda, { cim, sorok = [], igen, veszely = false }) {
+  // Egyszerre csak egy kérdés legyen a képernyőn.
+  gazda.querySelector('.megerosito')?.remove()
+
+  return new Promise((kesz) => {
+    let lezarva = false
+
+    const zar = (valasz) => {
+      if (lezarva) return
+      lezarva = true
+      document.removeEventListener('keydown', billentyu)
+      sav.classList.add('rejtve')
+      const takarit = () => {
+        sav.remove()
+        if (!gazda.querySelector('.megerosito')) gazda.classList.remove('megerosito-nyitva')
+      }
+      sav.addEventListener('transitionend', takarit, { once: true })
+      // Ha az átmenet valamiért elmarad, akkor is tűnjön el.
+      setTimeout(takarit, 400)
+      kesz(valasz)
+    }
+
+    const billentyu = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        zar(false)
+      }
+    }
+
+    const megseGomb = el('button', {
+      type: 'button',
+      class: 'gomb gomb-masodlagos gomb-apro',
+      text: 'Mégse',
+      onClick: () => zar(false),
+    })
+
+    const sav = el('div', { class: 'megerosito rejtve', role: 'alertdialog' }, [
+      el('div', { class: 'megerosito-szoveg' }, [
+        el('strong', { text: cim }),
+        ...sorok.map((sz) =>
+          el('span', { class: sz.kiemelt ? 'megerosito-figyelem' : '', text: sz.szoveg ?? sz }),
+        ),
+      ]),
+      el('div', { class: 'megerosito-gombok' }, [
+        megseGomb,
+        el('button', {
+          type: 'button',
+          class: veszely ? 'gomb gomb-veszely gomb-apro' : 'gomb gomb-apro',
+          text: igen,
+          onClick: () => zar(true),
+        }),
+      ]),
+    ])
+
+    gazda.classList.add('megerosito-nyitva')
+    gazda.appendChild(sav)
+    document.addEventListener('keydown', billentyu)
+    // Egy képkockányi várakozás kell, különben nincs mit animálni.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => sav.classList.remove('rejtve'))
+      megseGomb.focus()
+    })
+  })
+}
+
+/** Melyik dobozból csússzon ki a kérdés? */
+function megerositoGazdaja(elem) {
+  return elem?.closest('.parbeszed') ?? elem?.closest('.panel') ?? document.body
 }
 
 /** Hol használja az oldal ezt a képet? */
@@ -291,16 +369,23 @@ function kepHasznalata(utvonal) {
 }
 
 /** Kép végleges törlése a lemezről, előtte figyelmeztetéssel. */
-async function kepetTorol(k) {
+async function kepetTorol(k, honnan) {
   const hol = kepHasznalata(k.utvonal)
-  const figyelmeztetes = hol.length
-    ? `\n\nFIGYELEM: ezt a képet jelenleg használod itt:\n- ${hol.join('\n- ')}\n` +
-      'Törlés után ezeken a helyeken nem lesz kép.'
-    : ''
-
-  if (!confirm(`Törlöd ezt a képet?\n\n${k.nev}${figyelmeztetes}\n\nA fájl véglegesen törlődik.`)) {
-    return
+  const sorok = [`${k.nev} – a fájl véglegesen törlődik.`]
+  if (hol.length) {
+    sorok.push({
+      kiemelt: true,
+      szoveg: `Most itt használod: ${hol.join(', ')}. Törlés után ott nem lesz kép.`,
+    })
   }
+
+  const rendben = await megerositSav(megerositoGazdaja(honnan), {
+    cim: 'Törlöd ezt a képet?',
+    sorok,
+    igen: 'Törlés',
+    veszely: true,
+  })
+  if (!rendben) return
 
   try {
     await api(`/api/kep-torles?mappa=${k.mappa}&nev=${encodeURIComponent(k.nev)}`, {
