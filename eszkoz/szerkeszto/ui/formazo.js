@@ -124,9 +124,11 @@ function tartomanyEltolasbol(gazda, kezd, veg) {
 }
 
 /** Az előnézetben kijelölt szövegrész átvétele. */
-export function tavoliKijeloles({ mezo, kezd, veg }) {
+export function tavoliKijeloles({ mezo, kezd, veg, alap }) {
   if (!tavoliKezelo) return false
-  const html = tavoliKezelo.olvas(mezo)
+  // Amihez még nincs tárolt szöveg (állandó felirat), annál az oldalon
+  // látható tartalomból indulunk ki.
+  const html = tavoliKezelo.olvas(mezo) ?? alap
   if (html == null) return false
 
   const gazda = tavoliGazda()
@@ -457,7 +459,7 @@ export function csakSzoveg(html) {
 export function tisztitHtml(nyers) {
   const doboz = document.createElement('div')
   // A régebbi, egyszerű szövegként mentett bekezdésekben sortörés van.
-  doboz.innerHTML = String(nyers ?? '').replace(/\r\n?|\n/g, '<br />')
+  doboz.innerHTML = String(nyers ?? '').replace(/\s+$/, '').replace(/\r\n?|\n/g, '<br />')
 
   const bejaro = document.createTreeWalker(doboz, NodeFilter.SHOW_ELEMENT)
   const torlendo = []

@@ -2170,17 +2170,40 @@ window.addEventListener('beforeunload', (e) => {
 /* ================================================================== */
 
 /**
- * A mező azonosítója az előnézetből: "<slug>:description:<sorszám>".
- * Ebből keressük ki, melyik mod melyik bekezdéséről van szó.
+ * A mező azonosítója az előnézetből, kettősponttal tagolva:
+ *
+ *   <slug>:description:2                 - a mod harmadik bekezdése
+ *   <slug>:installationSteps:0:title     - az első telepítési lépés címe
+ *   <slug>:faq:1:answer                  - a második kérdés válasza
+ *   site:tagline                         - az oldal mottója
+ *   site:feliratok:szekcio.funkciok      - állandó felirat felülírása
+ *
+ * Ebből keressük meg, melyik adatot kell átírni. A számokból tömbindex lesz.
  */
 function tavoliMezoHelye(mezo) {
   const reszek = String(mezo ?? '').split(':')
-  if (reszek.length !== 3 || reszek[1] !== 'description') return null
-  const mod = allapot.adatok?.mods?.find((m) => m.slug === reszek[0])
-  if (!mod || !Array.isArray(mod.description)) return null
-  const i = Number(reszek[2])
-  if (!Number.isInteger(i) || i < 0 || i >= mod.description.length) return null
-  return { mod, i }
+  if (reszek.length < 2) return null
+
+  let hely =
+    reszek[0] === 'site'
+      ? allapot.adatok?.site
+      : allapot.adatok?.mods?.find((m) => m.slug === reszek[0])
+  if (!hely || typeof hely !== 'object') return null
+
+  const ut = reszek.slice(1)
+  const kulcsE = (s) => (/^\d+$/.test(s) ? Number(s) : s)
+
+  for (let i = 0; i < ut.length - 1; i++) {
+    const k = kulcsE(ut[i])
+    // A feliratok tárolója magától jöjjön létre, amikor először kell.
+    if (hely[k] == null && ut[i] === 'feliratok') hely[k] = {}
+    hely = hely[k]
+    if (!hely || typeof hely !== 'object') return null
+  }
+
+  const kulcs = kulcsE(ut[ut.length - 1])
+  if (typeof kulcs === 'number' && !Array.isArray(hely)) return null
+  return { szulo: hely, kulcs }
 }
 
 /** Az előnézetnek megmutatjuk, mi lett a bekezdésből. */
@@ -2196,12 +2219,13 @@ function elonezetiFormazasBekot() {
   tavoliForrasBeallit({
     olvas(mezo) {
       const hely = tavoliMezoHelye(mezo)
-      return hely ? hely.mod.description[hely.i] : null
+      const ertek = hely ? hely.szulo[hely.kulcs] : null
+      return typeof ertek === 'string' ? ertek : null
     },
     ir(mezo, html) {
       const hely = tavoliMezoHelye(mezo)
       if (!hely) return
-      hely.mod.description[hely.i] = html
+      hely.szulo[hely.kulcs] = html
       jelolValtozas()
       // Ugyanaz kerüljön az előnézetbe is, hogy rögtön látszódjon.
       const eltolas = tavoliEltolasok()
@@ -2213,9 +2237,10 @@ function elonezetiFormazasBekot() {
         veg: eltolas?.veg,
       })
       // Ha épp a Modok lapon áll a leírásdoboz, az is kövesse.
+      const aktualis = allapot.adatok?.mods?.[allapot.modIndex]
       const doboz = document.querySelector('.gazdag-szoveg:not(#formazoTavoli)')
-      if (doboz && allapot.adatok?.mods?.[allapot.modIndex] === hely.mod) {
-        bekezdesekBeir(doboz, hely.mod.description)
+      if (doboz && aktualis && hely.szulo === aktualis.description) {
+        bekezdesekBeir(doboz, aktualis.description)
       }
     },
   })
@@ -2231,7 +2256,7 @@ function elonezetiFormazasBekot() {
       tavoliKijelolestElenged()
       return
     }
-    if (!tavoliKijeloles({ mezo: a.mezo, kezd: a.kezd, veg: a.veg })) {
+    if (!tavoliKijeloles({ mezo: a.mezo, kezd: a.kezd, veg: a.veg, alap: a.alap })) {
       tavoliKijelolestElenged()
     }
   })

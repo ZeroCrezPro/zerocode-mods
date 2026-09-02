@@ -296,9 +296,33 @@ Két helyen, és mindkettő ugyanoda ment:
 - az **Előnézet** lapon, közvetlenül a kész oldalon – ott jelölöd ki a szót, ahol
   majd látszani fog.
 
-Az előnézetben a leírás bekezdéseiben lehet formázni. A szín és az animáció rögtön
-megjelenik az előnézetben is, és a **Mentés** ugyanúgy eltárolja, mintha a Leírás
-dobozban formáztál volna.
+Az előnézetben **majdnem minden szöveg** formázható, nem csak a leírás. A szín és az
+animáció rögtön megjelenik az előnézetben is, és a **Mentés** ugyanúgy eltárolja,
+mintha a Leírás dobozban formáztál volna.
+
+**Amit formázhatsz az előnézetben:**
+
+| Hol | Mi |
+| --- | --- |
+| Mod adatlap | mod neve, rövid leírás, játék neve, platform, készítő |
+| | a leírás minden bekezdése |
+| | a funkciók felsorolása |
+| | a telepítési lépések címe és szövege |
+| | a GYIK kérdései és válaszai |
+| | a verziók változáslistája és készítője |
+| | a hasznos linkek feliratai |
+| Szekciócímek | LEÍRÁS, FUNKCIÓK, TELEPÍTÉS, LETÖLTHETŐ VERZIÓK, GYAKORI KÉRDÉSEK |
+| Állandó feliratok | Állapot, Aktuális verzió, Frissítve, Platform, Készítő, Méret, Legfrissebb kiadás, Melyik játékhoz, Hasznos linkek, Régebbi verziók, gombfeliratok |
+| Modkártyák | a mod neve és rövid leírása, az oszlopok nevei |
+| Főoldal | a nagy ZEROCODE / MODS felirat, a mottó, a bevezető, az előnyök kártyái |
+
+**Amit szándékosan nem lehet formázni**, mert nem csak megjelenítésre szolgál:
+
+- **verziószám** (v1.8.1) és **dátumok** – ezekből készül a letöltési hivatkozás és a sorrend,
+- **címkék** – ezek az URL-be és a szűrésbe is bekerülnek,
+- **fájlméret, fájlnév, letöltésszám** – ezek nem kézzel írt szövegek,
+- a **Névjegy / Kapcsolat / Jogi / Adatvédelem** oldalak szövege – ezek nincsenek az
+  adatfájlban, tehát a program nem tudná elmenteni a változást.
 
 ### Hogyan használd?
 
@@ -331,8 +355,22 @@ program bezárása után is megmarad, és a **Frissítés** gomb után az éles 
 
 ### Hogyan találja meg a program, mit jelöltél ki az előnézetben?
 
-A legyártott oldalon minden leírás-bekezdés kap egy `data-zc-mezo` jelölőt (például
-`max-payne-2…:description:0`). A helyi előnézeti kiszolgáló – és **csak** az –
+A legyártott oldalon minden formázható szöveg kap egy `data-zc-mezo` jelölőt. Ez
+mondja meg, melyik adatot kell átírni:
+
+```
+max-payne-2…:description:2              a mod harmadik bekezdése
+max-payne-2…:features:0                 az első funkció
+max-payne-2…:installationSteps:0:title  az első telepítési lépés címe
+max-payne-2…:faq:1:answer               a második kérdés válasza
+site:tagline                            az oldal mottója
+site:feliratok:szekcio.funkciok         a FUNKCIÓK szekciócím
+```
+
+Az állandó feliratoknak (szekciócímek, oszlopnevek, gombfeliratok) alapból nincs
+tárolt szövegük: a beépített felirat látszik. Amint színt vagy animációt adsz nekik,
+a program létrehozza őket a `site.json` `feliratok` mezőjében – a beépített szöveggel
+együtt, tehát a felirat nem változik meg, csak formázást kap. A helyi előnézeti kiszolgáló – és **csak** az –
 hozzáfűz az oldalhoz egy apró szkriptet (`eszkoz/szerkeszto/elonezet-hid.js`), ami
 megmondja a szerkesztőnek, melyik bekezdésben, hányadik karaktertől hányadikig
 jelöltél ki. Ez a szkript soha nem kerül ki az éles weboldalra: a `dist` mappa

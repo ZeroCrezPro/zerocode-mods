@@ -98,6 +98,9 @@
       kezd: kezd,
       veg: veg,
       szoveg: r.toString(),
+      // Az állandó feliratoknak nincs tárolt értékük, amíg hozzá nem nyúlsz.
+      // Ilyenkor ez a jelenlegi tartalom lesz a kiindulás.
+      alap: cel.innerHTML,
     })
   }
 
@@ -120,9 +123,15 @@
 
     // Új tartalom egy mezőbe (a szerkesztő már megszűrte)
     if (a.tipus === 'zc-elonezet-frissit') {
-      var cel = mezotKeres(a.mezo)
+      // Ugyanaz az adat több helyen is megjelenhet az oldalon.
+      var mind = document.querySelectorAll(JELOLO)
+      var cel = null
+      for (var m = 0; m < mind.length; m++) {
+        if (mind[m].getAttribute('data-zc-mezo') !== a.mezo) continue
+        mind[m].innerHTML = a.html
+        if (!cel) cel = mind[m]
+      }
       if (!cel) return
-      cel.innerHTML = a.html
       if (typeof a.kezd === 'number' && typeof a.veg === 'number') {
         var r = tartomany(cel, a.kezd, a.veg)
         if (r) {

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { featuredMods, mods, site, totalDownloads, totalReleases } from '@/data'
 import { formatNumber } from '@/lib/format'
+import { Felirat, Szoveg } from '@/components/Szoveg'
 import { Seo, pageTitle } from '@/components/Seo'
 import { ModCard } from '@/components/ModCard'
 import { LinkButton, SectionHead } from '@/components/ui'
@@ -58,19 +59,32 @@ function Hero() {
       <div className="zc-container relative py-16 sm:py-24 lg:py-28">
         <p className="zc-label mb-5 flex items-center gap-2.5 text-blood-400">
           <span aria-hidden className="block h-px w-8 bg-blood-500" />
-          PC Modding &middot; {site.author}
+          <Felirat kulcs="fooldal.kicsiCim" alap="PC Modding" /> &middot;{' '}
+          <Szoveg ertek={site.author} mezo="site:author" />
         </p>
 
         <h1 className="max-w-4xl text-4xl leading-[0.95] font-black tracking-tighter uppercase sm:text-6xl lg:text-7xl">
-          ZeroCode
-          <span className="mt-1 block text-blood-500">Mods</span>
+          <Szoveg ertek={site.brandTop} mezo="site:brandTop" />
+          <Szoveg
+            elem="span"
+            className="mt-1 block text-blood-500"
+            ertek={site.brandBottom}
+            mezo="site:brandBottom"
+          />
         </h1>
 
-        <p className="mt-6 max-w-xl text-base text-ash-300 sm:text-lg">{site.tagline}</p>
-        <p className="mt-3 max-w-2xl text-sm text-ash-400">
-          Saját készítésű modok, trainerek és eszközök - ingyenesen, reklám és linkrövidítő nélkül.
-          A letöltés gomb egy kattintással indítja a fájlt.
-        </p>
+        <Szoveg
+          elem="p"
+          className="mt-6 max-w-xl text-base text-ash-300 sm:text-lg"
+          ertek={site.tagline}
+          mezo="site:tagline"
+        />
+        <Felirat
+          elem="p"
+          className="mt-3 max-w-2xl text-sm text-ash-400"
+          kulcs="fooldal.bevezeto"
+          alap="Saját készítésű modok, trainerek és eszközök - ingyenesen, reklám és linkrövidítő nélkül. A letöltés gomb egy kattintással indítja a fájlt."
+        />
 
         <div className="mt-9 flex flex-col gap-3 sm:flex-row">
           <LinkButton to="/modok" size="lg">
@@ -162,10 +176,18 @@ export default function Home() {
           ].map(({ icon: Icon, title, text }) => (
             <div key={title} className="border border-ink-700 bg-ink-900 p-5">
               <Icon width={20} height={20} className="text-blood-500" />
-              <h3 className="mt-3 text-sm font-bold tracking-wide text-ash-100 uppercase">
-                {title}
-              </h3>
-              <p className="mt-2 text-sm text-ash-400">{text}</p>
+              <Felirat
+                elem="h3"
+                className="mt-3 text-sm font-bold tracking-wide text-ash-100 uppercase"
+                kulcs={`fooldal.elony.${title}.cim`}
+                alap={title}
+              />
+              <Felirat
+                elem="p"
+                className="mt-2 text-sm text-ash-400"
+                kulcs={`fooldal.elony.${title}.szoveg`}
+                alap={text}
+              />
             </div>
           ))}
         </div>

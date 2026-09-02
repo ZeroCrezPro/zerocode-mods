@@ -3,11 +3,13 @@ import { formatDate, formatNumber, vLabel } from '@/lib/format'
 import { downloadFileName, downloadUrl } from '@/lib/download'
 import { Badge, btnClass } from './ui'
 import { IconDownload } from './Icons'
+import { Felirat, Szoveg } from './Szoveg'
+import { csakSzoveg } from '@/lib/gazdagSzoveg'
 
-function Meta({ label, value }: { label: string; value: string }) {
+function Meta({ label, kulcs, value }: { label: string; kulcs: string; value: string }) {
   return (
     <div>
-      <dt className="zc-label text-ash-400">{label}</dt>
+      <Felirat elem="dt" className="zc-label text-ash-400" kulcs={kulcs} alap={label} />
       <dd className="mt-0.5 text-sm text-ash-200">{value}</dd>
     </div>
   )
@@ -24,6 +26,8 @@ export function VersionCard({
 }) {
   const url = downloadUrl(version.download)
   const file = downloadFileName(version.download)
+  // A verzió helye a listában - ebből lesz a szerkesztő jelölője.
+  const vi = mod.versions.indexOf(version)
 
   return (
     <article
@@ -42,20 +46,29 @@ export function VersionCard({
             {vLabel(version.version)}
           </span>
           {latest && (
-            <Badge className="border-blood-500 bg-blood-600 text-white">Legújabb</Badge>
+            <Badge className="border-blood-500 bg-blood-600 text-white">
+              <Felirat kulcs="verzio.legujabb" alap="Legújabb" />
+            </Badge>
           )}
           {version.prerelease && (
-            <Badge className="border-amber-500/40 bg-amber-500/10 text-amber-300">Előzetes</Badge>
+            <Badge className="border-amber-500/40 bg-amber-500/10 text-amber-300">
+              <Felirat kulcs="verzio.elozetes" alap="Előzetes" />
+            </Badge>
           )}
           <span className="ml-auto text-xs text-ash-400">{formatDate(version.releaseDate)}</span>
         </div>
 
         <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-ink-800 py-3.5 sm:grid-cols-4">
-          <Meta label="Méret" value={version.size ?? 'ismeretlen'} />
-          <Meta label="Platform" value={version.platform ?? mod.platform} />
-          <Meta label="Típus" value={version.type ?? 'ZIP'} />
+          <Meta label="Méret" kulcs="mod.meret" value={version.size ?? 'ismeretlen'} />
+          <Meta
+            label="Platform"
+            kulcs="mod.platform"
+            value={csakSzoveg(version.platform ?? mod.platform)}
+          />
+          <Meta label="Típus" kulcs="verzio.tipus" value={version.type ?? 'ZIP'} />
           <Meta
             label="Letöltések"
+            kulcs="verzio.letoltesek"
             value={
               typeof version.downloads === 'number' ? formatNumber(version.downloads) : 'nincs adat'
             }
@@ -64,12 +77,17 @@ export function VersionCard({
 
         {version.changes && version.changes.length > 0 && (
           <div className="mt-4">
-            <p className="zc-label mb-2 text-ash-400">Változások</p>
+            <Felirat
+              elem="p"
+              className="zc-label mb-2 text-ash-400"
+              kulcs="verzio.valtozasok"
+              alap="Változások"
+            />
             <ul className="space-y-1.5">
-              {version.changes.map((c) => (
+              {version.changes.map((c, ci) => (
                 <li key={c} className="flex gap-2.5 text-sm text-ash-300">
                   <span aria-hidden className="mt-2 block h-1 w-1 shrink-0 bg-blood-500" />
-                  {c}
+                  <Szoveg ertek={c} mezo={`${mod.slug}:versions:${vi}:changes:${ci}`} />
                 </li>
               ))}
             </ul>
@@ -81,13 +99,24 @@ export function VersionCard({
             href={url}
             rel="noopener noreferrer"
             className={btnClass(latest ? 'primary' : 'secondary', latest ? 'lg' : 'md', 'sm:flex-none')}
-            aria-label={`${mod.name} ${vLabel(version.version)} letöltése${file ? ` (${file})` : ''}`}
+            aria-label={`${csakSzoveg(mod.name)} ${vLabel(version.version)} letöltése${
+              file ? ` (${file})` : ''
+            }`}
           >
             <IconDownload width={16} height={16} />
-            Letöltés
+            <Felirat kulcs="gomb.letoltes" alap="Letöltés" />
           </a>
           <p className="text-xs text-ash-400 sm:ml-auto">
-            Készítő: <span className="text-ash-200">{version.author ?? mod.author}</span>
+            <Felirat kulcs="verzio.keszito" alap="Készítő:" />{' '}
+            <Szoveg
+              className="text-ash-200"
+              ertek={version.author ?? mod.author}
+              mezo={
+                version.author
+                  ? `${mod.slug}:versions:${vi}:author`
+                  : `${mod.slug}:author`
+              }
+            />
             {file && (
               <>
                 {' '}

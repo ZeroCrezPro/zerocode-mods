@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { csakSzoveg } from '@/lib/gazdagSzoveg'
 import { allTags, lastUpdated, mods, site } from '@/data'
 import type { Mod } from '@/data/types'
 import { matches, normalize } from '@/lib/search'
@@ -20,15 +21,18 @@ const sortOptions: { key: SortKey; label: string }[] = [
 ]
 
 function haystack(mod: Mod): string {
+  // A formázás jelei ne zavarják a keresést.
   return normalize(
-    [
-      mod.name,
-      mod.game,
-      mod.shortDescription,
-      mod.description.join(' '),
-      mod.tags.join(' '),
-      mod.features.join(' '),
-    ].join(' '),
+    csakSzoveg(
+      [
+        mod.name,
+        mod.game,
+        mod.shortDescription,
+        mod.description.join(' '),
+        mod.tags.join(' '),
+        mod.features.join(' '),
+      ].join(' '),
+    ),
   )
 }
 
@@ -43,7 +47,7 @@ export default function Mods() {
   const list = useMemo(() => {
     let out = mods.filter((m) => matches(query, haystack(m)))
     if (activeTag) out = out.filter((m) => m.tags.includes(activeTag))
-    const byName = (a: Mod, b: Mod) => a.name.localeCompare(b.name, 'hu')
+    const byName = (a: Mod, b: Mod) => csakSzoveg(a.name).localeCompare(csakSzoveg(b.name), 'hu')
     switch (sort) {
       case 'az':
         return [...out].sort(byName)

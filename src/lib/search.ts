@@ -1,3 +1,4 @@
+import { csakSzoveg } from '@/lib/gazdagSzoveg'
 import { mods } from '@/data'
 import type { Mod } from '@/data/types'
 
@@ -11,17 +12,20 @@ export function normalize(text: string): string {
 }
 
 function haystackForMod(mod: Mod): string {
+  // A szövegekben lehet szín/animáció formázás - a keresés a tiszta szöveget nézi.
   return normalize(
-    [
-      mod.name,
-      mod.game,
-      mod.shortDescription,
-      mod.description.join(' '),
-      mod.tags.join(' '),
-      mod.features.join(' '),
-      mod.author,
-      mod.platform,
-    ].join(' '),
+    csakSzoveg(
+      [
+        mod.name,
+        mod.game,
+        mod.shortDescription,
+        mod.description.join(' '),
+        mod.tags.join(' '),
+        mod.features.join(' '),
+        mod.author,
+        mod.platform,
+      ].join(' '),
+    ),
   )
 }
 
@@ -50,8 +54,8 @@ export function quickSearch(query: string, limit = 8): QuickResult[] {
   return mods
     .filter((m) => matches(query, haystackForMod(m)))
     .map((m) => ({
-      title: m.name,
-      subtitle: m.game || 'Mod',
+      title: csakSzoveg(m.name),
+      subtitle: csakSzoveg(m.game) || 'Mod',
       href: `/modok/${m.slug}`,
       image: m.icon || m.cover,
     }))

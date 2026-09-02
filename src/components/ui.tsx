@@ -1,6 +1,7 @@
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { cx } from '@/lib/format'
+import { Felirat } from './Szoveg'
 
 /* ---------- Gombok ---------- */
 
@@ -101,6 +102,7 @@ export function Badge({
 
 export function Panel({
   title,
+  cimKulcs,
   id,
   action,
   children,
@@ -108,6 +110,8 @@ export function Panel({
   bodyClassName,
 }: {
   title?: string
+  /** Ha meg van adva, a szekciócím is formázható a szerkesztőben. */
+  cimKulcs?: string
   id?: string
   action?: ReactNode
   children: ReactNode
@@ -120,7 +124,7 @@ export function Panel({
         <header className="flex items-center justify-between gap-3 border-b border-ink-700 bg-ink-850 px-4 py-3 sm:px-5">
           <h2 className="zc-label flex items-center gap-2.5 text-ash-100">
             <span aria-hidden className="block h-3 w-[3px] bg-blood-500" />
-            {title}
+            {cimKulcs ? <Felirat kulcs={cimKulcs} alap={title} /> : title}
           </h2>
           {action}
         </header>

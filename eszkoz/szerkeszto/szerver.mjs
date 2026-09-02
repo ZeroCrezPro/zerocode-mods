@@ -185,7 +185,7 @@ function nyitoSpan(cimke) {
 
 /** Csak a saját formázásunkat engedjük át; minden más elem kiesik. */
 function tisztitHtml(nyers) {
-  const forras = String(nyers ?? '').replace(/\r\n?|\n/g, '<br />')
+  const forras = String(nyers ?? '').replace(/\s+$/, '').replace(/\r\n?|\n/g, '<br />')
   let ki = ''
   let i = 0
   const esc = (t) => t.replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -217,12 +217,62 @@ function tisztitHtml(nyers) {
   return ki
 }
 
+/**
+ * Mely mezőkben engedjük meg a formázást (színt, animációt)?
+ *
+ * A '*' minden tömbelemet, illetve minden kulcsot jelent. Ami nincs a
+ * listán, abba nem kerülhet HTML - így a címke, a verziószám, a dátum és
+ * minden útvonal érintetlen marad.
+ */
+const FORMAZHATO_MOD = [
+  ['name'],
+  ['shortDescription'],
+  ['game'],
+  ['author'],
+  ['platform'],
+  ['description', '*'],
+  ['features', '*'],
+  ['installationSteps', '*', 'title'],
+  ['installationSteps', '*', 'detail'],
+  ['faq', '*', 'question'],
+  ['faq', '*', 'answer'],
+  ['versions', '*', 'changes', '*'],
+  ['versions', '*', 'author'],
+  ['externalLinks', '*', 'label'],
+]
+
+const FORMAZHATO_SITE = [
+  ['tagline'],
+  ['author'],
+  ['brandTop'],
+  ['brandBottom'],
+  ['feliratok', '*'],
+]
+
+/** Egy útvonal mentén megtisztítja a szövegeket. */
+function utonTisztit(gyoker, ut) {
+  if (!gyoker || typeof gyoker !== 'object') return
+  const [fej, ...maradek] = ut
+
+  const egy = (kulcs) => {
+    if (maradek.length) return utonTisztit(gyoker[kulcs], maradek)
+    if (typeof gyoker[kulcs] === 'string') gyoker[kulcs] = tisztitHtml(gyoker[kulcs])
+  }
+
+  if (fej !== '*') return egy(fej)
+  const kulcsok = Array.isArray(gyoker) ? gyoker.map((_, i) => i) : Object.keys(gyoker)
+  for (const k of kulcsok) egy(k)
+}
+
 /** A formázható mezők átszűrése mentés előtt. */
 function formazasSzures(adatok) {
   for (const m of adatok.mods ?? []) {
-    if (Array.isArray(m.description)) {
-      m.description = m.description.map((b) => tisztitHtml(b)).filter((b) => b.trim())
-    }
+    for (const ut of FORMAZHATO_MOD) utonTisztit(m, ut)
+    // Az üresre törölt bekezdés ne maradjon ott.
+    if (Array.isArray(m.description)) m.description = m.description.filter((b) => b.trim())
+  }
+  if (adatok.site) {
+    for (const ut of FORMAZHATO_SITE) utonTisztit(adatok.site, ut)
   }
   return adatok
 }

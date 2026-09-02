@@ -49,7 +49,7 @@ function szinNormalizal(ertek: string): string {
 export function tisztitHtml(nyers: string): string {
   // A korábban egyszerű szövegként mentett bekezdésekben sortörés van;
   // HTML-ben az magától nem látszik, ezért <br /> lesz belőle.
-  nyers = nyers.replace(/\r\n?|\n/g, '<br />')
+  nyers = nyers.replace(/\s+$/, '').replace(/\r\n?|\n/g, '<br />')
   let ki = ''
   let i = 0
 

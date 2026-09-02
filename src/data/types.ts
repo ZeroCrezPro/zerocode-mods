@@ -111,6 +111,11 @@ export interface SiteConfig {
   favicon: string
   /** Közösségi megosztókép (1200x630) */
   ogImage: string
+  /**
+   * Állandó feliratok (szekciócímek, oszlopnevek, gombfeliratok) felülírása.
+   * A szerkesztő tölti, amikor színt vagy animációt adsz egy ilyen feliratnak.
+   */
+  feliratok?: Record<string, string>
   /** Összesített letöltésszám a főoldali statisztikához; null = nincs mérve */
   totalDownloadsOverride: number | null
 }
