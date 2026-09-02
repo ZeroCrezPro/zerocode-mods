@@ -525,6 +525,17 @@ Formátum: fényképszerű képhez `.webp` vagy `.jpg`, átlátszó hátterű je
 vagy `.svg`. A szerkesztő kiírja a feltöltött képek méretét, és sárgával jelzi, ha egy
 kép 600 kB fölött van – az már lassítja az oldal betöltését.
 
+### Kép törlése
+
+Minden kép jobb felső sarkában van egy piros **×** gomb – a **Képek** lapon és a
+képválasztó ablakban is. Rákattintva a program megkérdezi, biztosan törlöd-e, és
+**kiírja, hol használod jelenleg** azt a képet (melyik mod borítója, bannere, ikonja
+vagy diavetítő képe). Ha megerősíted, a fájl véglegesen törlődik a
+`public/images/` mappából.
+
+A törlés nem nyúl az adatokhoz: ha a kép még be volt állítva valahol, ott a helyőrző
+jelenik meg, amíg másikat nem választasz.
+
 **Kép nélkül is működik minden.** Ha egy modhoz vagy játékhoz nincs kép, a felület
 magától kirajzol egy ZeroCode helyőrzőt a név kezdőbetűivel – semmi nem törik el.
 

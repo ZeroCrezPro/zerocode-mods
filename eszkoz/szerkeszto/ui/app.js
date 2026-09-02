@@ -249,10 +249,76 @@ function kepCsempe(k, kattintasra) {
 
   const tartalom = [el('img', { src: k.utvonal, alt: '', loading: 'lazy' }), felirat]
 
-  return kattintasra
+  const csempe = kattintasra
     ? el('button', { type: 'button', class: 'kepgomb', onClick: () => kattintasra(k) }, tartalom)
     : el('div', { class: 'kepgomb' }, tartalom)
+
+  // A törlő gomb a csempe MELLETT van, nem benne: gomb a gombban
+  // érvénytelen lenne, és a kattintás is összekeveredne.
+  const torlo = el('button', {
+    type: 'button',
+    class: 'kep-torles',
+    title: `${k.nev} törlése`,
+    'aria-label': `${k.nev} törlése`,
+    text: '×',
+    onClick: (e) => {
+      e.stopPropagation()
+      kepetTorol(k)
+    },
+  })
+
+  return el('div', { class: 'kepgomb-burok' }, [csempe, torlo])
 }
+
+/** Hol használja az oldal ezt a képet? */
+function kepHasznalata(utvonal) {
+  const helyek = []
+  const s = allapot.adatok?.site
+  if (s) {
+    for (const kulcs of ['logo', 'favicon', 'ogImage']) {
+      if (s[kulcs] === utvonal) helyek.push(`Beállítások - ${kulcs}`)
+    }
+  }
+  for (const m of allapot.adatok?.mods ?? []) {
+    for (const kulcs of ['cover', 'banner', 'icon']) {
+      if (m[kulcs] === utvonal) helyek.push(`${m.name} - ${kulcs}`)
+    }
+    ;(m.slideshow ?? []).forEach((k, i) => {
+      if (k === utvonal) helyek.push(`${m.name} - diavetítő ${i + 1}.`)
+    })
+  }
+  return helyek
+}
+
+/** Kép végleges törlése a lemezről, előtte figyelmeztetéssel. */
+async function kepetTorol(k) {
+  const hol = kepHasznalata(k.utvonal)
+  const figyelmeztetes = hol.length
+    ? `\n\nFIGYELEM: ezt a képet jelenleg használod itt:\n- ${hol.join('\n- ')}\n` +
+      'Törlés után ezeken a helyeken nem lesz kép.'
+    : ''
+
+  if (!confirm(`Törlöd ezt a képet?\n\n${k.nev}${figyelmeztetes}\n\nA fájl véglegesen törlődik.`)) {
+    return
+  }
+
+  try {
+    await api(`/api/kep-torles?mappa=${k.mappa}&nev=${encodeURIComponent(k.nev)}`, {
+      method: 'POST',
+    })
+    pirit(`Törölve: ${k.nev}`, 'jo')
+  } catch (hiba) {
+    pirit(`Nem sikerült törölni: ${hiba.message}`, 'rossz')
+    return
+  }
+
+  await kepekBetolt()
+  if (kepAblakUjrarajzol && !$('#kepAblak').hidden) kepAblakUjrarajzol()
+  ujraRajzol()
+}
+
+/** A nyitott képválasztó újrarajzolása törlés után. */
+let kepAblakUjrarajzol = null
 
 /* ================================================================== */
 /* Mezőleírások                                                        */
@@ -2101,6 +2167,7 @@ async function kepValaszto(mappa, kivalasztva) {
     }
   }
   rajzol()
+  kepAblakUjrarajzol = rajzol
 
   test.append(
     el('div', { style: 'display:flex;gap:10px;margin-bottom:14px;align-items:center' }, [

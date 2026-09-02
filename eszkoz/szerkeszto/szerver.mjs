@@ -837,6 +837,19 @@ const szerver = http.createServer(async (req, res) => {
       await fsp.writeFile(cel, await testOlvas(req))
       return json(res, 200, { ok: true, utvonal: `/images/${mappa}/${nev}` })
     }
+    if (ut === '/api/kep-torles' && req.method === 'POST') {
+      const mappa = url.searchParams.get('mappa') ?? ''
+      const nev = path.basename(url.searchParams.get('nev') ?? '')
+      if (!KEP_MAPPAK.includes(mappa)) throw new Error('Ismeretlen képmappa.')
+      if (!KEP_KITERJESZTESEK.includes(path.extname(nev).toLowerCase())) {
+        throw new Error('Ez nem képfájl.')
+      }
+      const cel = path.join(kepDir, mappa, nev)
+      if (!belulVan(kepDir, cel)) throw new Error('Tiltott útvonal.')
+      if (!fs.existsSync(cel)) throw new Error('Nincs ilyen kép.')
+      await fsp.rm(cel, { force: true })
+      return json(res, 200, { ok: true, utvonal: `/images/${mappa}/${nev}` })
+    }
     // a szerkesztőben megjelenő képek a projekt public mappájából jönnek
     if (ut.startsWith('/images/')) return statikus(res, kepDir, ut.slice('/images'.length))
 
