@@ -64,6 +64,117 @@ document.addEventListener('selectionchange', () => {
   panelFrissit()
 })
 
+/* ---------------- Előnézetből érkező kijelölés ---------------- */
+
+/**
+ * A szerkesztő adatait kezelő függvények. Az app.js adja meg őket, mert
+ * csak ő tudja, hol van a modok listája.
+ *   olvas(mezo)      -> a bekezdés jelenlegi HTML-je (vagy null)
+ *   ir(mezo, html)   -> az új HTML eltárolása
+ */
+let tavoliKezelo = null
+
+export function tavoliForrasBeallit(kezelo) {
+  tavoliKezelo = kezelo
+}
+
+/**
+ * Képernyőn kívüli munkadoboz az előnézetből jött bekezdéshez.
+ *
+ * Nem rejtjük el display:none-nal, mert akkor a böngésző nem tudna benne
+ * kijelölést kezelni; egyszerűen kicsúsztatjuk a képernyőről.
+ */
+function tavoliGazda() {
+  let d = document.getElementById('formazoTavoli')
+  if (d) return d
+  d = document.createElement('div')
+  d.id = 'formazoTavoli'
+  d.className = 'gazdag-szoveg'
+  d.setAttribute('aria-hidden', 'true')
+  d.style.cssText =
+    'position:fixed;left:-10000px;top:0;width:640px;opacity:0;pointer-events:none'
+  d.addEventListener('input', () => {
+    if (!tavoliKezelo || !d.dataset.mezo) return
+    tavoliKezelo.ir(d.dataset.mezo, tisztitHtml(d.innerHTML))
+  })
+  document.body.appendChild(d)
+  return d
+}
+
+/** Tartomány készítése karakter-eltolásokból. */
+function tartomanyEltolasbol(gazda, kezd, veg) {
+  const jaro = document.createTreeWalker(gazda, NodeFilter.SHOW_TEXT)
+  const r = document.createRange()
+  let eddig = 0
+  let vanEleje = false
+  let csomo
+  while ((csomo = jaro.nextNode())) {
+    const hossz = csomo.textContent.length
+    if (!vanEleje && kezd <= eddig + hossz) {
+      r.setStart(csomo, Math.max(0, kezd - eddig))
+      vanEleje = true
+    }
+    if (vanEleje && veg <= eddig + hossz) {
+      r.setEnd(csomo, Math.max(0, veg - eddig))
+      return r
+    }
+    eddig += hossz
+  }
+  return null
+}
+
+/** Az előnézetben kijelölt szövegrész átvétele. */
+export function tavoliKijeloles({ mezo, kezd, veg }) {
+  if (!tavoliKezelo) return false
+  const html = tavoliKezelo.olvas(mezo)
+  if (html == null) return false
+
+  const gazda = tavoliGazda()
+  gazda.dataset.mezo = mezo
+  gazda.innerHTML = tisztitHtml(html)
+
+  const r = tartomanyEltolasbol(gazda, kezd, veg)
+  if (!r) return false
+
+  kijeloles.range = r.cloneRange()
+  kijeloles.gazda = gazda
+  const s = document.getSelection()
+  s.removeAllRanges()
+  s.addRange(r)
+  panelFrissit()
+  return true
+}
+
+/** Törli a megjegyzett kijelölést (ha az előnézetben megszűnt). */
+export function tavoliKijelolestElenged() {
+  if (kijeloles.gazda?.id !== 'formazoTavoli') return
+  kijeloles.range = null
+  panelFrissit()
+}
+
+/** Melyik mezőn dolgozunk épp az előnézet felől? ('' ha egyiken sem) */
+export function tavoliMezo() {
+  if (kijeloles.gazda?.id !== 'formazoTavoli') return ''
+  return kijeloles.gazda.dataset.mezo ?? ''
+}
+
+/** A munkadobozban levő kijelölés karakter-eltolásai. */
+export function tavoliEltolasok() {
+  if (kijeloles.gazda?.id !== 'formazoTavoli' || !kijeloles.range) return null
+  const gazda = kijeloles.gazda
+  const jaro = document.createTreeWalker(gazda, NodeFilter.SHOW_TEXT)
+  let eddig = 0
+  let kezd = -1
+  let veg = -1
+  let csomo
+  while ((csomo = jaro.nextNode())) {
+    if (csomo === kijeloles.range.startContainer) kezd = eddig + kijeloles.range.startOffset
+    if (csomo === kijeloles.range.endContainer) veg = eddig + kijeloles.range.endOffset
+    eddig += csomo.textContent.length
+  }
+  return kezd >= 0 && veg > kezd ? { kezd, veg } : null
+}
+
 /** A megjegyzett kijelölés visszaállítása a böngészőben. */
 function kijelolesVissza() {
   if (!kijeloles.range) return false
@@ -489,7 +600,7 @@ export function formazoPanel({ piritFn }) {
   /* --- műveletek --- */
   function szintAlkalmaz(szin) {
     if (!vanKijeloles()) {
-      pirit('Előbb jelölj ki egy szövegrészt.', 'rossz')
+      pirit('Előbb jelölj ki egy szövegrészt a leírásban vagy az Előnézetben.', 'rossz')
       return
     }
     kijelolesVissza()
@@ -575,7 +686,7 @@ export function formazoPanel({ piritFn }) {
     doboz.classList.toggle('nincs-kijeloles', !van)
     kijelolesSzoveg.textContent = van
       ? `„${f.szoveg.length > 70 ? f.szoveg.slice(0, 70) + '…' : f.szoveg}”`
-      : 'Jelölj ki egy szövegrészt a leírásban.'
+      : 'Jelölj ki egy szövegrészt a leírásban vagy az Előnézetben.'
 
     if (van) {
       if (f.szin) {

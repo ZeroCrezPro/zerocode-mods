@@ -193,9 +193,13 @@ export default function ModDetail() {
         <div className="min-w-0 space-y-6">
           <Panel title="Leírás">
             <div className="space-y-4">
-              {mod.description.map((para) => (
+              {mod.description.map((para, i) => (
                 <p
                   key={para.slice(0, 40)}
+                  // A szerkesztő előnézete ebből tudja, melyik bekezdésben
+                  // jelölt ki a felhasználó. Az éles oldalon csak egy
+                  // ártalmatlan adat-attribútum.
+                  data-zc-mezo={`${mod.slug}:description:${i}`}
                   className="text-sm leading-relaxed text-ash-300"
                   // A szerkesztőben megadott színek és animációk <span> elemekként
                   // vannak a szövegben; a tisztitHtml minden mást kiszűr.

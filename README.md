@@ -288,6 +288,18 @@ doboz. A jobb szélén ott a **Formázás** panel, amivel a *kijelölt* szövegr
 színt és animációt. A bal oldali felület nem változik: a panel a jobb szélen ül, és a
 függőleges fülével be- és kicsukható (a program megjegyzi, hogyan hagytad).
 
+### Hol jelölhetsz ki?
+
+Két helyen, és mindkettő ugyanoda ment:
+
+- a **Modok → Leírás** dobozban,
+- az **Előnézet** lapon, közvetlenül a kész oldalon – ott jelölöd ki a szót, ahol
+  majd látszani fog.
+
+Az előnézetben a leírás bekezdéseiben lehet formázni. A szín és az animáció rögtön
+megjelenik az előnézetben is, és a **Mentés** ugyanúgy eltárolja, mintha a Leírás
+dobozban formáztál volna.
+
 ### Hogyan használd?
 
 1. Jelöld ki egérrel azt a szót vagy mondatrészt, amit ki akarsz emelni.
@@ -316,6 +328,15 @@ Valódi HTML szöveg – neked soha nem kell HTML-t írni, a program állítja e
 Ez ugyanúgy a `src/data/mods.json` fájlba kerül, mint minden más módosítás, tehát a
 program bezárása után is megmarad, és a **Frissítés** gomb után az éles weboldalon is
 így jelenik meg.
+
+### Hogyan találja meg a program, mit jelöltél ki az előnézetben?
+
+A legyártott oldalon minden leírás-bekezdés kap egy `data-zc-mezo` jelölőt (például
+`max-payne-2…:description:0`). A helyi előnézeti kiszolgáló – és **csak** az –
+hozzáfűz az oldalhoz egy apró szkriptet (`eszkoz/szerkeszto/elonezet-hid.js`), ami
+megmondja a szerkesztőnek, melyik bekezdésben, hányadik karaktertől hányadikig
+jelöltél ki. Ez a szkript soha nem kerül ki az éles weboldalra: a `dist` mappa
+fájljai érintetlenek maradnak, a szkriptet a kiszolgáló futás közben teszi hozzá.
 
 ### Biztonság
 

@@ -671,7 +671,7 @@ function ghKeres() {
 /* Statikus fájlok                                                     */
 /* ------------------------------------------------------------------ */
 
-async function statikus(res, alap, relativ, sPAFallback = null) {
+async function statikus(res, alap, relativ, sPAFallback = null, beszuras = '') {
   let cel = path.join(alap, decodeURIComponent(relativ))
   if (!belulVan(alap, cel) && path.resolve(cel) !== path.resolve(alap)) {
     return valasz(res, 403, MIME['.txt'], 'Tiltott útvonal')
@@ -698,7 +698,18 @@ async function statikus(res, alap, relativ, sPAFallback = null) {
       }
     }
     const adat = await fsp.readFile(cel)
-    return valasz(res, 200, MIME[path.extname(cel).toLowerCase()] ?? 'application/octet-stream', adat)
+    const kiterjesztes = path.extname(cel).toLowerCase()
+
+    // Az előnézeti oldalakba beszúrjuk a szerkesztővel összekötő szkriptet.
+    if (beszuras && kiterjesztes === '.html') {
+      const szoveg = adat.toString('utf8')
+      const teli = szoveg.includes('</body>')
+        ? szoveg.replace('</body>', beszuras + '</body>')
+        : szoveg + beszuras
+      return valasz(res, 200, MIME['.html'], teli)
+    }
+
+    return valasz(res, 200, MIME[kiterjesztes] ?? 'application/octet-stream', adat)
   } catch {
     return valasz(res, 404, MIME['.txt'], 'Nincs ilyen fájl')
   }
@@ -836,6 +847,16 @@ const szerver = http.createServer(async (req, res) => {
  * útvonalról (/assets/...) kéri. Ha almappából jönne, a böngésző nem
  * találná meg őket, és az előnézet formázás nélkül jelenne meg.
  */
+/**
+ * A szerkesztővel összekötő szkript. Csak a helyi előnézetbe kerül bele,
+ * a legyártott, éles oldal fájljai érintetlenek maradnak.
+ */
+const ELONEZET_HID =
+  '<script>' +
+  fs.readFileSync(path.join(here, 'elonezet-hid.js'), 'utf8') +
+  '</' +
+  'script>'
+
 const elonezetSzerver = http.createServer(async (req, res) => {
   const ut = new URL(req.url, 'http://127.0.0.1').pathname
 
@@ -849,7 +870,7 @@ const elonezetSzerver = http.createServer(async (req, res) => {
         '<p>Még nincs elkészült előnézet. Kattints az <b style="color:#f2f2f4">Előnézet frissítése</b> gombra.</p>',
     )
   }
-  return statikus(res, distDir, ut === '/' ? '/index.html' : ut, '404.html')
+  return statikus(res, distDir, ut === '/' ? '/index.html' : ut, '404.html', ELONEZET_HID)
 })
 
 const elonezetCim = () => `http://127.0.0.1:${elonezetSzerver.address().port}/`

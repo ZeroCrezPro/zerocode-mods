@@ -10,6 +10,11 @@ import {
   bekezdesekBeir,
   bekezdesekBeolvas,
   formazoPanel,
+  tavoliEltolasok,
+  tavoliForrasBeallit,
+  tavoliKijeloles,
+  tavoliKijelolestElenged,
+  tavoliMezo,
   tisztitHtml as formazoTisztit,
 } from './formazo.js'
 
@@ -2160,9 +2165,88 @@ window.addEventListener('beforeunload', (e) => {
   }
 })
 
+/* ================================================================== */
+/* Formázás az előnézetben kijelölt szövegen                           */
+/* ================================================================== */
+
+/**
+ * A mező azonosítója az előnézetből: "<slug>:description:<sorszám>".
+ * Ebből keressük ki, melyik mod melyik bekezdéséről van szó.
+ */
+function tavoliMezoHelye(mezo) {
+  const reszek = String(mezo ?? '').split(':')
+  if (reszek.length !== 3 || reszek[1] !== 'description') return null
+  const mod = allapot.adatok?.mods?.find((m) => m.slug === reszek[0])
+  if (!mod || !Array.isArray(mod.description)) return null
+  const i = Number(reszek[2])
+  if (!Number.isInteger(i) || i < 0 || i >= mod.description.length) return null
+  return { mod, i }
+}
+
+/** Az előnézetnek megmutatjuk, mi lett a bekezdésből. */
+function elonezetnekKuld(uzenet) {
+  try {
+    elonezetKeret?.contentWindow?.postMessage(uzenet, '*')
+  } catch {
+    /* ha épp nincs betöltve az előnézet, nem baj */
+  }
+}
+
+function elonezetiFormazasBekot() {
+  tavoliForrasBeallit({
+    olvas(mezo) {
+      const hely = tavoliMezoHelye(mezo)
+      return hely ? hely.mod.description[hely.i] : null
+    },
+    ir(mezo, html) {
+      const hely = tavoliMezoHelye(mezo)
+      if (!hely) return
+      hely.mod.description[hely.i] = html
+      jelolValtozas()
+      // Ugyanaz kerüljön az előnézetbe is, hogy rögtön látszódjon.
+      const eltolas = tavoliEltolasok()
+      elonezetnekKuld({
+        tipus: 'zc-elonezet-frissit',
+        mezo,
+        html,
+        kezd: eltolas?.kezd,
+        veg: eltolas?.veg,
+      })
+      // Ha épp a Modok lapon áll a leírásdoboz, az is kövesse.
+      const doboz = document.querySelector('.gazdag-szoveg:not(#formazoTavoli)')
+      if (doboz && allapot.adatok?.mods?.[allapot.modIndex] === hely.mod) {
+        bekezdesekBeir(doboz, hely.mod.description)
+      }
+    },
+  })
+
+  window.addEventListener('message', (esemeny) => {
+    const a = esemeny.data
+    if (!a || typeof a !== 'object') return
+    if (a.tipus !== 'zc-elonezet-kijeloles') return
+    // Csak a saját előnézeti keretünket hallgatjuk meg.
+    if (elonezetKeret && esemeny.source !== elonezetKeret.contentWindow) return
+
+    if (a.ures) {
+      tavoliKijelolestElenged()
+      return
+    }
+    if (!tavoliKijeloles({ mezo: a.mezo, kezd: a.kezd, veg: a.veg })) {
+      tavoliKijelolestElenged()
+    }
+  })
+
+  // Az újrajátszás az előnézetben is fusson le, ne csak a háttérben.
+  $('#formazoUjrajatszas')?.addEventListener('click', () => {
+    const mezo = tavoliMezo()
+    if (mezo) elonezetnekKuld({ tipus: 'zc-elonezet-ujrajatszas', mezo })
+  })
+}
+
 async function indul() {
   // A jobb oldali szövegformázó panel - a bal oldali felülethez nem nyúl.
   formazoPanel({ piritFn: pirit })
+  elonezetiFormazasBekot()
 
   try {
     allapot.adatok = await api('/api/adatok')
