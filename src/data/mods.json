@@ -8,12 +8,12 @@
     "status": "fejlesztes",
     "featured": false,
     "createdAt": "2026-09-01",
-    "shortDescription": "Játék közbeni mod panel a Max Payne 2: The Fall of Max Payne játékhoz. Egyetlen gombnyomásra (ALT+E) előhívható panelről kapcsolgathatod a csalásokat: végtelen lőszer, végtelen élet, nincs újratöltés, egyből ölés és végtelen bullet time. Nem kell Cheat Engine, sem külön trainer-ablak – a mod a játékkal együtt indul, és megjegyzi, mi volt bekapcsolva.\n",
+    "shortDescription": "Játék közbeni mod panel a Max Payne 2: The Fall of Max Payne játékhoz. Egyetlen gombnyomásra (<span style=\"color:#f5d90a\">ALT+E</span>) előhívható panelről kapcsolgathatod a csalásokat: végtelen lőszer, végtelen élet, nincs újratöltés, egyből ölés és végtelen bullet time. Nem kell Cheat Engine, sem külön trainer-ablak – a mod a játékkal együtt indul, és megjegyzi, mi volt bekapcsolva.",
     "description": [
       "MP2 Mod Panel – játék közbeni csaláspanel a Max Payne 2: The Fall of Max Payne játékhoz.",
       "MI EZ?<br />Egy játékon belüli, felugró panel, amiről menet közben, egérrel kapcsolhatod a különböző csalásokat. Nem kell hozzá Cheat Engine, nincs külön trainer-ablak, amit csatolgatni kellene – a mod a játékkal együtt indul, és a panel egyetlen gombnyomásra előjön.",
       "FUNKCIÓK:<br />- Végtelen lőszer – nem fogy a tár, nem kell újratölteni a készletből<br />- Végtelen élet – nem veszítesz életet<br />- Nincs újratöltés – a fegyver nem tölt újra, folyamatosan tüzelhetsz<br />- Egyből ölés – az ellenfelek egyetlen találattól elesnek<br />- Végtelen bullet time – a lassítás nem fogy el<br />- Maximális lőszer – egy gombnyomásra azonnal teletölti a lőszered<br />- Sarok súgó – a képernyő sarkában megjelenő emlékeztető ki-/bekapcsolása",
-      "VEZÉRLÉS:<br />- <span style=\"color:#f5d90a\">ALT + E</span> – a panel megnyitása és bezárása (bal és jobb ALT is jó)<br />- A panel a képernyő jobb oldalán jelenik meg<br />- Egy funkció be-/kikapcsolása: kattints a sorára (<span class=\"zc-anim-fade-in\" style=\"color:#f5d90a\">KI</span> / <span class=\"zc-anim-fade-in\" style=\"color:#f5d90a\">BE</span>)<br />- A „Maximális lőszer” a MOST gombbal azonnal lefut<br />- Alapból minden KI van kapcsolva",
+      "VEZÉRLÉS:<br />- <span style=\"color:#f5d90a\">ALT + E</span> – a panel megnyitása és bezárása (bal és jobb ALT is jó)<br />- A panel a képernyő jobb oldalán jelenik meg<br />- Egy funkció be-/kikapcsolása: kattints a sorára (<span class=\"zc-anim-shake\" style=\"color:#f5d90a\">KI</span> / <span class=\"zc-anim-shake\"><span style=\"color:#f5d90a\">BE</span></span>)<br />- A „Maximális lőszer” a MOST gombbal azonnal lefut<br />- Alapból minden KI van kapcsolva",
       "JELLEMZŐK:<br />- A mod megjegyzi, mi volt bekapcsolva – újraindítás után és másik mentés betöltésekor is<br />- Nem külön program: a játékkal együtt indul, nincs külön ablak<br />- A ZeroCode felirat jelzi a panel fejlécében, hogy a mod fut<br />- Tesztelve a Steam-es kiadáson (maxpayne2.exe 1.0.98.0)",
       "VERZIÓ: 1.8.1"
     ],
@@ -35,7 +35,7 @@
     "installationSteps": [
       {
         "title": "A mod telepítése",
-        "detail": "Töltsd le és indítsd el az MP2Mod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot: ZeroCode (a kis- és nagybetű számít), ekkor megjelenik a TELEPÍTÉS gomb. A telepítő magától megkeresi a Max Payne 2 mappáját – ha nem találná, a Tallózás gombbal add meg kézzel. Kattints a TELEPÍTÉS gombra: a mod a scripts mappába kerül, a meglévő fájlokat nem írja felül (később a TÖRLÉS gombbal eltávolítható). Végül indítsd a játékot a Steamről, és játék közben nyomd meg az ALT + E-t a panel előhívásához.\n"
+        "detail": "Töltsd le és indítsd el az MP2Mod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot: <span class=\"zc-anim-shake\"><span style=\"color:#f5d90a\">ZeroCode</span></span> (a kis- és nagybetű számít), ekkor megjelenik a TELEPÍTÉS gomb. A telepítő magától megkeresi a Max Payne 2 mappáját – ha nem találná, a Tallózás gombbal add meg kézzel. Kattints a TELEPÍTÉS gombra: a mod a scripts mappába kerül, a meglévő fájlokat nem írja felül (később a TÖRLÉS gombbal eltávolítható). Végül indítsd a játékot a Steamről, és játék közben nyomd meg az ALT + E-t a panel előhívásához."
       }
     ],
     "versions": [

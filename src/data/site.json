@@ -13,5 +13,6 @@
   "ogImage": "/images/og-default.svg",
   "totalDownloadsOverride": null,
   "logo": "",
-  "favicon": ""
+  "favicon": "",
+  "feliratok": {}
 }
