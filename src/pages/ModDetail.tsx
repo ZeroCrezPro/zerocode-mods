@@ -88,10 +88,14 @@ export default function ModDetail() {
             ratio="h-full"
             className="h-full"
             eager
-            imgClassName="opacity-15 blur-[2px]"
+            imgClassName="opacity-45 blur-[1px]"
             dekoracio
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/88 to-ink-950/55" />
+          {/*
+            A banner látsszon, de a szöveg maradjon olvasható: a fátyol lent
+            a legsűrűbb (ott van a cím és a leírás), fölfelé haladva ritkul.
+          */}
+          <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/80 to-ink-950/40" />
         </div>
 
         <div className="zc-container relative py-10 sm:py-14">
