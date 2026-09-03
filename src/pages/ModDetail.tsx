@@ -230,20 +230,17 @@ export default function ModDetail() {
         </div>
       </section>
 
-      {/* ---------- Diavetítő a letöltés gomb és a leírás között ---------- */}
-      {(mod.video || (mod.slideshow && mod.slideshow.length > 0)) && (
-        /* Ugyanaz a rács, mint lent a tartalomnál: így a diavetítő pontosan
-           olyan széles, mint a Leírás panel, nem lóg túl rajta. */
-        <div className="zc-container grid gap-6 pt-8 sm:pt-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="min-w-0">
-            <Diavetites kepek={mod.slideshow ?? []} video={mod.video} nev={nev} />
-          </div>
-        </div>
-      )}
-
       {/* ---------- Tartalom ---------- */}
+      {/*
+        A diavetítő a bal oszlop tetején van, nem külön sávban: így a jobb
+        oldali letöltő doboz is fel tud jönni mellé, nem csak a leírás mellé.
+      */}
       <div className="zc-container grid gap-6 py-10 sm:py-14 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 space-y-6">
+          {(mod.video || (mod.slideshow && mod.slideshow.length > 0)) && (
+            <Diavetites kepek={mod.slideshow ?? []} video={mod.video} nev={nev} />
+          )}
+
           <Panel title="Leírás" cimKulcs="szekcio.leiras">
             <div className="space-y-4">
               {mod.description.map((para, i) => (
