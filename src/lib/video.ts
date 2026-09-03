@@ -75,12 +75,18 @@ export function youtubeCim(azonosito: string, kezdes = 0): string {
 }
 
 /**
- * Előnézeti kép a videóhoz.
+ * Előnézeti képek a videóhoz, a legélesebbtől a legkisebbig.
  *
- * A `hqdefault` minden videóhoz létezik, a `maxresdefault` viszont nem -
- * ezért a kisebbel indulunk, és csak akkor váltunk nagyobbra, ha az tényleg
- * letölthető (lásd Diavetites).
+ * A `hqdefault` minden videóhoz létezik, a nagyobbak viszont nem mindig -
+ * ezért a Diavetites sorra kipróbálja őket, és az elsőt használja, amelyik
+ * tényleg letölthető. Így soha nincs törött kép, de éles, ha van éles.
+ *
+ * Méretek: maxresdefault 1280x720, hq720 1280x720, sddefault 640x480,
+ * hqdefault 480x360. Az utolsó kettő 4:3, fekete csíkkal - azt a
+ * megjelenítés levágja.
  */
-export function youtubeBorito(azonosito: string, nagy = false): string {
-  return `https://i.ytimg.com/vi/${azonosito}/${nagy ? 'maxresdefault' : 'hqdefault'}.jpg`
+export const BORITO_MERETEK = ['maxresdefault', 'hq720', 'sddefault', 'hqdefault'] as const
+
+export function youtubeBorito(azonosito: string, meret = 'hqdefault'): string {
+  return `https://i.ytimg.com/vi/${azonosito}/${meret}.jpg`
 }

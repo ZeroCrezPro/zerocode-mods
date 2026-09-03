@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { cx } from '@/lib/format'
-import { youtubeAzonosito, youtubeBeagyazas, youtubeBorito, youtubeKezdes } from '@/lib/video'
+import {
+  BORITO_MERETEK,
+  youtubeAzonosito,
+  youtubeBeagyazas,
+  youtubeBorito,
+  youtubeKezdes,
+} from '@/lib/video'
 import { IconChevronLeft, IconChevronRight } from './Icons'
 
 /**
@@ -35,7 +41,8 @@ export function Diavetites({
 
   const [index, setIndex] = useState(0)
   const [jatszik, setJatszik] = useState(false)
-  const [nagyBorito, setNagyBorito] = useState(false)
+  // A legkisebbel indulunk, mert az biztosan létezik; ha van élesebb, arra váltunk.
+  const [boritoMeret, setBoritoMeret] = useState('hqdefault')
 
   const lep = useCallback(
     (irany: number) => {
@@ -55,20 +62,42 @@ export function Diavetites({
   }, [index])
 
   /*
-   * A nagy felbontású előnézeti kép nem minden videóhoz létezik. Előbb
-   * megnézzük, letölthető-e, és csak utána váltunk rá - így soha nem lesz
-   * törött kép a helyén.
+   * A nagy felbontású előnézeti kép nem minden videóhoz létezik. Sorra
+   * kipróbáljuk a méreteket a legélesebbtől lefelé, és az elsőt használjuk,
+   * amelyik tényleg letölthető - így soha nem lesz törött kép a helyén.
+   *
+   * A hiányzó méret helyett a YouTube egy 120x90-es szürke képet ad, ezért
+   * a szélességet is megnézzük, nem csak azt, hogy betöltött-e.
    */
   useEffect(() => {
     if (!azonosito) return
-    setNagyBorito(false)
+    setBoritoMeret('hqdefault')
+    let ervenyes = true
     const proba = new Image()
-    proba.onload = () => {
-      if (proba.naturalWidth > 200) setNagyBorito(true)
+
+    let i = 0
+    const kovetkezo = () => {
+      if (!ervenyes || i >= BORITO_MERETEK.length) return
+      proba.src = youtubeBorito(azonosito, BORITO_MERETEK[i])
     }
-    proba.src = youtubeBorito(azonosito, true)
+    proba.onload = () => {
+      if (!ervenyes) return
+      if (proba.naturalWidth > 200) setBoritoMeret(BORITO_MERETEK[i])
+      else {
+        i += 1
+        kovetkezo()
+      }
+    }
+    proba.onerror = () => {
+      i += 1
+      kovetkezo()
+    }
+    kovetkezo()
+
     return () => {
+      ervenyes = false
       proba.onload = null
+      proba.onerror = null
     }
   }, [azonosito])
 
@@ -136,13 +165,13 @@ export function Diavetites({
               className="group relative block h-full w-full cursor-pointer"
             >
               <img
-                src={youtubeBorito(elem.ertek, nagyBorito)}
+                src={youtubeBorito(elem.ertek, boritoMeret)}
                 alt=""
                 loading="eager"
                 decoding="async"
                 className="h-full w-full object-cover"
               />
-              <span className="absolute inset-0 bg-ink-950/25 transition-colors group-hover:bg-ink-950/10" />
+              {/* A képet nem sötétítjük: a piros gomb magától is jól látszik. */}
               <span className="absolute inset-0 flex items-center justify-center">
                 <span className="flex h-16 w-24 items-center justify-center border border-white/25 bg-blood-600/95 shadow-[0_10px_40px_rgba(0,0,0,0.6)] transition-colors group-hover:bg-blood-500">
                   <svg width="26" height="30" viewBox="0 0 26 30" aria-hidden focusable="false">
