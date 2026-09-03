@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { cx } from '@/lib/format'
+import { youtubeAzonosito, youtubeBeagyazas, youtubeBorito, youtubeKezdes } from '@/lib/video'
 import { IconChevronLeft, IconChevronRight } from './Icons'
 
 /**
- * Diavetítő: egyszerre egy nagy kép, alatta a vezérlőkkel.
+ * Diavetítő: egyszerre egy nagy elem, alatta a vezérlőkkel.
+ *
+ * Az első elem lehet egy YouTube-videó, utána jönnek a képek. A nyilak és a
+ * lapozópontok a videón és a képeken is ugyanúgy működnek.
  *
  * A nyilak és a lapozópontok szándékosan a kép ALATT vannak, nem rajta:
  * telefonon a képre helyezett gombok kitakarták a kép egy részét.
@@ -11,25 +15,71 @@ import { IconChevronLeft, IconChevronRight } from './Icons'
  * Csak képútvonalakat vár - a képleírást (amit a képernyőolvasó felolvas
  * és a kereső lát) a mod nevéből állítjuk elő.
  */
-export function Diavetites({ kepek, nev }: { kepek: string[]; nev: string }) {
+export function Diavetites({
+  kepek,
+  video,
+  nev,
+}: {
+  kepek: string[]
+  video?: string
+  nev: string
+}) {
+  const azonosito = youtubeAzonosito(video)
+  const kezdes = youtubeKezdes(video)
+
+  // A videó az első elem, utána a képek.
+  const elemek: { fajta: 'video' | 'kep'; ertek: string }[] = [
+    ...(azonosito ? [{ fajta: 'video' as const, ertek: azonosito }] : []),
+    ...kepek.map((k) => ({ fajta: 'kep' as const, ertek: k })),
+  ]
+
   const [index, setIndex] = useState(0)
+  const [jatszik, setJatszik] = useState(false)
+  const [nagyBorito, setNagyBorito] = useState(false)
 
   const lep = useCallback(
     (irany: number) => {
-      setIndex((i) => (i + irany + kepek.length) % kepek.length)
+      setIndex((i) => (i + irany + elemek.length) % elemek.length)
     },
-    [kepek.length],
+    [elemek.length],
   )
 
-  // Ha közben kevesebb kép lett, ne mutasson a semmibe
+  // Ha közben kevesebb elem lett, ne mutasson a semmibe.
   useEffect(() => {
-    if (index >= kepek.length) setIndex(0)
-  }, [index, kepek.length])
+    if (index >= elemek.length) setIndex(0)
+  }, [index, elemek.length])
 
-  if (!kepek.length) return null
+  // Lapozásnál álljon le a videó, ne szóljon a háttérben.
+  useEffect(() => {
+    setJatszik(false)
+  }, [index])
 
-  const jelenlegi = Math.min(index, kepek.length - 1)
-  const tobbKep = kepek.length > 1
+  /*
+   * A nagy felbontású előnézeti kép nem minden videóhoz létezik. Előbb
+   * megnézzük, letölthető-e, és csak utána váltunk rá - így soha nem lesz
+   * törött kép a helyén.
+   */
+  useEffect(() => {
+    if (!azonosito) return
+    setNagyBorito(false)
+    const proba = new Image()
+    proba.onload = () => {
+      if (proba.naturalWidth > 200) setNagyBorito(true)
+    }
+    proba.src = youtubeBorito(azonosito, true)
+    return () => {
+      proba.onload = null
+    }
+  }, [azonosito])
+
+  if (!elemek.length) return null
+
+  const jelenlegi = Math.min(index, elemek.length - 1)
+  const elem = elemek[jelenlegi]
+  const tobbElem = elemek.length > 1
+
+  // A képek sorszáma a videót nem számolja bele.
+  const kepSorszam = (i: number) => (azonosito ? i : i + 1)
 
   const nyilOsztaly =
     'flex h-11 w-11 shrink-0 items-center justify-center border border-ink-600 bg-ink-900 text-ash-200 transition-colors hover:border-blood-600 hover:text-white'
@@ -38,9 +88,9 @@ export function Diavetites({ kepek, nev }: { kepek: string[]; nev: string }) {
     <section
       aria-roledescription="diavetítő"
       aria-label={`Képek: ${nev}`}
-      tabIndex={tobbKep ? 0 : -1}
+      tabIndex={tobbElem ? 0 : -1}
       onKeyDown={(e) => {
-        if (!tobbKep) return
+        if (!tobbElem) return
         if (e.key === 'ArrowRight') {
           e.preventDefault()
           lep(1)
@@ -53,32 +103,80 @@ export function Diavetites({ kepek, nev }: { kepek: string[]; nev: string }) {
     >
       {/* A kép semmivel nincs letakarva */}
       <div className="aspect-[16/9] w-full overflow-hidden bg-black">
-        <img
-          key={kepek[jelenlegi]}
-          src={kepek[jelenlegi]}
-          alt={`${nev} - ${jelenlegi + 1}. kép`}
-          loading={jelenlegi === 0 ? 'eager' : 'lazy'}
-          decoding="async"
-          className="h-full w-full object-contain"
-        />
+        {elem.fajta === 'kep' && (
+          <img
+            key={elem.ertek}
+            src={elem.ertek}
+            alt={`${nev} - ${kepSorszam(jelenlegi)}. kép`}
+            loading={jelenlegi === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            className="h-full w-full object-contain"
+          />
+        )}
+
+        {elem.fajta === 'video' &&
+          (jatszik ? (
+            <iframe
+              key={elem.ertek}
+              src={youtubeBeagyazas(elem.ertek, kezdes)}
+              title={`${nev} - videó`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="h-full w-full border-0"
+            />
+          ) : (
+            /*
+             * Amíg a látogató rá nem kattint, csak egy állókép van itt.
+             * Így a YouTube lejátszója nem tölt be minden oldalmegnyitáskor.
+             */
+            <button
+              type="button"
+              onClick={() => setJatszik(true)}
+              aria-label={`${nev} - videó lejátszása`}
+              className="group relative block h-full w-full cursor-pointer"
+            >
+              <img
+                src={youtubeBorito(elem.ertek, nagyBorito)}
+                alt=""
+                loading="eager"
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
+              <span className="absolute inset-0 bg-ink-950/25 transition-colors group-hover:bg-ink-950/10" />
+              <span className="absolute inset-0 flex items-center justify-center">
+                <span className="flex h-16 w-24 items-center justify-center border border-white/25 bg-blood-600/95 shadow-[0_10px_40px_rgba(0,0,0,0.6)] transition-colors group-hover:bg-blood-500">
+                  <svg width="26" height="30" viewBox="0 0 26 30" aria-hidden focusable="false">
+                    <path d="M2 2 L24 15 L2 28 Z" fill="#fff" />
+                  </svg>
+                </span>
+              </span>
+            </button>
+          ))}
       </div>
 
-      {tobbKep && (
+      {tobbElem && (
         <div className="flex items-center justify-center gap-3 border-t border-ink-700 px-3 py-3">
-          <button type="button" onClick={() => lep(-1)} aria-label="Előző kép" className={nyilOsztaly}>
+          <button
+            type="button"
+            onClick={() => lep(-1)}
+            aria-label="Előző"
+            className={nyilOsztaly}
+          >
             <IconChevronLeft width={20} height={20} />
           </button>
 
           <div className="flex flex-wrap justify-center gap-1.5">
-            {kepek.map((k, i) => (
+            {elemek.map((e, i) => (
               <button
-                key={k + i}
+                key={e.ertek + i}
                 type="button"
-                aria-label={`${i + 1}. kép`}
+                aria-label={e.fajta === 'video' ? 'Videó' : `${kepSorszam(i)}. kép`}
                 aria-current={i === jelenlegi}
                 onClick={() => setIndex(i)}
                 className={cx(
-                  'h-2.5 w-7 transition-colors',
+                  'h-2.5 transition-colors',
+                  // A videó pontja szélesebb, hogy első pillantásra látszódjon.
+                  e.fajta === 'video' ? 'w-11' : 'w-7',
                   i === jelenlegi ? 'bg-blood-500' : 'bg-ink-600 hover:bg-ink-500',
                 )}
               />
@@ -88,7 +186,7 @@ export function Diavetites({ kepek, nev }: { kepek: string[]; nev: string }) {
           <button
             type="button"
             onClick={() => lep(1)}
-            aria-label="Következő kép"
+            aria-label="Következő"
             className={nyilOsztaly}
           >
             <IconChevronRight width={20} height={20} />

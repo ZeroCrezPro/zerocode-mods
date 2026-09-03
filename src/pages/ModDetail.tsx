@@ -231,9 +231,9 @@ export default function ModDetail() {
       </section>
 
       {/* ---------- Diavetítő a letöltés gomb és a leírás között ---------- */}
-      {mod.slideshow && mod.slideshow.length > 0 && (
+      {(mod.video || (mod.slideshow && mod.slideshow.length > 0)) && (
         <div className="zc-container pt-8 sm:pt-10">
-          <Diavetites kepek={mod.slideshow} nev={nev} />
+          <Diavetites kepek={mod.slideshow ?? []} video={mod.video} nev={nev} />
         </div>
       )}
 

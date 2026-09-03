@@ -272,6 +272,28 @@ Kézzel, fájlból:
 A mod adatlapján a letöltés gomb és a leírás között megjelenik egy diavetítő: egy nagy
 kép, két oldalán nyíllal, alatta ponttal minden képhez. Ez a mod gyors bemutatására való.
 
+### YouTube videó a képek előtt
+
+A diavetítő **első lapja lehet egy YouTube-videó**, utána jönnek a képek – ugyanazokkal
+a nyilakkal lehet köztük váltani. A szerkesztőben a **Képek** panelben, a *YouTube videó*
+mezőbe kell beilleszteni a videó címét. Bármelyik alak jó:
+
+```
+https://youtu.be/AZONOSITO
+https://www.youtube.com/watch?v=AZONOSITO
+https://www.youtube.com/shorts/AZONOSITO
+```
+
+Ha a címben benne van egy időpont (`?t=1m30s`), a videó onnan indul.
+
+**A videó nem tölt be magától.** Amíg a látogató rá nem kattint, csak egy állókép
+látszik a YouTube előnézetével és egy piros lejátszás gombbal – így az oldal gyorsan
+nyílik, és a látogató addig nem kap YouTube-sütit. Kattintásra a lejátszó a
+`youtube-nocookie.com` címről töltődik be. Ha ellapozol a videóról, a lejátszó
+bezárul, tehát nem szól tovább a háttérben.
+
+A videó mező üresen hagyható – akkor csak a képek látszanak, mint eddig.
+
 Csak a képet kell megadni – se cím, se felirat. A képleírás (amit a képernyőolvasó
 felolvas és a kereső lát) magától elkészül a mod nevéből.
 
@@ -516,6 +538,7 @@ rajzol – törött kép sehol nem jelenik meg.
 | **Mod** – banner | elmosva az adatlap fejléce mögé | 1920 × 640 |
 | **Mod** – ikon | kereső, Legújabb lap, adatlap | 256 × 256 (1:1) |
 | **Mod** – diavetítés | a letöltés gomb alatt, nyilakkal lapozható | 1920 × 1080 (16:9) |
+| **Mod** – videó | YouTube-hivatkozás, a képek elé kerül | – (nem kép) |
 | **Mod** – képernyőképek | a Képek galéria lentebb | 1280 × 720 vagy 1920 × 1080 |
 | **Oldal** – logó | a fejléc és a lábléc jele | 128 × 128 |
 | **Oldal** – böngészőfül ikonja | a fül címkéjén látszó ikon | 64 × 64 vagy SVG |

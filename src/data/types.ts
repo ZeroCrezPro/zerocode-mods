@@ -79,6 +79,11 @@ export interface Mod {
   tags: string[]
   features: string[]
   installationSteps: InstallStep[]
+  /**
+   * A diavetítő első eleme: egy YouTube-videó címe.
+   * Bármelyik alak jó (youtu.be/..., watch?v=..., shorts/...).
+   */
+  video?: string
   /** Diavetítő a letöltés gomb alatt: csak képútvonalak, a felirat magától készül */
   slideshow?: string[]
   /** Verziók - a legfrissebb kerüljön elsőnek */

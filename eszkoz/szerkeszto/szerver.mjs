@@ -283,6 +283,34 @@ function formazasSzures(adatok) {
 
 const SLUG_MINTA = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
+/**
+ * YouTube-azonosító kiolvasása. Ugyanaz a logika, mint a weboldalon
+ * (src/lib/video.ts) - itt csak azt nézzük, hogy értelmes-e a beírt cím.
+ */
+function youtubeAzonosito(cim) {
+  const t = String(cim ?? '').trim()
+  if (!t) return ''
+  if (/^[A-Za-z0-9_-]{11}$/.test(t)) return t
+  let u
+  try {
+    u = new URL(t.includes('://') ? t : `https://${t}`)
+  } catch {
+    return ''
+  }
+  const gep = u.hostname.replace(/^www\./, '').replace(/^m\./, '')
+  if (gep === 'youtu.be') {
+    const id = u.pathname.split('/').filter(Boolean)[0] ?? ''
+    return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : ''
+  }
+  if (gep === 'youtube.com' || gep === 'youtube-nocookie.com') {
+    const v = u.searchParams.get('v')
+    if (v && /^[A-Za-z0-9_-]{11}$/.test(v)) return v
+    const m = /^\/(?:embed|shorts|live|v)\/([A-Za-z0-9_-]{11})/.exec(u.pathname)
+    if (m) return m[1]
+  }
+  return ''
+}
+
 function ellenoriz({ site, mods }) {
   const hibak = []
 
@@ -300,6 +328,11 @@ function ellenoriz({ site, mods }) {
     }
     if (modSlugok.has(m.slug)) hibak.push(`${hol}: ez az URL azonosító már foglalt.`)
     modSlugok.add(m.slug)
+    if (m.video?.trim() && !youtubeAzonosito(m.video)) {
+      hibak.push(
+        `${hol}: a videó címét nem ismerem fel. YouTube-hivatkozás kell, például https://youtu.be/AZONOSITO.`,
+      )
+    }
     if (!Array.isArray(m.versions) || m.versions.length === 0) {
       hibak.push(`${hol}: legalább egy verzió kell, különben nincs mit letölteni.`)
     }

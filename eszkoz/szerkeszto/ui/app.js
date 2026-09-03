@@ -576,6 +576,13 @@ const MOD_SZAKASZOK = [
         sugo: 'Négyzetes, 1:1 - ajánlott 256x256. A keresőben és a Legújabb lapon látszik.',
       },
       {
+        k: 'video',
+        cim: 'YouTube videó (a lapozható képek elé)',
+        tipus: 'szoveg',
+        teljes: true,
+        sugo: 'Illeszd be a videó címét a YouTube megosztás gombjából - például https://youtu.be/AZONOSITO vagy https://www.youtube.com/watch?v=AZONOSITO. A videó a diavetítő első lapja lesz, a képek utána jönnek. Üresen hagyva csak a képek látszanak.',
+      },
+      {
         k: 'slideshow',
         cim: 'Lapozható képek (diavetítő a letöltés gomb alatt)',
         tipus: 'kepLista',
