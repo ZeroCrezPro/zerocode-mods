@@ -4,10 +4,7 @@ import type { Mod } from '@/data/types'
 import { latestVersion } from '@/data'
 import { statusLabel, statusTextClass } from '@/lib/labels'
 import { formatDate, vLabel } from '@/lib/format'
-import { downloadUrl } from '@/lib/download'
-import { btnClass } from './ui'
 import { SmartImage } from './SmartImage'
-import { IconDownload } from './Icons'
 import { Felirat, Szoveg } from './Szoveg'
 import { csakSzoveg } from '@/lib/gazdagSzoveg'
 
@@ -92,26 +89,11 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
           </Adat>
         </dl>
 
-        <div className="mt-4 flex gap-2 pt-1">
-          <Link
-            to={`/modok/${mod.slug}`}
-            className={btnClass('secondary', 'sm', 'flex-1')}
-            aria-label={`${nev} részletei`}
-          >
-            <Felirat kulcs="gomb.reszletek" alap="Részletek" />
-          </Link>
-          {v && (
-            <a
-              href={downloadUrl(v.download)}
-              rel="noopener noreferrer"
-              className={btnClass('primary', 'sm', 'flex-1')}
-              aria-label={`${nev} ${vLabel(v.version)} letöltése`}
-            >
-              <IconDownload width={14} height={14} />
-              <Felirat kulcs="gomb.letoltes" alap="Letöltés" />
-            </a>
-          )}
-        </div>
+        {/*
+          A kártyán nincs Letöltés gomb: a letöltés az adatlapon van, ahol a
+          telepítési kódot is fel kell fedni hozzá - innen letölteni
+          megkerülné. A kártya a nevére vagy a képére kattintva nyílik.
+        */}
       </div>
     </article>
   )

@@ -160,6 +160,15 @@
    ================================================================== */
 
 /* A formázott részek soron belül maradnak, hogy a szöveg ne törjön szét. */
+/*
+ * Oldalon belüli ugrásoknál (Telepítési útmutató, Összes verzió) a cél ne
+ * csússzon a ragadós fejléc alá: a fejléc ~73 képpont magas, ennyi hellyel
+ * följebb áll meg a görgetés.
+ */
+[id] {
+  scroll-margin-top: 90px;
+}
+
 /* A kódmező átcsúszása az oldalsávba, amikor a fenti kigördül a képből. */
 @keyframes zc-atcsusszan {
   from {
