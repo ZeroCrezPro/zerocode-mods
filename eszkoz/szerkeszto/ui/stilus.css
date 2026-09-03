@@ -327,6 +327,15 @@ a {
   padding: 24px 26px 80px;
 }
 
+/*
+ * A teljes szélességű lapok (Áttekintés, Beállítások, Képek) közvetlenül a
+ * tartalomterületben ülnek, nem a kétoszlopos rácsban. Magasság nélkül nem
+ * tudnának görgetni: a keret levágná a kilógó részüket.
+ */
+.tartalom > .lap {
+  height: 100%;
+}
+
 .lap-szeles {
   max-width: 1180px;
 }
