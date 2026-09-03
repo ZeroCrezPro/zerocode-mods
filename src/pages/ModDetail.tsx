@@ -9,6 +9,7 @@ import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { SmartImage } from '@/components/SmartImage'
 import { Diavetites } from '@/components/Diavetites'
+import { KodDoboz } from '@/components/KodDoboz'
 import { AccordionItem } from '@/components/Accordion'
 import { VersionCard } from '@/components/VersionCard'
 import { Felirat, Szoveg } from '@/components/Szoveg'
@@ -229,6 +230,9 @@ export default function ModDetail() {
                   </a>
                 </div>
               )}
+
+              {/* A telepítési kód mindig a letöltés gomb alatt van, elrejtve. */}
+              {mod.installCode && <KodDoboz kod={mod.installCode} />}
             </div>
           </div>
         </div>

@@ -80,6 +80,12 @@ export interface Mod {
   features: string[]
   installationSteps: InstallStep[]
   /**
+   * Telepítési kód. Nem kerül bele az oldal szövegébe: a letöltés gomb
+   * alatti dobozban lapul, és egy tíz másodpercenként változó négyjegyű
+   * szám beírásával fedhető fel.
+   */
+  installCode?: string
+  /**
    * A diavetítő első eleme: egy YouTube-videó címe.
    * Bármelyik alak jó (youtu.be/..., watch?v=..., shorts/...).
    */

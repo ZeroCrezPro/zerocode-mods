@@ -610,6 +610,12 @@ const MOD_SZAKASZOK = [
     cim: 'Telepítés',
     mezok: [
       {
+        k: 'installCode',
+        cim: 'Telepítési kód (elrejtve, a letöltés gomb alatt)',
+        tipus: 'szoveg',
+        sugo: 'Ha a telepítő kódot kér, ide írd - NE a leírás szövegébe. A kód a letöltés gomb alatti dobozban jelenik meg elrejtve: a látogatónak be kell írnia egy tíz másodpercenként változó négyjegyű számot, és csak utána látja. Üresen hagyva a doboz nem jelenik meg.',
+      },
+      {
         k: 'installationSteps',
         cim: 'Telepítési lépések',
         tipus: 'blokkok',

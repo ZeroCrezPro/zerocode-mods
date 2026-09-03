@@ -413,6 +413,21 @@ animációk nem futnak le – a szöveg és a szín viszont ugyanúgy látszik.
 
 ---
 
+## A telepítési kód
+
+Ha a mod telepítője kódot kér, azt **ne írd bele a leírás szövegébe**. A szerkesztőben
+a Modok → Telepítés panel *Telepítési kód* mezőjébe írd - az oldalon a letöltés gomb
+alatt jelenik meg egy dobozban, **elrejtve**.
+
+A látogató így fedi fel: a doboz mutat egy piros, négyjegyű **ellenőrző számot**, ami
+tíz másodpercenként változik. A Kód felfedése gombra kattintva egy kis ablak kéri ezt
+a számot - helyes szám után a kód megjelenik, és egy gombbal másolható. (A váltás
+pillanatában beütött előző szám is elfogadott, hogy senki ne járjon rosszul.)
+
+Üresen hagyva a mezőt a doboz egyáltalán nem jelenik meg.
+
+---
+
 ## Hogyan adok ki új verziót?
 
 **A legegyszerűbb út:** a szerkesztő program **Modok** lapján, az adott modnál a

@@ -35,7 +35,7 @@
     "installationSteps": [
       {
         "title": "A mod telepítése",
-        "detail": "Töltsd le és indítsd el az MP2Mod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot: <span class=\"zc-anim-shake\"><span style=\"color:#f5d90a\">ZeroCode</span></span> (a kis- és nagybetű számít), ekkor megjelenik a TELEPÍTÉS gomb. A telepítő magától megkeresi a Max Payne 2 mappáját – ha nem találná, a Tallózás gombbal add meg kézzel. Kattints a TELEPÍTÉS gombra: a mod a scripts mappába kerül, a meglévő fájlokat nem írja felül (később a TÖRLÉS gombbal eltávolítható). Végül indítsd a játékot a Steamről, és játék közben nyomd meg az ALT + E-t a panel előhívásához."
+        "detail": "Töltsd le és indítsd el az MP2Mod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot (a kis- és nagybetű számít) - a kódot a letöltés gomb alatti <span style=\"color:#f5d90a\">Telepítési kód</span> dobozban tudod felfedni. Ekkor megjelenik a TELEPÍTÉS gomb. A telepítő magától megkeresi a Max Payne 2 mappáját – ha nem találná, a Tallózás gombbal add meg kézzel. Kattints a TELEPÍTÉS gombra: a mod a scripts mappába kerül, a meglévő fájlokat nem írja felül (később a TÖRLÉS gombbal eltávolítható). Végül indítsd a játékot a Steamről, és játék közben nyomd meg az ALT + E-t a panel előhívásához."
       }
     ],
     "versions": [
@@ -63,6 +63,7 @@
       "/images/screenshots/2.webp",
       "/images/screenshots/3.webp"
     ],
-    "video": "https://youtu.be/vVZB2vxqXUo"
+    "video": "https://youtu.be/vVZB2vxqXUo",
+    "installCode": "ZeroCode"
   }
 ]
