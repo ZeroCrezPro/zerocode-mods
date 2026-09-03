@@ -19,10 +19,13 @@ export function VersionCard({
   mod,
   version,
   latest = false,
+  zarolt = false,
 }: {
   mod: Mod
   version: ModVersion
   latest?: boolean
+  /** Amíg a telepítési kód nincs felfedve, a letöltés nem él. */
+  zarolt?: boolean
 }) {
   const url = downloadUrl(version.download)
   const file = downloadFileName(version.download)
@@ -96,9 +99,15 @@ export function VersionCard({
 
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:items-center">
           <a
-            href={url}
+            href={zarolt ? undefined : url}
             rel="noopener noreferrer"
-            className={btnClass(latest ? 'primary' : 'secondary', latest ? 'lg' : 'md', 'sm:flex-none')}
+            aria-disabled={zarolt}
+            title={zarolt ? 'Előbb fedd fel a telepítési kódot a lap tetején.' : undefined}
+            className={btnClass(
+              latest ? 'primary' : 'secondary',
+              latest ? 'lg' : 'md',
+              zarolt ? 'cursor-not-allowed opacity-45 sm:flex-none' : 'sm:flex-none',
+            )}
             aria-label={`${csakSzoveg(mod.name)} ${vLabel(version.version)} letöltése${
               file ? ` (${file})` : ''
             }`}

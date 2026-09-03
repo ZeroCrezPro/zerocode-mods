@@ -21,8 +21,12 @@ export default function ModDetail() {
   const { slug } = useParams()
   const mod = slug ? getModBySlug(slug) : undefined
   const [showOlder, setShowOlder] = useState(false)
+  // A letöltés addig nem él, amíg a látogató fel nem fedi a telepítési kódot.
+  const [kodFeloldva, setKodFeloldva] = useState(false)
 
   if (!mod) return <NotFound />
+
+  const zarolt = Boolean(mod.installCode) && !kodFeloldva
 
   const latest = latestVersion(mod)
   const older = olderVersions(mod)
@@ -216,9 +220,15 @@ export default function ModDetail() {
               {latest && (
                 <div className="mt-7 flex flex-col gap-2.5 sm:flex-row">
                   <a
-                    href={downloadUrl(latest.download)}
+                    href={zarolt ? undefined : downloadUrl(latest.download)}
                     rel="noopener noreferrer"
-                    className={btnClass('primary', 'lg')}
+                    aria-disabled={zarolt}
+                    title={zarolt ? 'Előbb írd be az ellenőrző számot a jobb oldali mezőbe.' : undefined}
+                    className={btnClass(
+                      'primary',
+                      'lg',
+                      zarolt ? 'cursor-not-allowed opacity-45' : undefined,
+                    )}
                     aria-label={`${nev} ${vLabel(latest.version)} letöltése`}
                   >
                     <IconDownload width={18} height={18} />
@@ -228,11 +238,15 @@ export default function ModDetail() {
                   <a href="#telepites" className={btnClass('secondary', 'lg')}>
                     <Felirat kulcs="gomb.utmutato" alap="Telepítési útmutató" />
                   </a>
+                  {/*
+                    A telepítési kód a Telepítési útmutató mellett, vele egy
+                    magasságban: szám + visszaszámláló + beírás, majd a kód.
+                  */}
+                  {mod.installCode && (
+                    <KodDoboz kod={mod.installCode} onFeloldas={() => setKodFeloldva(true)} />
+                  )}
                 </div>
               )}
-
-              {/* A telepítési kód mindig a letöltés gomb alatt van, elrejtve. */}
-              {mod.installCode && <KodDoboz kod={mod.installCode} />}
             </div>
           </div>
         </div>
@@ -320,7 +334,7 @@ export default function ModDetail() {
             bodyClassName="space-y-4"
             cimKulcs="szekcio.letoltesek"
           >
-            {latest && <VersionCard mod={mod} version={latest} latest />}
+            {latest && <VersionCard mod={mod} version={latest} latest zarolt={zarolt} />}
 
             {older.length > 0 && (
               <div className="border border-ink-800">
@@ -348,7 +362,7 @@ export default function ModDetail() {
                 </button>
                 <div id="regebbi-verziok" hidden={!showOlder} className="space-y-3 p-3">
                   {older.map((v) => (
-                    <VersionCard key={v.version} mod={mod} version={v} />
+                    <VersionCard key={v.version} mod={mod} version={v} zarolt={zarolt} />
                   ))}
                 </div>
               </div>
@@ -389,9 +403,15 @@ export default function ModDetail() {
               </p>
               <p className="mt-0.5 text-xs text-ash-400">{formatDate(latest.releaseDate)}</p>
               <a
-                href={downloadUrl(latest.download)}
+                href={zarolt ? undefined : downloadUrl(latest.download)}
                 rel="noopener noreferrer"
-                className={btnClass('primary', 'md', 'mt-4 w-full')}
+                aria-disabled={zarolt}
+                title={zarolt ? 'Előbb fedd fel a telepítési kódot a lap tetején.' : undefined}
+                className={btnClass(
+                  'primary',
+                  'md',
+                  zarolt ? 'mt-4 w-full cursor-not-allowed opacity-45' : 'mt-4 w-full',
+                )}
               >
                 <IconDownload width={16} height={16} />
                 <Felirat kulcs="gomb.letoltes" alap="Letöltés" />

@@ -416,15 +416,17 @@ animációk nem futnak le – a szöveg és a szín viszont ugyanúgy látszik.
 ## A telepítési kód
 
 Ha a mod telepítője kódot kér, azt **ne írd bele a leírás szövegébe**. A szerkesztőben
-a Modok → Telepítés panel *Telepítési kód* mezőjébe írd - az oldalon a letöltés gomb
-alatt jelenik meg egy dobozban, **elrejtve**.
+a Modok → Telepítés panel *Telepítési kód* mezőjébe írd - az oldalon a **Telepítési
+útmutató gomb mellett**, vele egy magasságban jelenik meg egy kódmező.
 
-A látogató így fedi fel: a doboz mutat egy piros, négyjegyű **ellenőrző számot**, ami
-tíz másodpercenként változik. A Kód felfedése gombra kattintva egy kis ablak kéri ezt
-a számot - helyes szám után a kód megjelenik, és egy gombbal másolható. (A váltás
-pillanatában beütött előző szám is elfogadott, hogy senki ne járjon rosszul.)
+A mezőben balról jobbra: egy piros, négyjegyű **ellenőrző szám** (tíz másodpercenként
+változik), a visszaszámláló, és a hely, ahova a látogató beírja. A negyedik számjegy
+után rögtön ellenőrzi - külön gomb nincs. Helyes szám után ugyanott megjelenik a kód,
+és kattintásra másolható. (A váltás pillanatában beütött előző szám is elfogadott.)
 
-Üresen hagyva a mezőt a doboz egyáltalán nem jelenik meg.
+**A letöltés csak ezután él:** amíg a kód nincs felfedve, az oldal összes Letöltés
+gombja halvány és nem kattintható. Üresen hagyva a mezőt nincs kódmező, és a letöltés
+azonnal aktív - minden úgy működik, mint korábban.
 
 ---
 

@@ -18,20 +18,21 @@ function ellenorzoSzam(eltolas = 0): number {
 }
 
 /**
- * Telepítési kód doboz - a letöltés gomb alatt.
+ * Telepítési kód mező - a Telepítési útmutató gomb mellett, vele egy
+ * magasságban.
  *
- * A kód nincs beleírva az oldal szövegébe: itt lapul elrejtve, és egy kis
- * ablak kéri hozzá a mellette látható, tíz másodpercenként változó
- * négyjegyű számot. Helyes szám után a kód megjelenik, és másolható.
+ * Sorrend balról jobbra: a négyjegyű ellenőrző szám, a visszaszámláló,
+ * majd a hely, ahova a látogató beírja. Helyes szám után ugyanitt jelenik
+ * meg a kód (kattintásra másolható), és csak ekkor élednek fel a letöltés
+ * gombok (lásd ModDetail).
  */
-export function KodDoboz({ kod }: { kod: string }) {
+export function KodDoboz({ kod, onFeloldas }: { kod: string; onFeloldas?: () => void }) {
   // A kiszolgálón renderelt oldalban még nincs szám - csak betöltés után.
   const [szam, setSzam] = useState<number | null>(null)
   const [hatra, setHatra] = useState(10)
-  const [nyitva, setNyitva] = useState(false)
-  const [felfedve, setFelfedve] = useState(false)
   const [beirt, setBeirt] = useState('')
-  const [hiba, setHiba] = useState('')
+  const [felfedve, setFelfedve] = useState(false)
+  const [hibas, setHibas] = useState(false)
   const [masolva, setMasolva] = useState(false)
   const mezo = useRef<HTMLInputElement>(null)
 
@@ -45,21 +46,21 @@ export function KodDoboz({ kod }: { kod: string }) {
     return () => clearInterval(ora)
   }, [])
 
-  useEffect(() => {
-    if (nyitva) mezo.current?.focus()
-  }, [nyitva])
-
   if (!kod) return null
 
-  const proba = () => {
-    const n = Number(beirt.trim())
-    // Az éppen érvényes és az előző számot is elfogadjuk.
+  const gepel = (nyers: string) => {
+    const ertek = nyers.replace(/\D/g, '').slice(0, 4)
+    setBeirt(ertek)
+    setHibas(false)
+    if (ertek.length < 4) return
+
+    // A negyedik számjegynél rögtön ellenőrzünk - nem kell külön gomb.
+    const n = Number(ertek)
     if (n === ellenorzoSzam() || n === ellenorzoSzam(-1)) {
       setFelfedve(true)
-      setNyitva(false)
-      setHiba('')
+      onFeloldas?.()
     } else {
-      setHiba('Nem egyezik - írd be a mellette látható négyjegyű számot.')
+      setHibas(true)
       setBeirt('')
       mezo.current?.focus()
     }
@@ -75,87 +76,50 @@ export function KodDoboz({ kod }: { kod: string }) {
     }
   }
 
-  return (
-    <div className="mt-4 max-w-xl border border-ink-700 bg-ink-900/90 p-4">
-      <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
-        <div>
-          <p className="zc-label text-ash-400">Telepítési kód</p>
-          <p
-            className={`mt-1 font-mono text-xl font-black tracking-widest ${
-              felfedve ? 'text-ash-100' : 'text-ash-500'
-            }`}
-          >
-            {felfedve ? kod : '•'.repeat(Math.min(Math.max(kod.length, 6), 12))}
-          </p>
-        </div>
-
-        <div>
-          <p className="zc-label text-ash-400">Ellenőrző szám</p>
-          <p className="mt-1 font-mono text-xl font-black tracking-widest text-blood-400">
-            {szam ?? '----'}
-            <span className="ml-2 align-middle font-sans text-[11px] font-normal tracking-normal text-ash-500">
-              {hatra} mp múlva változik
-            </span>
-          </p>
-        </div>
-
-        <div className="ml-auto">
-          {felfedve ? (
-            <button
-              type="button"
-              onClick={masol}
-              className="h-9 border border-ink-600 bg-ink-800 px-3.5 text-[11px] font-bold tracking-[0.08em] text-ash-100 uppercase transition-colors hover:border-blood-600"
-            >
-              {masolva ? 'Kimásolva!' : 'Kód másolása'}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                setNyitva((v) => !v)
-                setHiba('')
-                setBeirt('')
-              }}
-              aria-expanded={nyitva}
-              className="h-9 bg-blood-600 px-3.5 text-[11px] font-bold tracking-[0.08em] text-white uppercase transition-colors hover:bg-blood-500"
-            >
-              Kód felfedése
-            </button>
-          )}
-        </div>
+  if (felfedve) {
+    return (
+      <div className="flex h-13 items-center gap-3 border border-blood-600/60 bg-ink-900 px-5">
+        <span className="zc-label text-ash-400">Kód</span>
+        <button
+          type="button"
+          onClick={masol}
+          title="Kattints a másoláshoz"
+          className="font-mono text-base font-black tracking-widest text-ash-100 transition-colors hover:text-blood-400"
+        >
+          {masolva ? 'Kimásolva!' : kod}
+        </button>
       </div>
+    )
+  }
 
-      {/* A kis ablak, ami a négyjegyű számot kéri */}
-      {nyitva && !felfedve && (
-        <div className="mt-3 border border-ink-600 bg-ink-850 p-3">
-          <label htmlFor="kodEllenorzo" className="block text-xs text-ash-300">
-            Írd be a fenti piros, négyjegyű ellenőrző számot:
-          </label>
-          <div className="mt-2 flex gap-2">
-            <input
-              id="kodEllenorzo"
-              ref={mezo}
-              value={beirt}
-              onChange={(e) => setBeirt(e.target.value.replace(/\D/g, '').slice(0, 4))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') proba()
-              }}
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder="0000"
-              className="h-9 w-24 border border-ink-600 bg-ink-950 px-3 text-center font-mono text-base font-bold tracking-widest text-ash-100 outline-none focus:border-blood-600"
-            />
-            <button
-              type="button"
-              onClick={proba}
-              className="h-9 bg-blood-600 px-4 text-[11px] font-bold tracking-[0.08em] text-white uppercase transition-colors hover:bg-blood-500"
-            >
-              Felfedés
-            </button>
-          </div>
-          {hiba && <p className="mt-2 text-xs text-blood-400">{hiba}</p>}
-        </div>
-      )}
+  return (
+    <div
+      className="flex h-13 items-center gap-3 border border-ink-600 bg-ink-900 px-4"
+      title="Írd be a piros számot, és megkapod a telepítési kódot - utána él a letöltés."
+    >
+      <span
+        className="font-mono text-lg font-black tracking-widest text-blood-400"
+        aria-label="Ellenőrző szám"
+      >
+        {szam ?? '----'}
+      </span>
+      <span className="w-6 text-center font-mono text-[11px] text-ash-500" aria-hidden>
+        {hatra}s
+      </span>
+      <input
+        ref={mezo}
+        value={beirt}
+        onChange={(e) => gepel(e.target.value)}
+        inputMode="numeric"
+        autoComplete="off"
+        placeholder="írd be"
+        aria-label="Írd be a mellette látható négyjegyű ellenőrző számot"
+        className={`h-9 w-22 border bg-ink-950 px-2 text-center font-mono text-base font-bold tracking-widest text-ash-100 outline-none placeholder:font-sans placeholder:text-xs placeholder:font-normal placeholder:tracking-normal ${
+          hibas
+            ? 'zc-anim-shake border-blood-500 placeholder:text-blood-400'
+            : 'border-ink-600 focus:border-blood-600 placeholder:text-ash-500'
+        }`}
+      />
     </div>
   )
 }
