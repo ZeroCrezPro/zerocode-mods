@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getModBySlug, latestVersion, olderVersions, site } from '@/data'
 import { formatDate, vLabel } from '@/lib/format'
@@ -23,6 +23,20 @@ export default function ModDetail() {
   const [showOlder, setShowOlder] = useState(false)
   // A letöltés addig nem él, amíg a látogató fel nem fedi a telepítési kódot.
   const [kodFeloldva, setKodFeloldva] = useState(false)
+
+  // Ha a fenti kódmező kigördül a képből, az oldalsávban jelenik meg helyette.
+  const fentiKodHelye = useRef<HTMLDivElement>(null)
+  const [fentiKodLatszik, setFentiKodLatszik] = useState(true)
+
+  useEffect(() => {
+    const cel = fentiKodHelye.current
+    if (!cel) return
+    const figyelo = new IntersectionObserver(([b]) => setFentiKodLatszik(b.isIntersecting), {
+      threshold: 0,
+    })
+    figyelo.observe(cel)
+    return () => figyelo.disconnect()
+  }, [])
 
   if (!mod) return <NotFound />
 
@@ -243,7 +257,13 @@ export default function ModDetail() {
                     magasságban: szám + visszaszámláló + beírás, majd a kód.
                   */}
                   {mod.installCode && (
-                    <KodDoboz kod={mod.installCode} onFeloldas={() => setKodFeloldva(true)} />
+                    <div ref={fentiKodHelye}>
+                      <KodDoboz
+                        kod={mod.installCode}
+                        feloldva={kodFeloldva}
+                        onFeloldas={() => setKodFeloldva(true)}
+                      />
+                    </div>
                   )}
                 </div>
               )}
@@ -419,6 +439,21 @@ export default function ModDetail() {
               <a href="#letoltesek" className={btnClass('ghost', 'sm', 'mt-1.5 w-full')}>
                 <Felirat kulcs="gomb.osszesVerzio" alap="Összes verzió" />
               </a>
+            </div>
+          )}
+
+          {/*
+            Amikor a fenti kódmező kigördül a képből, ide csúszik át, a
+            letöltő doboz alá - így görgetés közben is kéznél van.
+          */}
+          {mod.installCode && !fentiKodLatszik && (
+            <div className="kod-atcsusszan">
+              <KodDoboz
+                kod={mod.installCode}
+                feloldva={kodFeloldva}
+                onFeloldas={() => setKodFeloldva(true)}
+                osztaly="w-full"
+              />
             </div>
           )}
 

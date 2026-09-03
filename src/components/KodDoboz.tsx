@@ -26,12 +26,22 @@ function ellenorzoSzam(eltolas = 0): number {
  * meg a kód (kattintásra másolható), és csak ekkor élednek fel a letöltés
  * gombok (lásd ModDetail).
  */
-export function KodDoboz({ kod, onFeloldas }: { kod: string; onFeloldas?: () => void }) {
+export function KodDoboz({
+  kod,
+  feloldva = false,
+  onFeloldas,
+  osztaly = '',
+}: {
+  kod: string
+  /** A szülő mondja meg, fel van-e már oldva - így minden példány együtt vált. */
+  feloldva?: boolean
+  onFeloldas?: () => void
+  osztaly?: string
+}) {
   // A kiszolgálón renderelt oldalban még nincs szám - csak betöltés után.
   const [szam, setSzam] = useState<number | null>(null)
   const [hatra, setHatra] = useState(10)
   const [beirt, setBeirt] = useState('')
-  const [felfedve, setFelfedve] = useState(false)
   const [hibas, setHibas] = useState(false)
   const [masolva, setMasolva] = useState(false)
   const mezo = useRef<HTMLInputElement>(null)
@@ -57,7 +67,6 @@ export function KodDoboz({ kod, onFeloldas }: { kod: string; onFeloldas?: () => 
     // A negyedik számjegynél rögtön ellenőrzünk - nem kell külön gomb.
     const n = Number(ertek)
     if (n === ellenorzoSzam() || n === ellenorzoSzam(-1)) {
-      setFelfedve(true)
       onFeloldas?.()
     } else {
       setHibas(true)
@@ -76,9 +85,9 @@ export function KodDoboz({ kod, onFeloldas }: { kod: string; onFeloldas?: () => 
     }
   }
 
-  if (felfedve) {
+  if (feloldva) {
     return (
-      <div className="flex h-13 items-center gap-3 border border-blood-600/60 bg-ink-900 px-5">
+      <div className={`flex h-13 items-center gap-3 border border-blood-600/60 bg-ink-900 px-5 ${osztaly}`}>
         <span className="zc-label text-ash-400">Kód</span>
         <button
           type="button"
@@ -94,7 +103,7 @@ export function KodDoboz({ kod, onFeloldas }: { kod: string; onFeloldas?: () => 
 
   return (
     <div
-      className="flex h-13 items-center gap-3 border border-ink-600 bg-ink-900 px-4"
+      className={`flex h-13 items-center gap-3 border border-ink-600 bg-ink-900 px-4 ${osztaly}`}
       title="Írd be a piros számot, és megkapod a telepítési kódot - utána él a letöltés."
     >
       <span

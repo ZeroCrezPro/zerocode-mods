@@ -424,6 +424,10 @@ változik), a visszaszámláló, és a hely, ahova a látogató beírja. A negye
 után rögtön ellenőrzi - külön gomb nincs. Helyes szám után ugyanott megjelenik a kód,
 és kattintásra másolható. (A váltás pillanatában beütött előző szám is elfogadott.)
 
+Legörgetéskor a kódmező nem vész el: amikor a gombsor kigördül a képből, a mező
+**átcsúszik a jobb oldali letöltő doboz alá**, és a ragadós oldalsávval együtt mozog -
+így a Letölthető verzióknál is kéznél van.
+
 **A letöltés csak ezután él:** amíg a kód nincs felfedve, az oldal összes Letöltés
 gombja halvány és nem kattintható. Üresen hagyva a mezőt nincs kódmező, és a letöltés
 azonnal aktív - minden úgy működik, mint korábban.

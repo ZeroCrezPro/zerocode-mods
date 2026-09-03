@@ -160,6 +160,29 @@
    ================================================================== */
 
 /* A formázott részek soron belül maradnak, hogy a szöveg ne törjön szét. */
+/* A kódmező átcsúszása az oldalsávba, amikor a fenti kigördül a képből. */
+@keyframes zc-atcsusszan {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.kod-atcsusszan {
+  animation: zc-atcsusszan 0.3s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kod-atcsusszan {
+    animation: none;
+  }
+}
+
 [class*='zc-anim-'] {
   display: inline-block;
   will-change: transform, opacity;
