@@ -54,7 +54,9 @@
         "platform": "Windows",
         "type": "Installer",
         "author": "ZeroCode",
-        "changes": [],
+        "changes": [
+          "Két új nyelv: magyar és angol."
+        ],
         "download": {
           "kind": "github-latest",
           "file": "MP2Mod.exe"
