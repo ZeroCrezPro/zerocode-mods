@@ -73,5 +73,76 @@
     ],
     "video": "https://youtu.be/vVZB2vxqXUo",
     "installCode": "ZeroCode"
+  },
+  {
+    "id": "mod-acbf-magyar",
+    "slug": "assassins-creed-black-flag-magyaritas",
+    "name": "Assassin's Creed Black Flag Resynced Magyarítás",
+    "game": "Assassin's Creed Black Flag Resynced",
+    "createdAt": "2026-09-04",
+    "shortDescription": "Teljes magyar nyelv az Assassin’s Creed Black Flag Resynced játékhoz, egyetlen okos telepítőben: magától megtalálja a játékot, és a magyarítást a játék aktuális verziójához igazítja. A csomagban a magyar szövegek és a magyar figyelmeztető videók is benne vannak.",
+    "description": [
+      "Teljes magyarítás az Assassin’s Creed Black Flag Resynced játékhoz, egyetlen telepítőben. A magyarító programot, a magyar szövegeket és a magyar figyelmeztető videókat is magában hordozza – nem kell mellé semmit másolni, és nem kell kicsomagolni sem.",
+      "MI EZ?\nEgy okos telepítő: magától megkeresi a játékot a gépeden (Ubisoft Connect kulcs, az összes Steam könyvtár – a második-harmadik meghajtóra telepítettek is –, gyakori mappák, végső esetben a meghajtók átfésülése). Utána a magyarítást a játék aktuális verziójához igazítja, és beírja – a \"Kész\" üzenet után a játék magyarul indul.",
+      "MIT MÁSOL BE?\n- AC_BF_Resynced_Text_Tool.exe – a magyarító program\n- ENGLISH.txt – az eredeti szövegek\n- TRANSLATED.txt – a magyar szövegek\n- videos\\en\\... – magyar figyelmeztető videók\nA játék forge/adat fájljaihoz maga a telepítő nem nyúl – a tényleges szövegcserét a magyarító program végzi.",
+      "FONTOS:\n- A magyarító program önálló, csomagolt program – a vírusirtók az ilyet néha tévesen bejelzik, nem vírus.\n- Ha a játék nyitva van telepítéskor, először zárd be.\n- Ha a játék rendszergazdai jogot igénylő helyre van telepítve, a telepítő jelzi, és felajánlja az újraindítást rendszergazdaként."
+    ],
+    "cover": "",
+    "banner": "",
+    "icon": "",
+    "author": "ZeroCode",
+    "platform": "Windows PC",
+    "status": "aktiv",
+    "tags": [
+      "Magyarítás"
+    ],
+    "features": [
+      "Egyetlen fájl – minden benne van, nincs kicsomagolás",
+      "Magától megtalálja a játékot (Ubisoft, Steam, Epic)",
+      "Minden játékverzióhoz magától igazodik – nincs sor-eltérés hiba",
+      "Magyar figyelmeztető videók",
+      "A játék eredeti fájljaihoz a telepítő nem nyúl",
+      "Az ablak bárhol megfogható; kilépés ESC-cel is"
+    ],
+    "installCode": "ZeroCode",
+    "installationSteps": [
+      {
+        "title": "A magyarítás telepítése",
+        "detail": "Töltsd le és indítsd el az ACBF_Magyaritas.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot (a kis- és nagybetű számít) – a kódot a Telepítési útmutató gomb melletti mezőben kapod meg: írd be az ott villogó négyjegyű számot. A telepítő magától megkeresi a játékot az ACBlackFlag.exe alapján – ha megvan, az útvonal kerete zöldre vált; ha nem találná, a Tallózás gombbal add meg kézzel. Nyomd meg a TELEPÍTÉS gombot: a gombon belüli csík mutatja a haladást, a telepítő a magyarítást a játék verziójához igazítja és beírja. A \"Kész\" üzenet után indítsd a játékot – magyarul fog megszólalni."
+      }
+    ],
+    "versions": [
+      {
+        "version": "1.0.0",
+        "releaseDate": "2026-09-04",
+        "size": "12.7 MB",
+        "platform": "Windows",
+        "type": "Installer",
+        "author": "ZeroCode",
+        "changes": [
+          "Első kiadás."
+        ],
+        "download": {
+          "kind": "github-tag",
+          "tag": "assassins-creed-black-flag-magyaritas-v1.0.0",
+          "file": "ACBF_Magyaritas.exe"
+        }
+      }
+    ],
+    "faq": [
+      {
+        "question": "Miért jelzi a vírusirtó?",
+        "answer": "A magyarító program (AC_BF_Resynced_Text_Tool.exe) egy önálló, csomagolt program – a vírusirtók az ilyet néha tévesen bejelzik. Nem vírus."
+      },
+      {
+        "question": "Melyik játékverzióval működik?",
+        "answer": "Mindegyikkel: a telepítő a magyarítást magától a játék aktuális verziójához igazítja, így nincs sor-eltérés hiba."
+      },
+      {
+        "question": "Nem találja meg a játékot – mit tegyek?",
+        "answer": "A Tallózás gombbal add meg kézzel azt a mappát, amelyikben az ACBlackFlag.exe van."
+      }
+    ],
+    "featured": true
   }
 ]

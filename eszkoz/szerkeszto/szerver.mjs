@@ -528,6 +528,9 @@ async function modFajlokFeltoltese() {
       ]
       if (t.verzio.prerelease) argumentumok.push('--prerelease')
       else if (t.legfrissebb) argumentumok.push('--latest')
+      // Konkrét címkés kiadás NE vegye át a "legfrissebb" jelölést,
+      // különben eltörné a többi mod releases/latest letöltését.
+      else argumentumok.push('--latest=false')
 
       await parancs(gh, argumentumok, 'Új kiadás létrehozása', { halkan: true })
     }
