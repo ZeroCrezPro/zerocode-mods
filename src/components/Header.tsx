@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { site } from '@/data/site'
 import { quickSearch } from '@/lib/search'
 import { cx } from '@/lib/format'
-import { IconClose, IconGlobe, IconMenu, IconSearch } from './Icons'
+import { IconClose, IconMenu, IconSearch } from './Icons'
 import { SmartImage } from './SmartImage'
 
 const nav = [
@@ -224,16 +224,6 @@ export function Header() {
             className="flex h-10 w-10 items-center justify-center border border-ink-700 text-ash-300 transition-colors hover:border-blood-600 hover:text-ash-100 xl:hidden"
           >
             {mobileSearch ? <IconClose /> : <IconSearch />}
-          </button>
-
-          <button
-            type="button"
-            title="Nyelv: magyar (további nyelvek hamarosan)"
-            aria-label="Nyelvválasztó - jelenleg magyar"
-            className="hidden h-10 items-center gap-1.5 border border-ink-700 px-2.5 text-ash-300 transition-colors hover:border-blood-600 hover:text-ash-100 sm:flex"
-          >
-            <IconGlobe width={16} height={16} />
-            <span className="text-[11px] font-bold tracking-widest">HU</span>
           </button>
 
           <button
