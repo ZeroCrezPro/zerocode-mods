@@ -83,13 +83,13 @@
     "shortDescription": "Teljes magyar nyelv az Assassin’s Creed Black Flag Resynced játékhoz, egyetlen okos telepítőben: magától megtalálja a játékot, és a magyarítást a játék aktuális verziójához igazítja. A csomagban a magyar szövegek és a magyar figyelmeztető videók is benne vannak.",
     "description": [
       "Teljes magyarítás az Assassin’s Creed Black Flag Resynced játékhoz, egyetlen telepítőben. A magyarító programot, a magyar szövegeket és a magyar figyelmeztető videókat is magában hordozza – nem kell mellé semmit másolni, és nem kell kicsomagolni sem.",
-      "MI EZ?\nEgy okos telepítő: magától megkeresi a játékot a gépeden (Ubisoft Connect kulcs, az összes Steam könyvtár – a második-harmadik meghajtóra telepítettek is –, gyakori mappák, végső esetben a meghajtók átfésülése). Utána a magyarítást a játék aktuális verziójához igazítja, és beírja – a \"Kész\" üzenet után a játék magyarul indul.",
-      "MIT MÁSOL BE?\n- AC_BF_Resynced_Text_Tool.exe – a magyarító program\n- ENGLISH.txt – az eredeti szövegek\n- TRANSLATED.txt – a magyar szövegek\n- videos\\en\\... – magyar figyelmeztető videók\nA játék forge/adat fájljaihoz maga a telepítő nem nyúl – a tényleges szövegcserét a magyarító program végzi.",
-      "FONTOS:\n- A magyarító program önálló, csomagolt program – a vírusirtók az ilyet néha tévesen bejelzik, nem vírus.\n- Ha a játék nyitva van telepítéskor, először zárd be.\n- Ha a játék rendszergazdai jogot igénylő helyre van telepítve, a telepítő jelzi, és felajánlja az újraindítást rendszergazdaként."
+      "MI EZ?<br />Egy okos telepítő: magától megkeresi a játékot a gépeden (Ubisoft Connect kulcs, az összes Steam könyvtár – a második-harmadik meghajtóra telepítettek is –, gyakori mappák, végső esetben a meghajtók átfésülése). Utána a magyarítást a játék aktuális verziójához igazítja, és beírja – a \"Kész\" üzenet után a játék magyarul indul.",
+      "MIT MÁSOL BE?<br />- AC_BF_Resynced_Text_Tool.exe – a magyarító program<br />- ENGLISH.txt – az eredeti szövegek<br />- TRANSLATED.txt – a magyar szövegek<br />- videos\\en\\... – magyar figyelmeztető videók<br />A játék forge/adat fájljaihoz maga a telepítő nem nyúl – a tényleges szövegcserét a magyarító program végzi.",
+      "FONTOS:<br />- A magyarító program önálló, csomagolt program – a vírusirtók az ilyet néha tévesen bejelzik, nem vírus.<br />- Ha a játék nyitva van telepítéskor, először zárd be.<br />- Ha a játék rendszergazdai jogot igénylő helyre van telepítve, a telepítő jelzi, és felajánlja az újraindítást rendszergazdaként."
     ],
-    "cover": "",
-    "banner": "",
-    "icon": "",
+    "cover": "/images/mods/acbf.webp",
+    "banner": "/images/mods/acbf.webp",
+    "icon": "/images/mods/icon1.webp",
     "author": "ZeroCode",
     "platform": "Windows PC",
     "status": "aktiv",
@@ -143,6 +143,8 @@
         "answer": "A Tallózás gombbal add meg kézzel azt a mappát, amelyikben az ACBlackFlag.exe van."
       }
     ],
-    "featured": true
+    "featured": true,
+    "slideshow": [],
+    "externalLinks": []
   }
 ]
