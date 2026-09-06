@@ -145,5 +145,106 @@
     "slideshow": [],
     "externalLinks": [],
     "magyaritas": true
+  },
+  {
+    "id": "mod-mp2-magyar",
+    "slug": "max-payne-2-magyaritas",
+    "name": "Max Payne 2 The Fall of Max Payne Magyarítás",
+    "game": "Max Payne 2 The Fall of Max Payne",
+    "createdAt": "2026-09-06",
+    "shortDescription": "Teljes magyar felirat a Max Payne 2: The Fall of Max Payne játékhoz: a menü, az indítóablak, a HUD-üzenetek, a képregény-átvezetők és mind a 2498 feliratsor magyarul. Egyetlen telepítőben, ami magától megtalálja a játékot, biztonsági másolatot készít, és egy gombbal vissza is állítja az angol nyelvet.",
+    "description": [
+      "Teljes szöveges magyarítás a Max Payne 2: The Fall of Max Payne játékhoz, egyetlen telepítőben. A magyar szövegeket, a magyar ékezetes betűtípusokat és a visszaállításhoz szükséges eredeti angol fájlokat is magában hordozza – nem kell mellé semmit másolni, és nem kell kicsomagolni sem.",
+      "MI EZ?<br />A játék teljes szövegállománya magyarul: a főmenü, az indító beállítóablak, a HUD-üzenetek, a fegyver- és lőszernevek, a képregény-átvezetők szövege, és ami a legfontosabb: <strong>mind a 2498 feliratsor</strong> – mind a 22 fejezet, a filmbetétek és a játékban nézhető tévésorozatok is (Cím ismeretlen, Baseballütő Kapitány, Dick Justice, Urak és úrnők, hírek).",
+      "MI VAN LEFORDÍTVA?<br />- A játékon belüli menü, a fejezetcímek és a kilépő idézetek<br />- A HUD-üzenetek, fegyver- és lőszernevek, tippek<br />- A teljes feliratanyag (2498 sor)<br />- Az indító beállítóablak minden szövege és súgója<br />- A billentyűnevek<br />- A betűtípus-textúrák, hogy az ő és ű betű is helyesen jelenjen meg",
+      "HOGYAN MŰKÖDIK?<br />A telepítő a játék két archívumát (MP2_Data.ras és MP2_English.ras) építi újra a magyar tartalommal. Előtte biztonsági másolatot készít mindkettőről, így az eltávolítás <strong>bitre pontosan</strong> visszaadja az eredeti állapotot. A telepítés és az eltávolítás is ugyanabból a programból megy, egyetlen gombbal.",
+      "SZINKRONHANG<br />Magyar szinkron <strong>nincs</strong>, és nem is készíthető el: a játékhoz soha nem készült magyar szinkronhang, a beszédhangok angolul vannak az archívumban. A megoldás a magyar felirat + eredeti angol hang.",
+      "FONTOS:<br />- A játékban a Beállítások / Játék menüben a <strong>Feliratok</strong> kapcsoló legyen bekapcsolva, különben a párbeszédek felirata nem jelenik meg.<br />- A telepítéshez kb. 1,3 GB szabad hely kell a játék meghajtóján (ebből 640 MB a biztonsági másolat, a többi átmeneti).<br />- Telepítés előtt zárd be a játékot.<br />- Ha a játék a Program Files alatt van, a telepítő kéri a rendszergazdai jogot.<br />- Ha a Steamben lefuttatod a „Játékfájlok épségének ellenőrzése” funkciót, az visszatölti az eredeti angol archívumokat, és a magyarítást újra kell telepíteni."
+    ],
+    "cover": "/images/mods/6.png",
+    "banner": "/images/mods/hatter.webp",
+    "icon": "/images/mods/5.webp",
+    "author": "ZeroCode",
+    "platform": "Windows PC",
+    "status": "aktiv",
+    "tags": [
+      "Magyarítás"
+    ],
+    "features": [
+      "Mind a 2498 feliratsor magyarul – 22 fejezet, filmbetétek, tévésorozatok",
+      "Magyar menü, indítóablak, HUD-üzenetek és képregény-szövegek",
+      "Magyar ékezetes betűtípusok – az ő és ű betű is jól jelenik meg",
+      "Egyetlen fájl – minden benne van, nincs kicsomagolás",
+      "Magától megtalálja a játékot (Steam, GOG, Remedy)",
+      "Biztonsági másolat a játék archívumairól telepítés előtt",
+      "Egy gombos eltávolítás – bitre pontosan visszaáll az eredeti",
+      "Az ablak bárhol megfogható; kilépés ESC-cel is"
+    ],
+    "installCode": "ZeroCode",
+    "installationSteps": [
+      {
+        "title": "A magyarítás telepítése",
+        "detail": "Zárd be a Max Payne 2-t, ha fut. Töltsd le és indítsd el az MP2Magyaritas.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot (a kis- és nagybetű számít) – a kódot a Telepítési útmutató gomb melletti mezőben kapod meg: írd be az ott villogó négyjegyű számot. Ekkor megjelenik a TELEPÍTÉS gomb. A telepítő magától megkeresi a Max Payne 2 mappáját a maxpayne2.exe alapján – ha megvan, az útvonal kerete zöldre vált; ha nem találná, a Tallózás gombbal add meg kézzel. Nyomd meg a TELEPÍTÉS gombot: a gombon belüli csík mutatja a haladást, a telepítő előbb biztonsági másolatot készít a két archívumról, majd beírja a magyar szövegeket és betűtípusokat. A „KÉSZ” üzenet után indítsd el a játékot, és a Beállítások / Játék menüben kapcsold be a Feliratok kapcsolót."
+      }
+    ],
+    "versions": [
+      {
+        "version": "1.0.0",
+        "releaseDate": "2026-09-06",
+        "size": "4.7 MB",
+        "platform": "Windows",
+        "type": "Installer",
+        "author": "ZeroCode",
+        "changes": [
+          "Első kiadás.",
+          "A játék teljes feliratanyaga lefordítva (2498 sor).",
+          "Magyar menü, indítóablak, HUD-üzenetek és képregény-szövegek.",
+          "Magyar ékezetes betűtípusok (ő, ű).",
+          "Telepítő biztonsági másolattal és egygombos eltávolítással."
+        ],
+        "download": {
+          "kind": "github-tag",
+          "tag": "max-payne-2-magyaritas-v1.0.0",
+          "file": "MP2Magyaritas.exe"
+        }
+      }
+    ],
+    "faq": [
+      {
+        "question": "Melyik kiadással működik?",
+        "answer": "Bármelyik PC-s kiadással: Steam, GOG vagy lemezes. A telepítő a játék két archívumát módosítja, ami minden kiadásban ugyanaz."
+      },
+      {
+        "question": "Elindítottam a játékot, de nem látok magyar feliratot.",
+        "answer": "A játékban a Beállítások / Játék menüben kapcsold be a Feliratok kapcsolót. Enélkül a párbeszédek felirata nem jelenik meg – a menü és a képregény-átvezetők ettől függetlenül magyarul vannak."
+      },
+      {
+        "question": "Van magyar szinkron?",
+        "answer": "Nincs, és nem is készíthető: a játékhoz soha nem készült magyar szinkronhang, a beszédhangok angolul vannak a játék archívumában. Ez a csomag magyar feliratot ad az eredeti angol hang mellé."
+      },
+      {
+        "question": "Hogyan távolíthatom el?",
+        "answer": "Indítsd el újra az MP2Magyaritas.exe-t: ha a magyarítás fent van, a gomb már ELTÁVOLÍTÁS felirattal jelenik meg, és ehhez nem kell kód. Ha megvan a telepítéskor készült biztonsági másolat, az archívumok bitre pontosan az eredetiek lesznek; ha nem, a telepítőbe épített eredeti angol fájlokat írja vissza."
+      },
+      {
+        "question": "Mennyi szabad hely kell?",
+        "answer": "Kb. 1,3 GB a játék meghajtóján: 640 MB a biztonsági másolat, a többi átmeneti hely az archívumok újraépítéséhez. A telepítés után a biztonsági másolat (a két .bak fájl) törölhető, ha nincs rá szükséged."
+      },
+      {
+        "question": "Steam fájlellenőrzés után eltűnt a magyarítás.",
+        "answer": "Ez normális: a „Játékfájlok épségének ellenőrzése” visszatölti az eredeti angol archívumokat. Ilyenkor egyszerűen futtasd le újra a telepítőt."
+      },
+      {
+        "question": "Miért jelzi a vírusirtó?",
+        "answer": "A telepítő egy önálló, tömörített program, ami saját magából bontja ki a fájlokat – a vírusirtók az ilyet néha tévesen bejelzik. Nem vírus."
+      },
+      {
+        "question": "Elrontja a mentéseimet?",
+        "answer": "Nem. A telepítő csak a szövegeket és a betűtípusokat tartalmazó két archívumhoz nyúl, a mentésekhez és a játék többi fájljához nem."
+      }
+    ],
+    "slideshow": [],
+    "externalLinks": [],
+    "magyaritas": true
   }
 ]
