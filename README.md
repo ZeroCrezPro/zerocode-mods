@@ -559,6 +559,7 @@ rajzol – törött kép sehol nem jelenik meg.
 | **Mod** – ikon | kereső, Legújabb lap, adatlap | 256 × 256 (1:1) |
 | **Mod** – diavetítés | a letöltés gomb alatt, nyilakkal lapozható | 1920 × 1080 (16:9) |
 | **Mod** – videó | YouTube-hivatkozás, a képek elé kerül | – (nem kép) |
+| **Mod** – Magyarosítás ikon | kapcsoló: magyar zászló a borító jobb alsó sarkán | – (beépített kép) |
 | **Mod** – képernyőképek | a Képek galéria lentebb | 1280 × 720 vagy 1920 × 1080 |
 | **Oldal** – logó | a fejléc és a lábléc jele | 128 × 128 |
 | **Oldal** – böngészőfül ikonja | a fül címkéjén látszó ikon | 64 × 64 vagy SVG |
