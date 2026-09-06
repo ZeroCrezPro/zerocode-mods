@@ -52,13 +52,14 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
         {mod.magyaritas && (
           <span
             title="Magyarosítás"
-            className="absolute right-2 bottom-2 block h-8 w-14 overflow-hidden border border-ink-950/80 shadow-[0_4px_14px_rgba(0,0,0,0.65)]"
+            className="absolute right-0 bottom-0 block h-10 w-18 overflow-hidden shadow-[0_4px_14px_rgba(0,0,0,0.65)]"
           >
+            {/* A ránagyítás vágja le a kép saját fehér szegélyét. */}
             <img
               src="/images/games/magyaritas-jelzo.webp"
               alt="Magyarosítás"
               loading="lazy"
-              className="h-full w-full scale-110 object-cover"
+              className="h-full w-full scale-130 object-cover"
             />
           </span>
         )}
