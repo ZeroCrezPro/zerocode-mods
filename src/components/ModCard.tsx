@@ -51,15 +51,12 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
         {/* Magyarosítás-jelző: magyar zászló a borító jobb alsó sarkán. */}
         {mod.magyaritas && (
           <img
-            src="/images/games/magyaritas-jelzo.png"
+            src="/images/games/magyaritas-jelzo.webp"
             alt="Magyarosítás"
             title="Magyarosítás"
             loading="lazy"
-            /*
-             * A kép háttere átlátszó, ezért az egész zászló látszik, a
-             * rongyos széleivel együtt - az árnyék is a formáját követi.
-             */
-            className="absolute right-0 bottom-0 h-10 w-18 object-contain object-bottom drop-shadow-[0_3px_8px_rgba(0,0,0,0.8)]"
+            /* A zászló 2:1 arányú, a doboz is az - pontosan kitölti. */
+            className="absolute right-0 bottom-0 h-10 w-20 object-cover drop-shadow-[0_3px_8px_rgba(0,0,0,0.8)]"
           />
         )}
       </Link>
