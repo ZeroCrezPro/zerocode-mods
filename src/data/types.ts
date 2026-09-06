@@ -96,8 +96,6 @@ export interface Mod {
   versions: ModVersion[]
   faq: FaqItem[]
   externalLinks?: ExternalLink[]
-  /** Megjelenjen-e a főoldal "Kiemelt modok" szekciójában */
-  featured?: boolean
   /** Első kiadás dátuma (ISO) */
   createdAt: string
 }

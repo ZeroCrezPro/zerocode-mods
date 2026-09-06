@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { featuredMods, mods, site, totalDownloads, totalReleases } from '@/data'
+import { legujabbModok, mods, site, totalDownloads, totalReleases } from '@/data'
 import { formatNumber } from '@/lib/format'
 import { Felirat, Szoveg } from '@/components/Szoveg'
 import { Seo, pageTitle } from '@/components/Seo'
@@ -98,7 +98,7 @@ function Hero() {
 }
 
 export default function Home() {
-  const featured = featuredMods(6)
+  const legujabbak = legujabbModok(6)
 
   return (
     <>
@@ -131,8 +131,8 @@ export default function Home() {
 
       <section className="zc-container py-16 sm:py-20">
         <SectionHead
-          eyebrow="Válogatás"
-          title="Kiemelt modok"
+          eyebrow="Frissítések"
+          title="Legújabb modok"
           action={
             <Link
               to="/modok"
@@ -142,13 +142,13 @@ export default function Home() {
             </Link>
           }
         />
-        {featured.length === 0 ? (
+        {legujabbak.length === 0 ? (
           <Empty title="Még nincs közzétett mod.">
             Az első ZeroCode mod hamarosan érkezik. Addig is nézz körbe a Névjegy oldalon.
           </Empty>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((mod, i) => (
+            {legujabbak.map((mod, i) => (
               <ModCard key={mod.id} mod={mod} eager={i < 3} />
             ))}
           </div>

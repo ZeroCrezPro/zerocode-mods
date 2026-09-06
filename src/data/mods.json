@@ -6,7 +6,6 @@
     "author": "ZeroCode",
     "platform": "Windows PC",
     "status": "fejlesztes",
-    "featured": false,
     "createdAt": "2026-09-01",
     "shortDescription": "Játék közbeni mod panel a Max Payne 2: The Fall of Max Payne játékhoz. Egyetlen gombnyomásra (ALT+E) előhívható, kétnyelvű (magyar/angol) panelről kapcsolgathatod a csalásokat: végtelen lőszer, végtelen élet, nincs újratöltés, egyből ölés, végtelen bullet time és maximális lőszer. Nem kell Cheat Engine vagy külön trainer – a mod a játékkal együtt indul, és megjegyzi a beállításaidat (a választott nyelvet is).",
     "description": [
@@ -143,7 +142,6 @@
         "answer": "A Tallózás gombbal add meg kézzel azt a mappát, amelyikben az ACBlackFlag.exe van."
       }
     ],
-    "featured": true,
     "slideshow": [],
     "externalLinks": []
   }

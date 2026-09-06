@@ -68,9 +68,7 @@ export function releaseFeed(limit?: number): ReleaseFeedItem[] {
   return typeof limit === 'number' ? items.slice(0, limit) : items
 }
 
-/** Kiemelt modok a főoldalra. */
-export function featuredMods(limit = 6): Mod[] {
-  const featured = mods.filter((m) => m.featured)
-  const pool = featured.length ? featured : mods
-  return [...pool].sort((a, b) => lastUpdated(b).localeCompare(lastUpdated(a))).slice(0, limit)
+/** A legutóbb frissített modok a főoldalra, a legfrissebb elöl. */
+export function legujabbModok(limit = 6): Mod[] {
+  return [...mods].sort((a, b) => lastUpdated(b).localeCompare(lastUpdated(a))).slice(0, limit)
 }

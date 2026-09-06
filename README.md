@@ -260,7 +260,6 @@ Kézzel, fájlból:
 | `compatibility` | `{ label, state, note? }`, state: `'tesztelve'` \| `'reszben'` \| `'nem-tesztelt'` \| `'nem-tamogatott'` |
 | `versions` | Letölthető verziók, a legfrissebb elöl |
 | `faq` | `{ question, answer }` párok |
-| `featured` | `true` esetén megjelenik a főoldal Kiemelt modok között |
 | `createdAt` | Az első kiadás dátuma, ISO formában (`2026-06-14`) |
 
 3. `npm run build`, majd publikálás (lásd lentebb).

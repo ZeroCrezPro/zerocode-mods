@@ -526,7 +526,6 @@ const MOD_SZAKASZOK = [
       { k: 'platform', cim: 'Platform', tipus: 'szoveg' },
       { k: 'status', cim: 'Állapot', tipus: 'valaszto', valasztek: ALLAPOT_VALASZTEK },
       { k: 'createdAt', cim: 'Első kiadás dátuma', tipus: 'datum' },
-      { k: 'featured', cim: 'Kiemelt a főoldalon', tipus: 'kapcsolo' },
     ],
   },
   {
@@ -1711,7 +1710,6 @@ function ujMod() {
     author: allapot.adatok.site.author ?? 'ZeroCode',
     platform: 'Windows PC',
     status: 'fejlesztes',
-    featured: false,
     createdAt: maiDatum(),
     shortDescription: '',
     description: [],
