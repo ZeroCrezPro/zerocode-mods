@@ -248,7 +248,11 @@
         "answer": "Nem. A telepítő csak a szövegeket és a betűtípusokat tartalmazó két archívumhoz nyúl, a mentésekhez és a játék többi fájljához nem."
       }
     ],
-    "slideshow": [],
+    "slideshow": [
+      "/images/screenshots/max-payne-2-magyaritas/1.webp",
+      "/images/screenshots/max-payne-2-magyaritas/2.webp",
+      "/images/screenshots/max-payne-2-magyaritas/3.webp"
+    ],
     "externalLinks": [],
     "magyaritas": true
   }
