@@ -61,7 +61,21 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
         )}
       </Link>
 
-      <div className="flex flex-1 flex-col p-4">
+      <div className="relative isolate flex flex-1 flex-col p-4">
+        {/*
+          Magyarosításnál az egér alatt halványan előtűnik a fordítás-jel a
+          szövegek mögött. Negatív rétegen ül, az isolate tartja a kártyán
+          belül - így a szöveg mindig fölötte marad.
+        */}
+        {mod.magyaritas && (
+          <img
+            src="/images/games/magyar-forditas.webp"
+            alt=""
+            aria-hidden
+            loading="lazy"
+            className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-contain p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-20"
+          />
+        )}
         <h3 className="text-lg leading-tight font-extrabold tracking-tight text-ash-100">
           <Link to={`/modok/${mod.slug}`} className="transition-colors group-hover:text-blood-400">
             <Szoveg ertek={mod.name} mezo={`${mod.slug}:name`} />

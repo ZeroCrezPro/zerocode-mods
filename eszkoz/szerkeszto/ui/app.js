@@ -579,7 +579,7 @@ const MOD_SZAKASZOK = [
         cim: 'Magyarosítás ikon',
         tipus: 'kapcsolo',
         teljes: true,
-        sugo: 'Bekapcsolva a mod borítóképének jobb alsó sarkában egy magyar zászló jelenik meg - a modok listájában és a főoldalon is. Magyarosításoknál kapcsold be.',
+        sugo: 'Bekapcsolva a mod borítóképének jobb alsó sarkában egy magyar zászló jelenik meg, és az egeret a kártyára víve a szövegek mögött halványan előtűnik a fordítás-jel is. Magyarosításoknál kapcsold be.',
       },
       {
         k: 'video',
