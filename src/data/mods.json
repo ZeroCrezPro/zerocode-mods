@@ -23,9 +23,9 @@
       "NYELVVÁLASZTÁS:",
       "A panel teljesen kétnyelvű: magyar és angol. A legalsó, elkülönített sorban egyetlen kattintással válthatsz a két nyelv között (HU / EN) – ilyenkor a panel minden felirata és gombja átvált. A választott nyelvet a mod megjegyzi, így a következő indításnál és másik mentés betöltésekor is azon a nyelven jön be."
     ],
-    "cover": "/images/mods/6.png",
-    "banner": "/images/mods/hatter.webp",
-    "icon": "/images/mods/5.webp",
+    "cover": "/images/mods/max-payne-2-the-fall-of-max-payne/hatter.webp",
+    "banner": "/images/mods/max-payne-2-the-fall-of-max-payne/4.webp",
+    "icon": "/images/mods/max-payne-2-the-fall-of-max-payne/5.webp",
     "tags": [
       "Mod"
     ],
@@ -86,9 +86,9 @@
       "MIT MÁSOL BE?<br />- AC_BF_Resynced_Text_Tool.exe – a magyarító program<br />- ENGLISH.txt – az eredeti szövegek<br />- TRANSLATED.txt – a magyar szövegek<br />- videos\\en\\... – magyar figyelmeztető videók<br />A játék forge/adat fájljaihoz maga a telepítő nem nyúl – a tényleges szövegcserét a magyarító program végzi.",
       "FONTOS:<br />- A magyarító program önálló, csomagolt program – a vírusirtók az ilyet néha tévesen bejelzik, nem vírus.<br />- Ha a játék nyitva van telepítéskor, először zárd be.<br />- Ha a játék rendszergazdai jogot igénylő helyre van telepítve, a telepítő jelzi, és felajánlja az újraindítást rendszergazdaként."
     ],
-    "cover": "/images/mods/acbf.webp",
-    "banner": "/images/mods/acbf.webp",
-    "icon": "/images/mods/icon1.webp",
+    "cover": "/images/mods/assassins-creed-black-flag-magyaritas/acbf.webp",
+    "banner": "/images/mods/assassins-creed-black-flag-magyaritas/acbf2.webp",
+    "icon": "/images/mods/assassins-creed-black-flag-magyaritas/icon1.webp",
     "author": "ZeroCode",
     "platform": "Windows PC",
     "status": "aktiv",
@@ -161,9 +161,9 @@
       "SZINKRONHANG<br />Ez a csomag <strong>feliratot</strong> ad, szinkront nem tartalmaz. A telepítő csak a szövegeket és a betűtípusokat cseréli ki – a beszédhangokhoz nem nyúl, így az eredeti hang marad. A játékhoz külön létezik magyar szinkron, az nem része ennek a telepítőnek.",
       "FONTOS:<br />- A játékban a Beállítások / Játék menüben a <strong>Feliratok</strong> kapcsoló legyen bekapcsolva, különben a párbeszédek felirata nem jelenik meg.<br />- A telepítéshez kb. 1,3 GB szabad hely kell a játék meghajtóján (ebből 640 MB a biztonsági másolat, a többi átmeneti).<br />- Telepítés előtt zárd be a játékot.<br />- Ha a játék a Program Files alatt van, a telepítő kéri a rendszergazdai jogot.<br />- Ha a Steamben lefuttatod a „Játékfájlok épségének ellenőrzése” funkciót, az visszatölti az eredeti angol archívumokat, és a magyarítást újra kell telepíteni."
     ],
-    "cover": "/images/mods/6.png",
-    "banner": "/images/mods/hatter.webp",
-    "icon": "/images/mods/5.webp",
+    "cover": "/images/mods/max-payne-2-magyaritas/hatter.webp",
+    "banner": "/images/mods/max-payne-2-magyaritas/4.webp",
+    "icon": "/images/mods/max-payne-2-magyaritas/5.webp",
     "author": "ZeroCode",
     "platform": "Windows PC",
     "status": "aktiv",
