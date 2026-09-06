@@ -749,6 +749,13 @@ const BEALLITAS_SZAKASZOK = [
         mappa: 'mods',
         sugo: 'Ez jelenik meg, ha valaki megosztja az oldalt - ajánlott 1200x630.',
       },
+      {
+        k: 'heroImage',
+        cim: 'Főoldal háttérképe',
+        tipus: 'kep',
+        mappa: 'games',
+        sugo: 'A főoldal nagy fejléce mögött jelenik meg, sötétítéssel. Ajánlott fekvő, legalább 1920 széles kép. Üresen a sima rácsos háttér látszik.',
+      },
     ],
   },
   {

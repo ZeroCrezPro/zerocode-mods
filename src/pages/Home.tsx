@@ -47,6 +47,24 @@ function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-ink-700">
       <div className="zc-grid-bg absolute inset-0" aria-hidden />
+
+      {/*
+        Háttérkép a fejléc mögé (Beállítások -> Az oldal képei). A szöveg a
+        bal oldalon ül, ezért balról sűrűbb a sötétítés; alul belesimul a
+        következő szakasz sötétjébe.
+      */}
+      {site.heroImage && (
+        <div className="absolute inset-0" aria-hidden>
+          <img
+            src={site.heroImage}
+            alt=""
+            className="h-full w-full object-cover opacity-70"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink-950/90 via-ink-950/55 to-ink-950/25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-transparent to-ink-950/45" />
+        </div>
+      )}
+
       <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_18%_-10%,rgba(214,31,39,0.22),transparent_58%)]"
         aria-hidden
