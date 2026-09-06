@@ -158,7 +158,7 @@
       "MI EZ?<br />A játék teljes szövegállománya magyarul: a főmenü, az indító beállítóablak, a HUD-üzenetek, a fegyver- és lőszernevek, a képregény-átvezetők szövege, és ami a legfontosabb: <strong>mind a 2498 feliratsor</strong> – mind a 22 fejezet, a filmbetétek és a játékban nézhető tévésorozatok is (Cím ismeretlen, Baseballütő Kapitány, Dick Justice, Urak és úrnők, hírek).",
       "MI VAN LEFORDÍTVA?<br />- A játékon belüli menü, a fejezetcímek és a kilépő idézetek<br />- A HUD-üzenetek, fegyver- és lőszernevek, tippek<br />- A teljes feliratanyag (2498 sor)<br />- Az indító beállítóablak minden szövege és súgója<br />- A billentyűnevek<br />- A betűtípus-textúrák, hogy az ő és ű betű is helyesen jelenjen meg",
       "HOGYAN MŰKÖDIK?<br />A telepítő a játék két archívumát (MP2_Data.ras és MP2_English.ras) építi újra a magyar tartalommal. Előtte biztonsági másolatot készít mindkettőről, így az eltávolítás <strong>bitre pontosan</strong> visszaadja az eredeti állapotot. A telepítés és az eltávolítás is ugyanabból a programból megy, egyetlen gombbal.",
-      "SZINKRONHANG<br />Magyar szinkron <strong>nincs</strong>, és nem is készíthető el: a játékhoz soha nem készült magyar szinkronhang, a beszédhangok angolul vannak az archívumban. A megoldás a magyar felirat + eredeti angol hang.",
+      "SZINKRONHANG<br />Ez a csomag <strong>feliratot</strong> ad, szinkront nem tartalmaz. A telepítő csak a szövegeket és a betűtípusokat cseréli ki – a beszédhangokhoz nem nyúl, így az eredeti hang marad. A játékhoz külön létezik magyar szinkron, az nem része ennek a telepítőnek.",
       "FONTOS:<br />- A játékban a Beállítások / Játék menüben a <strong>Feliratok</strong> kapcsoló legyen bekapcsolva, különben a párbeszédek felirata nem jelenik meg.<br />- A telepítéshez kb. 1,3 GB szabad hely kell a játék meghajtóján (ebből 640 MB a biztonsági másolat, a többi átmeneti).<br />- Telepítés előtt zárd be a játékot.<br />- Ha a játék a Program Files alatt van, a telepítő kéri a rendszergazdai jogot.<br />- Ha a Steamben lefuttatod a „Játékfájlok épségének ellenőrzése” funkciót, az visszatölti az eredeti angol archívumokat, és a magyarítást újra kell telepíteni."
     ],
     "cover": "/images/mods/6.png",
@@ -220,7 +220,7 @@
       },
       {
         "question": "Van magyar szinkron?",
-        "answer": "Nincs, és nem is készíthető: a játékhoz soha nem készült magyar szinkronhang, a beszédhangok angolul vannak a játék archívumában. Ez a csomag magyar feliratot ad az eredeti angol hang mellé."
+        "answer": "Ebben a csomagban nincs: ez magyar feliratot ad, a hangot nem cseréli le. A telepítő csak a szövegeket és a betűtípusokat írja át, a beszédhangokhoz nem nyúl. Magyar szinkron külön létezik a játékhoz – az más csomag, nem ez."
       },
       {
         "question": "Hogyan távolíthatom el?",
