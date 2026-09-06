@@ -544,6 +544,13 @@ download: { kind: 'github-latest', file: 'valami.zip', repo: 'masik-repo' },
 
 1. Tedd a fájlt a `public/images/` megfelelő almappájába
    (`games/`, `mods/`, `screenshots/`).
+
+**Minden modnak saját képmappája van.** A szerkesztőben egy mod képeinél a
+feltöltés a mod saját almappájába megy (például `mods/<mod-azonosító>/`), és a
+képválasztó is elsősorban ezt mutatja - így a különböző modok képei nem
+keverednek össze. A korábban a közös mappába feltöltött képek a választó
+"Közös képek" csoportjában továbbra is elérhetők, és a Képek lapon minden mod
+mappája saját szakaszt kap.
 2. Hivatkozz rá az adatfájlból a `/images/...`-szal kezdődő útvonalon.
 3. Képernyőképeknél mindig adj meg értelmes `alt` szöveget – ez akadálymentességi követelmény
    és a keresőnek is számít.

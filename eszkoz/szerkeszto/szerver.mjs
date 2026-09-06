@@ -628,20 +628,53 @@ async function muveletFuttat(nev, uzenet) {
 const KEP_MAPPAK = ['games', 'mods', 'screenshots']
 const KEP_KITERJESZTESEK = ['.svg', '.png', '.jpg', '.jpeg', '.webp', '.gif']
 
+/**
+ * 'mods' vagy 'mods/<mod-azonosító>' alakú képmappa ellenőrzése.
+ * Minden mod a saját almappájába tölt, hogy a képek ne keveredjenek.
+ */
+function kepMappaEllenoriz(mappa) {
+  const reszek = String(mappa ?? '').split('/')
+  const jo =
+    (reszek.length === 1 || reszek.length === 2) &&
+    KEP_MAPPAK.includes(reszek[0]) &&
+    (reszek.length === 1 || /^[a-z0-9][a-z0-9._-]*$/i.test(reszek[1]))
+  if (!jo) throw new Error('Ismeretlen képmappa.')
+  return reszek.join('/')
+}
+
 async function kepekListaja() {
   const ki = []
   for (const mappa of KEP_MAPPAK) {
     const dir = path.join(kepDir, mappa)
-    let fajlok = []
+    let bejegyzesek = []
     try {
-      fajlok = await fsp.readdir(dir)
+      bejegyzesek = await fsp.readdir(dir, { withFileTypes: true })
     } catch {
       continue
     }
-    for (const f of fajlok.sort()) {
-      if (KEP_KITERJESZTESEK.includes(path.extname(f).toLowerCase())) {
-        const st = await fsp.stat(path.join(dir, f))
-        ki.push({ utvonal: `/images/${mappa}/${f}`, mappa, nev: f, meret: st.size })
+    for (const b of [...bejegyzesek].sort((x, y) => x.name.localeCompare(y.name))) {
+      if (b.isDirectory()) {
+        // A modok saját almappái - egy szinttel mélyebben.
+        let belso = []
+        try {
+          belso = await fsp.readdir(path.join(dir, b.name))
+        } catch {
+          continue
+        }
+        for (const f of belso.sort()) {
+          if (KEP_KITERJESZTESEK.includes(path.extname(f).toLowerCase())) {
+            const st = await fsp.stat(path.join(dir, b.name, f))
+            ki.push({
+              utvonal: `/images/${mappa}/${b.name}/${f}`,
+              mappa: `${mappa}/${b.name}`,
+              nev: f,
+              meret: st.size,
+            })
+          }
+        }
+      } else if (KEP_KITERJESZTESEK.includes(path.extname(b.name).toLowerCase())) {
+        const st = await fsp.stat(path.join(dir, b.name))
+        ki.push({ utvonal: `/images/${mappa}/${b.name}`, mappa, nev: b.name, meret: st.size })
       }
     }
   }
@@ -857,9 +890,8 @@ const szerver = http.createServer(async (req, res) => {
       return json(res, 200, { kepek: await kepekListaja() })
     }
     if (ut === '/api/kep' && req.method === 'POST') {
-      const mappa = url.searchParams.get('mappa') ?? 'mods'
+      const mappa = kepMappaEllenoriz(url.searchParams.get('mappa') ?? 'mods')
       const nyersNev = url.searchParams.get('nev') ?? 'kep.png'
-      if (!KEP_MAPPAK.includes(mappa)) throw new Error('Ismeretlen képmappa.')
       const nev = path
         .basename(nyersNev)
         .toLowerCase()
@@ -874,9 +906,8 @@ const szerver = http.createServer(async (req, res) => {
       return json(res, 200, { ok: true, utvonal: `/images/${mappa}/${nev}` })
     }
     if (ut === '/api/kep-torles' && req.method === 'POST') {
-      const mappa = url.searchParams.get('mappa') ?? ''
+      const mappa = kepMappaEllenoriz(url.searchParams.get('mappa') ?? '')
       const nev = path.basename(url.searchParams.get('nev') ?? '')
-      if (!KEP_MAPPAK.includes(mappa)) throw new Error('Ismeretlen képmappa.')
       if (!KEP_KITERJESZTESEK.includes(path.extname(nev).toLowerCase())) {
         throw new Error('Ez nem képfájl.')
       }

@@ -201,6 +201,19 @@ function urlapHianyai(objektum, szakaszok) {
  */
 const mezoElemek = new WeakMap()
 
+/**
+ * Melyik mappába való a mező képe?
+ *
+ * A modok képei a mod saját almappájába kerülnek (pl. mods/<slug>), hogy a
+ * különböző modok képei ne keveredjenek. Az oldal beállításai (logó,
+ * háttér) a közös mappákat használják.
+ */
+function kepMappaja(mezo, objektum) {
+  const alap = mezo.mappa ?? 'mods'
+  const modE = objektum && typeof objektum.slug === 'string' && Array.isArray(objektum.versions)
+  return modE && objektum.slug ? `${alap}/${objektum.slug}` : alap
+}
+
 function mezoElemRogzit(objektum, kulcs, elem) {
   let terkep = mezoElemek.get(objektum)
   if (!terkep) {
@@ -1143,7 +1156,7 @@ function mezoRajz(objektum, mezo) {
                 class: 'gomb gomb-masodlagos gomb-apro',
                 text: 'Csere',
                 onClick: () =>
-                  kepValaszto(mezo.mappa ?? 'screenshots', (uj) => {
+                  kepValaszto(kepMappaja(mezo, objektum), (uj) => {
                     tomb[i] = uj
                     jelolValtozas()
                     ujraRajzol()
@@ -1172,7 +1185,7 @@ function mezoRajz(objektum, mezo) {
           style: 'margin-top:10px',
           text: '+ Kép hozzáadása',
           onClick: () =>
-            kepValaszto(mezo.mappa ?? 'screenshots', (uj) => {
+            kepValaszto(kepMappaja(mezo, objektum), (uj) => {
               tomb.push(uj)
               jelolValtozas()
               ujraRajzol()
@@ -1219,7 +1232,7 @@ function mezoRajz(objektum, mezo) {
             class: 'gomb gomb-masodlagos gomb-apro',
             text: 'Kép választása',
             onClick: () =>
-              kepValaszto(mezo.mappa ?? 'mods', (ut) => {
+              kepValaszto(kepMappaja(mezo, objektum), (ut) => {
                 objektum[mezo.k] = ut
                 jelolValtozas()
                 ujraRajzol()
@@ -1896,12 +1909,25 @@ function lapKepek() {
     }),
   )
 
-  for (const mappa of ['mods', 'screenshots', 'games']) {
-    const nev = {
-      mods: 'Modok és arculat',
-      screenshots: 'Képernyőképek',
-      games: 'Egyéb képek',
-    }[mappa]
+  const alapNevek = {
+    mods: 'Modok és arculat',
+    screenshots: 'Képernyőképek',
+    games: 'Egyéb képek',
+  }
+
+  // Az alapmappák után a modok saját almappái is saját szakaszt kapnak.
+  const mappak = ['mods', 'screenshots', 'games']
+  const tovabbiak = [...new Set(allapot.kepek.map((k) => k.mappa))]
+    .filter((m) => m.includes('/'))
+    .sort()
+  mappak.push(...tovabbiak)
+
+  for (const mappa of mappak) {
+    const [alap, almappa] = mappa.split('/')
+    const modNeve = almappa
+      ? (allapot.adatok?.mods?.find((m) => m.slug === almappa)?.name ?? almappa)
+      : ''
+    const nev = almappa ? `${alapNevek[alap] ?? alap} - ${modNeve}` : alapNevek[mappa]
     const racs = el('div', { class: 'keprács' })
     const sajat = allapot.kepek.filter((k) => k.mappa === mappa)
 
@@ -2255,6 +2281,12 @@ async function kepValaszto(mappa, kivalasztva) {
   test.replaceChildren()
 
   const racs = el('div', { class: 'keprács' })
+  const kozosDoboz = el('div')
+  const valaszt = (kep) => {
+    kivalasztva(kep.utvonal)
+    ablak.hidden = true
+  }
+
   const rajzol = () => {
     racs.replaceChildren()
     const sajat = allapot.kepek.filter((k) => k.mappa === mappa)
@@ -2262,17 +2294,29 @@ async function kepValaszto(mappa, kivalasztva) {
       racs.append(
         el('p', {
           class: 'sugo teljes-sor',
-          text: 'Még nincs kép ebben a mappában. Tölts fel egyet a fenti gombbal!',
+          text: 'Ennek a modnak még nincs saját képe. Tölts fel egyet a fenti gombbal!',
         }),
       )
     }
-    for (const k of sajat) {
-      racs.append(
-        kepCsempe(k, (kep) => {
-          kivalasztva(kep.utvonal)
-          ablak.hidden = true
-        }),
-      )
+    for (const k of sajat) racs.append(kepCsempe(k, valaszt))
+
+    // A közös (régi) képek külön csoportban, hogy semmi ne vesszen el.
+    kozosDoboz.replaceChildren()
+    const alap = mappa.split('/')[0]
+    if (alap !== mappa) {
+      const kozos = allapot.kepek.filter((k) => k.mappa === alap)
+      if (kozos.length) {
+        const kozosRacs = el('div', { class: 'keprács' })
+        for (const k of kozos) kozosRacs.append(kepCsempe(k, valaszt))
+        kozosDoboz.append(
+          el('p', {
+            class: 'sugo',
+            style: 'margin:16px 0 10px',
+            text: `Közös képek (public/images/${alap}) - a korábban ide feltöltött képek is választhatók:`,
+          }),
+          kozosRacs,
+        )
+      }
     }
   }
   rajzol()
@@ -2287,6 +2331,7 @@ async function kepValaszto(mappa, kivalasztva) {
       el('span', { class: 'sugo', text: `Mappa: public/images/${mappa}` }),
     ]),
     racs,
+    kozosDoboz,
   )
   ablak.hidden = false
 }
