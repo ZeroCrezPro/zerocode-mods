@@ -81,7 +81,7 @@ export interface Mod {
   installationSteps: InstallStep[]
   /**
    * Magyarosítás-jelző: bekapcsolva a borítókép jobb alsó sarkában egy
-   * magyar zászló jelenik meg (/images/games/magyaritas-jelzo.webp).
+   * magyar zászló jelenik meg (/images/games/magyar-zaszlo.webp).
    */
   magyaritas?: boolean
   /**

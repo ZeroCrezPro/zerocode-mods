@@ -51,7 +51,7 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
         {/* Magyarosítás-jelző: magyar zászló a borító jobb alsó sarkán. */}
         {mod.magyaritas && (
           <img
-            src="/images/games/magyaritas-jelzo.webp"
+            src="/images/games/magyar-zaszlo.webp"
             alt="Magyarosítás"
             title="Magyarosítás"
             loading="lazy"
