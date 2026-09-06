@@ -39,7 +39,7 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
         to={`/modok/${mod.slug}`}
         tabIndex={-1}
         aria-hidden
-        className="block overflow-hidden border-b border-ink-700"
+        className="relative block overflow-hidden border-b border-ink-700"
       >
         <SmartImage
           src={mod.cover}
@@ -48,6 +48,20 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
           fallbackText={nev}
           imgClassName="transition-transform duration-500 group-hover:scale-[1.04]"
         />
+        {/* Magyarosítás-jelző: magyar zászló a borító jobb alsó sarkán. */}
+        {mod.magyaritas && (
+          <span
+            title="Magyarosítás"
+            className="absolute right-2 bottom-2 block h-8 w-14 overflow-hidden border border-ink-950/80 shadow-[0_4px_14px_rgba(0,0,0,0.65)]"
+          >
+            <img
+              src="/images/games/magyaritas-jelzo.webp"
+              alt="Magyarosítás"
+              loading="lazy"
+              className="h-full w-full scale-110 object-cover"
+            />
+          </span>
+        )}
       </Link>
 
       <div className="flex flex-1 flex-col p-4">

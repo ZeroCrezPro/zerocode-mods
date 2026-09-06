@@ -575,6 +575,13 @@ const MOD_SZAKASZOK = [
         sugo: 'Négyzetes, 1:1 - ajánlott 256x256. A keresőben és a Legújabb lapon látszik.',
       },
       {
+        k: 'magyaritas',
+        cim: 'Magyarosítás ikon',
+        tipus: 'kapcsolo',
+        teljes: true,
+        sugo: 'Bekapcsolva a mod borítóképének jobb alsó sarkában egy magyar zászló jelenik meg - a modok listájában és a főoldalon is. Magyarosításoknál kapcsold be.',
+      },
+      {
         k: 'video',
         cim: 'YouTube videó (a lapozható képek elé)',
         tipus: 'szoveg',
