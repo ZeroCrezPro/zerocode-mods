@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { Mod } from '@/data/types'
@@ -28,13 +29,38 @@ function Adat({
 export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
   const v = latestVersion(mod)
 
+  /*
+   * Érintőképernyőn nincs egér, így a rávitelre előtűnő fordítás-jel nem
+   * jelenne meg. Ott akkor tűnik elő, amikor a kártya nagyrészt a
+   * képernyőre gördül - és eltűnik, amikor tovább görgetnek.
+   */
+  const kartya = useRef<HTMLElement>(null)
+  const [kozelben, setKozelben] = useState(false)
+
+  useEffect(() => {
+    if (!mod.magyaritas) return
+    // Ahol van egér, ott a rávitel intézi.
+    if (window.matchMedia('(hover: hover)').matches) return
+    const cel = kartya.current
+    if (!cel) return
+    const figyelo = new IntersectionObserver(
+      ([b]) => setKozelben(b.isIntersecting && b.intersectionRatio >= 0.45),
+      { threshold: [0, 0.45] },
+    )
+    figyelo.observe(cel)
+    return () => figyelo.disconnect()
+  }, [mod.magyaritas])
+
   const nev = csakSzoveg(mod.name)
 
   // Ha a mod ugyanazt a nevet kapta, mint a játék, ne írjuk ki kétszer.
   const jatekNeve = mod.game && csakSzoveg(mod.game) !== nev ? mod.game : null
 
   return (
-    <article className="group flex h-full flex-col border border-ink-700 bg-ink-900 transition-colors duration-200 hover:border-blood-600/70">
+    <article
+      ref={kartya}
+      className="group flex h-full flex-col border border-ink-700 bg-ink-900 transition-colors duration-200 hover:border-blood-600/70"
+    >
       <Link
         to={`/modok/${mod.slug}`}
         tabIndex={-1}
@@ -73,7 +99,9 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
             alt=""
             aria-hidden
             loading="lazy"
-            className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-contain p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-20"
+            className={`pointer-events-none absolute inset-0 -z-10 h-full w-full object-contain p-6 transition-opacity duration-300 group-hover:opacity-20 ${
+              kozelben ? 'opacity-20' : 'opacity-0'
+            }`}
           />
         )}
         <h3 className="text-lg leading-tight font-extrabold tracking-tight text-ash-100">
