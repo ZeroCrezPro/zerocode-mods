@@ -255,5 +255,79 @@
     ],
     "externalLinks": [],
     "magyaritas": true
+  },
+  {
+    "id": "mod-shc-de-panel",
+    "slug": "stronghold-crusader-de-mod-panel",
+    "name": "Stronghold Crusader DE Mod Panel",
+    "game": "Stronghold Crusader: Definitive Edition",
+    "createdAt": "2026-09-09",
+    "shortDescription": "Játékon belüli mod panel a Stronghold Crusader: Definitive Edition-höz. ALT+E-re előugró panelről adhatsz és vehetsz el aranyat, tölthetsz árut a raktárba, a magtárba és a fegyvertárba, és állíthatod az állatok meg a termények hozamát. Egyetlen telepítő, ami mindent visz magával.",
+    "description": [
+      "Játékon belüli mod panel a Stronghold Crusader: Definitive Edition-höz. Nem külön program: a játékkal együtt indul, és az ALT+E-re előugró panelről, egérrel kezelheted.",
+      "MI TUD?\n- ARANY – adott mennyiség hozzáadása vagy elvétele egy gombnyomásra\n- RAKTÁR, MAGTÁR, FEGYVERTÁR – bármelyik áru feltöltése vagy elvétele (búza, alma, bőr, fegyverek, páncélok és a többi)\n- ÁLLATOK – az elejtett vadak hozamának állítása, és az AI kő/ökör aranyának szabályozása\n- NÖVÉNYEK – a termények hozamának szorzója, akár a többszörösére\nA saját beállításaidat a mod megjegyzi.",
+      "A TELEPÍTŐ\nEgyetlen fájl (SHCMod.exe), minden benne van: a BepInEx betöltő és maga a mod is – nem kell mellé semmit másolni, kicsomagolni sem. Magától megkeresi a játékot a gépeden (Steam-kulcs, az összes Steam könyvtár, gyakori mappák), és ha a mod már fent van, ugyanez a telepítő el is távolítja.",
+      "FONTOS:\n- Ha a játékban már van BepInEx, azt nem írja felül – csak a modot teszi mellé.\n- A játék eredeti fájljaihoz nem nyúl.\n- A vírusirtó a csomagolt telepítőt tévesen bejelezheti – nem vírus."
+    ],
+    "cover": "",
+    "banner": "",
+    "icon": "",
+    "author": "ZeroCode",
+    "platform": "Windows PC",
+    "status": "aktiv",
+    "tags": [
+      "Mod"
+    ],
+    "features": [
+      "ALT+E - játék közben előugró, egérrel kezelhető panel",
+      "Arany hozzáadása és elvétele egy gombnyomásra",
+      "Raktár, magtár és fegyvertár feltöltése bármelyik áruval",
+      "Állatok: az elejtett vad hozama és az AI kő/ökör aranya",
+      "Növények: a termények hozamának szorzója",
+      "Megjegyzi a beállításaidat",
+      "A meglévő BepInEx-et nem írja felül, a játék fájljaihoz nem nyúl"
+    ],
+    "installCode": "ZeroCode",
+    "installationSteps": [
+      {
+        "title": "A mod telepítése",
+        "detail": "Töltsd le és indítsd el az SHCMod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). A telepítő magától megkeresi a Stronghold Crusader: Definitive Edition-t – ha megvan, az útvonal kerete zöldre vált; ha nem találná, a Tallózás gombbal add meg kézzel. Írd be a kért kódot (a kis- és nagybetű számít) – a kódot a Telepítési útmutató gomb melletti mezőben kapod meg: írd be az ott villogó négyjegyű számot. Ekkor megjelenik a TELEPÍTÉS gomb; nyomd meg, a gomb belsejében látszik a folyamat. Végül indítsd a játékot, és játék közben nyomj ALT+E-t a panel előhívásához. Eltávolítás: ugyanez a telepítő – ha a mod fent van, a fő gomb felirata TÖRLÉS."
+      }
+    ],
+    "versions": [
+      {
+        "version": "1.0.0",
+        "releaseDate": "2026-09-09",
+        "platform": "Windows",
+        "type": "Installer",
+        "author": "ZeroCode",
+        "changes": [
+          "Első kiadás."
+        ],
+        "download": {
+          "kind": "github-tag",
+          "tag": "stronghold-crusader-de-mod-panel-v1.0.0",
+          "file": "SHCMod.exe"
+        }
+      }
+    ],
+    "faq": [
+      {
+        "question": "Kell hozzá külön BepInEx?",
+        "answer": "Nem. A telepítő mindent visz magával, a BepInEx betöltőt is. Ha a játékban már van BepInEx, azt nem írja felül – csak a modot teszi be a plugins mappába."
+      },
+      {
+        "question": "Miért jelzi a vírusirtó?",
+        "answer": "A telepítő egy önálló, csomagolt program – a vírusirtók az ilyet néha tévesen bejelzik. Nem vírus, és a játék eredeti fájljaihoz nem nyúl."
+      },
+      {
+        "question": "Hogyan tudom eltávolítani?",
+        "answer": "Indítsd el újra a telepítőt: ha a mod fent van, a fő gomb felirata TÖRLÉS. Ez eltávolítja a modot és a beállításait; a BepInEx-et csak akkor, ha azt is ez a telepítő tette fel."
+      },
+      {
+        "question": "Melyik kiadással működik?",
+        "answer": "A Steames Stronghold Crusader: Definitive Edition-nel. A telepítő a Steam alapján magától megtalálja, de a Tallózás gombbal kézzel is megadható a játék mappája."
+      }
+    ]
   }
 ]
