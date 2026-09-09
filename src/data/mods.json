@@ -265,9 +265,9 @@
     "shortDescription": "Játékon belüli mod panel a Stronghold Crusader: Definitive Edition-höz. ALT+E-re előugró panelről adhatsz és vehetsz el aranyat, tölthetsz árut a raktárba, a magtárba és a fegyvertárba, és állíthatod az állatok meg a termények hozamát. Egyetlen telepítő, ami mindent visz magával.",
     "description": [
       "Játékon belüli mod panel a Stronghold Crusader: Definitive Edition-höz. Nem külön program: a játékkal együtt indul, és az ALT+E-re előugró panelről, egérrel kezelheted.",
-      "MI TUD?\n- ARANY – adott mennyiség hozzáadása vagy elvétele egy gombnyomásra\n- RAKTÁR, MAGTÁR, FEGYVERTÁR – bármelyik áru feltöltése vagy elvétele (búza, alma, bőr, fegyverek, páncélok és a többi)\n- ÁLLATOK – az elejtett vadak hozamának állítása, és az AI kő/ökör aranyának szabályozása\n- NÖVÉNYEK – a termények hozamának szorzója, akár a többszörösére\nA saját beállításaidat a mod megjegyzi.",
-      "A TELEPÍTŐ\nEgyetlen fájl (SHCMod.exe), minden benne van: a BepInEx betöltő és maga a mod is – nem kell mellé semmit másolni, kicsomagolni sem. Magától megkeresi a játékot a gépeden (Steam-kulcs, az összes Steam könyvtár, gyakori mappák), és ha a mod már fent van, ugyanez a telepítő el is távolítja.",
-      "FONTOS:\n- Ha a játékban már van BepInEx, azt nem írja felül – csak a modot teszi mellé.\n- A játék eredeti fájljaihoz nem nyúl.\n- A vírusirtó a csomagolt telepítőt tévesen bejelezheti – nem vírus."
+      "MI TUD?<br />- ARANY – adott mennyiség hozzáadása vagy elvétele egy gombnyomásra<br />- RAKTÁR, MAGTÁR, FEGYVERTÁR – bármelyik áru feltöltése vagy elvétele (búza, alma, bőr, fegyverek, páncélok és a többi)<br />- ÁLLATOK – az elejtett vadak hozamának állítása, és az AI kő/ökör aranyának szabályozása<br />- NÖVÉNYEK – a termények hozamának szorzója, akár a többszörösére<br />A saját beállításaidat a mod megjegyzi.",
+      "A TELEPÍTŐ<br />Egyetlen fájl (SHCMod.exe), minden benne van: a BepInEx betöltő és maga a mod is – nem kell mellé semmit másolni, kicsomagolni sem. Magától megkeresi a játékot a gépeden (Steam-kulcs, az összes Steam könyvtár, gyakori mappák), és ha a mod már fent van, ugyanez a telepítő el is távolítja.",
+      "FONTOS:<br />- Ha a játékban már van BepInEx, azt nem írja felül – csak a modot teszi mellé.<br />- A játék eredeti fájljaihoz nem nyúl.<br />- A vírusirtó a csomagolt telepítőt tévesen bejelezheti – nem vírus."
     ],
     "cover": "",
     "banner": "",
@@ -308,7 +308,8 @@
           "kind": "github-tag",
           "tag": "stronghold-crusader-de-mod-panel-v1.0.0",
           "file": "SHCMod.exe"
-        }
+        },
+        "size": "2.8 MB"
       }
     ],
     "faq": [
@@ -328,6 +329,8 @@
         "question": "Melyik kiadással működik?",
         "answer": "A Steames Stronghold Crusader: Definitive Edition-nel. A telepítő a Steam alapján magától megtalálja, de a Tallózás gombbal kézzel is megadható a játék mappája."
       }
-    ]
+    ],
+    "slideshow": [],
+    "externalLinks": []
   }
 ]
