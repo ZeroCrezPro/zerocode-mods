@@ -269,9 +269,9 @@
       "A TELEPÍTŐ<br />Egyetlen fájl (SHCMod.exe), minden benne van: a BepInEx betöltő és maga a mod is – nem kell mellé semmit másolni, kicsomagolni sem. Magától megkeresi a játékot a gépeden (Steam-kulcs, az összes Steam könyvtár, gyakori mappák), és ha a mod már fent van, ugyanez a telepítő el is távolítja.",
       "FONTOS:<br />- Ha a játékban már van BepInEx, azt nem írja felül – csak a modot teszi mellé.<br />- A játék eredeti fájljaihoz nem nyúl.<br />- A vírusirtó a csomagolt telepítőt tévesen bejelezheti – nem vírus."
     ],
-    "cover": "",
-    "banner": "",
-    "icon": "",
+    "cover": "/images/mods/stronghold-crusader-de-mod-panel/3.webp",
+    "banner": "/images/mods/stronghold-crusader-de-mod-panel/2.webp",
+    "icon": "/images/mods/stronghold-crusader-de-mod-panel/1.webp",
     "author": "ZeroCode",
     "platform": "Windows PC",
     "status": "aktiv",
