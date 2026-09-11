@@ -201,7 +201,7 @@ export function FizetosLetoltes({
     : '#'
 
   return (
-    <div className="relative">
+    <div className="contents">
       <button
         type="button"
         onClick={() => setNyitva((v) => !v)}
@@ -215,7 +215,7 @@ export function FizetosLetoltes({
       </button>
 
       {nyitva && (
-        <div className="mt-2.5 w-full max-w-xl border border-ink-600 bg-ink-900 p-4 sm:absolute sm:left-0 sm:z-20 sm:w-[28rem] sm:shadow-[0_24px_60px_rgba(0,0,0,0.7)]">
+        <div className="order-last mt-1 max-w-xl basis-full border border-ink-600 bg-ink-900 p-4">
           {fizetos.leiras && <p className="text-sm text-ash-300">{fizetos.leiras}</p>}
 
           {allapot === 'ok' && jegy ? (

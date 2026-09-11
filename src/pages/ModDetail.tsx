@@ -233,7 +233,7 @@ export default function ModDetail() {
               </dl>
 
               {latest && (
-                <div className="mt-7 flex flex-col gap-2.5 sm:flex-row">
+                <div className="mt-7 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
                   <a
                     href={zarolt ? undefined : downloadUrl(latest.download)}
                     rel="noopener noreferrer"
