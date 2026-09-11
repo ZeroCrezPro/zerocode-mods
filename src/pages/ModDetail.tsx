@@ -10,6 +10,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { SmartImage } from '@/components/SmartImage'
 import { Diavetites } from '@/components/Diavetites'
 import { KodDoboz } from '@/components/KodDoboz'
+import { FizetosLetoltes } from '@/components/FizetosLetoltes'
 import { AccordionItem } from '@/components/Accordion'
 import { VersionCard } from '@/components/VersionCard'
 import { Felirat, Szoveg } from '@/components/Szoveg'
@@ -249,11 +250,10 @@ export default function ModDetail() {
                     <Felirat kulcs="gomb.letoltes" alap="Letöltés" /> &middot;{' '}
                     {vLabel(latest.version)}
                   </a>
-                  <a href="#telepites" className={btnClass('secondary', 'lg')}>
-                    <Felirat kulcs="gomb.utmutato" alap="Telepítési útmutató" />
-                  </a>
+                  {/* Fizetős (prémium) letöltés - a szolgáltató kulcsával nyílik. */}
+                  {mod.fizetos?.fajl && <FizetosLetoltes slug={mod.slug} fizetos={mod.fizetos} />}
                   {/*
-                    A telepítési kód a Telepítési útmutató mellett, vele egy
+                    A telepítési kód a letöltés gomb mellett, vele egy
                     magasságban: szám + visszaszámláló + beírás, majd a kód.
                   */}
                   {mod.installCode && (

@@ -18,6 +18,7 @@ React + TypeScript + Vite + Tailwind CSS, statikusan előrenderelve, Cloudflare 
 3. [Könyvtárszerkezet](#könyvtárszerkezet)
 4. [Hogyan adok hozzá új modot?](#hogyan-adok-hozzá-új-modot)
 5. [Szövegformázás: szín és animáció](#szövegformázás-szín-és-animáció)
+5b. [Fizetős (prémium) letöltés](#fizetős-prémium-letöltés)
 6. [Hogyan adok ki új verziót?](#hogyan-adok-ki-új-verziót)
 7. [Hogyan működik a letöltés (GitHub Releases)?](#hogyan-működik-a-letöltés-github-releases)
 8. [Hogyan változtatom meg a letöltési URL-t?](#hogyan-változtatom-meg-a-letöltési-url-t)
@@ -430,6 +431,66 @@ Legörgetéskor a kódmező nem vész el: amikor a gombsor kigördül a képből
 **A letöltés csak ezután él:** amíg a kód nincs felfedve, az oldal összes Letöltés
 gombja halvány és nem kattintható. Üresen hagyva a mezőt nincs kódmező, és a letöltés
 azonnal aktív - minden úgy működik, mint korábban.
+
+---
+
+## Fizetős (prémium) letöltés
+
+Egy modhoz a szabad letöltés mellé egy **fizetős csomag** is adható - a Letöltés gomb
+mellett jelenik meg egy második gomb az árral (például *Prémium csomag · 1 990 Ft*).
+
+### Hogyan működik a vásárlónak?
+
+1. A gombra kattintva kinyílik egy panel; a **Megvásárlás** a fizetési oldalra visz
+   (új lapon). Fizetés után **azonnal** kap egy licenckulcsot - a képernyőn és
+   e-mailben is.
+2. A kulcsot beírja a panelbe. Az oldal a szolgáltató nyilvános ellenőrző címén
+   **egy másodperc alatt** ellenőrzi, valódi-e, és ehhez a modhoz tartozik-e.
+3. Érvényes kulcs után él a **Letöltés** gomb. A kulcsot a böngésző megjegyzi, később
+   újra le tudja tölteni keresgélés nélkül.
+
+A fájl a Cloudflare-en van, **zárt útvonalon**: közvetlen címről nem tölthető le,
+csak érvényes kulccsal, az oldal saját kis programján keresztül. A GitHubra a fizetős
+fájl **nem kerül fel**.
+
+### Miért így, és nem saját fizetéssel?
+
+A fizetést és a számlázást egy erre szakosodott szolgáltató intézi, ami **a te
+nevedben számláz és kezeli az áfát** is (merchant of record) - neked nem kell
+bankkártya-elfogadást, számlázót vagy adóügyet építeni. Két szolgáltató támogatott,
+mindkettő vásárlás után azonnal licenckulcsot ad, és nyilvános ellenőrző címe van
+(titkos kulcs nem kell hozzá):
+
+| Szolgáltató | Díj (kb.) | Megjegyzés |
+| --- | --- | --- |
+| **Lemon Squeezy** (ajánlott) | 5% + 0,50 $ | Szebb fizetőoldal, EU-áfa rendben, magyar bankszámlára vagy PayPalra fizet ki |
+| **Gumroad** | 10% | Egyszerűbb, de drágább |
+
+### Beállítás lépésről lépésre (Lemon Squeezy)
+
+1. Regisztrálj: https://app.lemonsqueezy.com - hozz létre egy boltot (*Store*).
+2. **Products → New product.** Add meg a nevet, az árat, és a *Deliverables* résznél
+   kapcsold be a **License keys** opciót (ez adja a vásárlónak a kulcsot). Fájlt
+   NEM kell feltöltened oda - a fájlt az oldal adja.
+3. A terméknél a **Share** gomb adja a vásárlási linket (`https://....lemonsqueezy.com/buy/...`).
+4. A termék **variant ID-je**: a termék oldalán a változat (*Variant*) sorában, vagy a
+   címsorban látszik - egy szám (pl. `123456`). Ezt kéri a szerkesztő *Termék
+   azonosítója* mezője.
+5. A szerkesztőben a mod **Fizetős letöltés** paneljén: gomb felirata, kiírt ár, mit kap
+   a vásárló, szolgáltató, termék azonosítója, fizetési link - és a **fizetős fájl**
+   kijelölése (ugyanúgy, mint a modfájlé).
+6. **Mentés**, majd **Frissítés**. A fájl a Cloudflare zárt útvonalára kerül.
+
+Gumroadnál ugyanez: a terméknél kapcsold be a *Generate a unique license key per sale*
+opciót; a *Termék azonosítója* a termék **product ID**-je (a termék beállításainál).
+
+### Korlátok
+
+- A fizetős fájl legfeljebb **25 MB** lehet (a Cloudflare Pages egy fájlra ennyit
+  enged). Nagyobb csomagot tömöríts, vagy bontsd részekre.
+- Az előnézetben a kulcs-ellenőrzés nem fut - az csak az éles oldalon működik.
+- A kulcs ellenőrzése a szolgáltató szerverén történik; ha az nem elérhető, az oldal
+  ezt kiírja, és kéri, hogy próbálja újra egy perc múlva.
 
 ---
 

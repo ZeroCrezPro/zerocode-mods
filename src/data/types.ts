@@ -61,6 +61,34 @@ export interface ModVersion {
   prerelease?: boolean
 }
 
+/**
+ * Fizetős letöltés egy modhoz.
+ *
+ * A fizetést és a számlázást a szolgáltató intézi (Lemon Squeezy vagy
+ * Gumroad); tőlük kap a vásárló egy licenckulcsot. A kulcsot az oldal a
+ * szolgáltató nyilvános ellenőrző címén azonnal ellenőrzi, és csak utána
+ * adja ki a fájlt - a fájl maga a Cloudflare-en van, közvetlenül nem
+ * érhető el.
+ */
+export interface FizetosTartalom {
+  /** A gomb felirata, pl. "Prémium csomag" */
+  cim: string
+  /** A kiírt ár, pl. "1 990 Ft" - magát az összeget a szolgáltatónál állítod be */
+  ar: string
+  /** Mit kap a vásárló (rövid) */
+  leiras?: string
+  /** A fizetési oldal címe (Lemon Squeezy checkout vagy Gumroad termék) */
+  vasarlasUrl: string
+  /** Ki ellenőrzi a licenckulcsot */
+  szolgaltato: 'lemonsqueezy' | 'gumroad'
+  /** Lemon Squeezy: a termék variant ID-je; Gumroad: a termék product ID-je */
+  termekAzonosito: string
+  /** A letölthető fájl neve - a szerkesztő tölti ki, amikor kijelölöd a fájlt */
+  fajl: string
+  /** A fájl mérete emberi formában (a szerkesztő tölti ki) */
+  meret?: string
+}
+
 export interface Mod {
   id: string
   /** URL-barát azonosító: /modok/<slug> */
@@ -90,6 +118,8 @@ export interface Mod {
    * szám beírásával fedhető fel.
    */
   installCode?: string
+  /** Fizetős (prémium) letöltés - üresen nincs ilyen gomb */
+  fizetos?: FizetosTartalom
   /**
    * A diavetítő első eleme: egy YouTube-videó címe.
    * Bármelyik alak jó (youtu.be/..., watch?v=..., shorts/...).

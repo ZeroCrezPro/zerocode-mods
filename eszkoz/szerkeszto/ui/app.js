@@ -442,6 +442,11 @@ const LETOLTES_VALASZTEK = [
   ['url', 'Közvetlen link'],
 ]
 
+const FIZETES_VALASZTEK = [
+  ['lemonsqueezy', 'Lemon Squeezy (ajánlott)'],
+  ['gumroad', 'Gumroad'],
+]
+
 const LETOLTES_MEZOK = [
   {
     k: 'kind',
@@ -645,6 +650,69 @@ const MOD_SZAKASZOK = [
         mezok: [
           { k: 'title', cim: 'Lépés címe', tipus: 'szoveg', teljes: true },
           { k: 'detail', cim: 'Magyarázat', tipus: 'hosszu', teljes: true },
+        ],
+      },
+    ],
+  },
+  {
+    cim: 'Fizetős letöltés',
+    mezok: [
+      {
+        k: 'fizetos',
+        cim: 'Prémium csomag (a szabad Letöltés gomb mellett jelenik meg)',
+        tipus: 'csoport',
+        teljes: true,
+        sugo:
+          'Üresen hagyva nincs fizetős gomb. A fizetést és a számlázást a szolgáltató intézi: nála hozod létre a terméket az árral, ő adja a vásárlónak a licenckulcsot, az oldal pedig a kulcsot ellenőrzi és csak utána adja ki a fájlt.',
+        mezok: [
+          {
+            k: 'cim',
+            cim: 'A gomb felirata',
+            tipus: 'szoveg',
+            sugo: 'Például: Prémium csomag, Teljes verzió, Extra pályák.',
+          },
+          {
+            k: 'ar',
+            cim: 'Kiírt ár',
+            tipus: 'szoveg',
+            sugo: 'Csak felirat, például "1 990 Ft". Az összeget a szolgáltatónál állítod be.',
+          },
+          {
+            k: 'leiras',
+            cim: 'Mit kap a vásárló?',
+            tipus: 'hosszu',
+            teljes: true,
+            sugo: 'Egy-két mondat a panelben, a Megvásárlás gomb fölött.',
+          },
+          {
+            k: 'szolgaltato',
+            cim: 'Fizetési szolgáltató',
+            tipus: 'valaszto',
+            valasztek: FIZETES_VALASZTEK,
+            sugo: 'Mindkettő a te nevedben számláz és kezeli az áfát; vásárlás után rögtön licenckulcsot ad.',
+          },
+          {
+            k: 'termekAzonosito',
+            cim: 'Termék azonosítója az ellenőrzéshez',
+            tipus: 'szoveg',
+            mono: true,
+            sugo: 'Lemon Squeezy: a termék változatának (variant) számazonosítója. Gumroad: a termék product ID-je. Ezzel ellenőrzi az oldal, hogy a kulcs ehhez a termékhez tartozik.',
+          },
+          {
+            k: 'vasarlasUrl',
+            cim: 'A fizetési oldal címe',
+            tipus: 'szoveg',
+            mono: true,
+            teljes: true,
+            sugo: 'A szolgáltatónál kapott vásárlási link (checkout). A Megvásárlás gomb ide visz.',
+          },
+          {
+            k: 'fajl',
+            cim: 'A fizetős fájl',
+            tipus: 'fizetosFajl',
+            teljes: true,
+            sugo: 'Ezt kapja a vásárló a kulcs beírása után. A Frissítés viszi fel a Cloudflare-re, zárt útvonalra - a GitHubra nem kerül fel. Legfeljebb 25 MB lehet.',
+          },
         ],
       },
     ],
@@ -1102,6 +1170,69 @@ function mezoRajz(objektum, mezo) {
       return mezoBurok(mezo, doboz)
     }
 
+    case 'fizetosFajl': {
+      // A fájl a kiadasok/<mod>/fizetos mappába kerül; a Frissítés a
+      // Cloudflare zárt útvonalára másolja (nem a GitHubra).
+      const mod = aktualisMod()
+      const varakozo = mod ? varakozoModFajl(mod.id, 'fizetos') : null
+
+      const be = el('input', {
+        type: 'file',
+        accept: '.zip,.7z,.rar,.exe,.msi',
+        style: 'display:none',
+        onChange: (e) => {
+          const fajl = e.target.files?.[0]
+          e.target.value = ''
+          if (fajl) fizetosFajlAtvetel(objektum, fajl)
+        },
+      })
+
+      const doboz = el('div', {})
+      if (varakozo) {
+        const nagy = varakozo.meret > 25 * 1024 * 1024
+        doboz.append(
+          el('div', { class: 'modfajl' + (nagy ? '' : ' fent') }, [
+            el('span', { class: 'modfajl-jel', text: nagy ? '!' : '✓' }),
+            el('span', { style: 'min-width:0;flex:1' }, [
+              el('span', { class: 'modfajl-nev', text: varakozo.nev }),
+              el('span', {
+                class: 'modfajl-allapot',
+                text: nagy
+                  ? `${meretSzoveg(varakozo.meret)} - TÚL NAGY: a Cloudflare legfeljebb 25 MB-ot enged`
+                  : `${meretSzoveg(varakozo.meret)} - a Frissítés a zárt útvonalra másolja`,
+              }),
+            ]),
+            el('button', {
+              type: 'button',
+              class: 'gomb gomb-masodlagos gomb-apro',
+              text: 'Csere',
+              onClick: () => be.click(),
+            }),
+            el('button', {
+              type: 'button',
+              class: 'gomb gomb-veszely gomb-apro',
+              text: 'Eltávolítás',
+              onClick: () => fizetosFajlTorles(mod, objektum),
+            }),
+          ]),
+        )
+      }
+      doboz.append(
+        el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;align-items:center' }, [
+          be,
+          varakozo
+            ? null
+            : el('button', {
+                type: 'button',
+                class: 'gomb gomb-elsodleges gomb-apro',
+                text: 'Fizetős fájl megadása',
+                onClick: () => be.click(),
+              }),
+        ]),
+      )
+      return mezoBurok(mezo, doboz)
+    }
+
     case 'kepLista': {
       // Egyszerű képsor: csak képek, felirat és képleírás nélkül.
       if (!Array.isArray(objektum[mezo.k])) objektum[mezo.k] = []
@@ -1487,6 +1618,53 @@ async function modFajlAtvetel(verzio, fajl) {
     pirit(`${fajl.name} készen áll a feltöltésre.`, 'jo')
   } catch (hiba) {
     pirit(`Nem sikerült átvenni a fájlt: ${hiba.message}`, 'rossz')
+  }
+}
+
+/**
+ * A fizetős fájl átvétele: a neve és mérete az adatokba, a fájl a
+ * kiadasok/<mod>/fizetos mappába. A Frissítés innen másolja a kész oldal
+ * zárt útvonalára - a GitHubra szándékosan nem kerül fel.
+ */
+async function fizetosFajlAtvetel(fizetos, fajl) {
+  const mod = aktualisMod()
+  if (!mod) return
+  if (fajl.size > 25 * 1024 * 1024) {
+    pirit(`Ez a fájl ${meretSzoveg(fajl.size)} - a Cloudflare Pages legfeljebb 25 MB-ot enged. Tömörítsd kisebbre.`, 'rossz')
+    return
+  }
+
+  fizetos.fajl = fajl.name
+  fizetos.meret = meretSzoveg(fajl.size)
+  jelolValtozas()
+  ujraRajzol()
+
+  pirit(`${fajl.name} átvétele… (${meretSzoveg(fajl.size)})`)
+  try {
+    await api(
+      `/api/modfajl?mod=${encodeURIComponent(mod.id)}&verzio=fizetos&nev=${encodeURIComponent(fajl.name)}`,
+      { method: 'POST', body: await fajl.arrayBuffer() },
+    )
+    await modFajlokBetolt()
+    ujraRajzol()
+    pirit(`${fajl.name} készen áll - a Frissítés viszi fel.`, 'jo')
+  } catch (hiba) {
+    pirit(`Nem sikerült átvenni a fájlt: ${hiba.message}`, 'rossz')
+  }
+}
+
+async function fizetosFajlTorles(mod, fizetos) {
+  if (!confirm('Eltávolítod a fizetős fájlt?\n\nA következő Frissítés után az oldalról is lekerül.')) return
+  try {
+    await api(`/api/modfajl-torles?mod=${encodeURIComponent(mod.id)}&verzio=fizetos`, { method: 'POST' })
+    fizetos.fajl = ''
+    fizetos.meret = ''
+    jelolValtozas()
+    await modFajlokBetolt()
+    ujraRajzol()
+    pirit('A fizetős fájl eltávolítva.', 'jo')
+  } catch (hiba) {
+    pirit(`Nem sikerült eltávolítani: ${hiba.message}`, 'rossz')
   }
 }
 
@@ -2227,7 +2405,7 @@ async function frissitesInditas() {
   })
 
   // Mi vár feltöltésre?
-  const varakozoFajlok = allapot.modfajlok.filter((f) => !f.feltoltve)
+  const varakozoFajlok = allapot.modfajlok.filter((f) => !f.feltoltve && f.verzio !== 'fizetos')
   if (varakozoFajlok.length) {
     test.append(
       el('div', { class: 'uzenet' }, [

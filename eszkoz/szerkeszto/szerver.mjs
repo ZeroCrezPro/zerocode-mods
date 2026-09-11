@@ -328,6 +328,22 @@ function ellenoriz({ site, mods }) {
     }
     if (modSlugok.has(m.slug)) hibak.push(`${hol}: ez az URL azonosító már foglalt.`)
     modSlugok.add(m.slug)
+    const fz = m.fizetos
+    const fzBarmi = fz && Object.values(fz).some((v) => typeof v === 'string' && v.trim())
+    if (fzBarmi) {
+      if (!fz.cim?.trim()) hibak.push(`${hol}: a fizetős letöltésnél add meg a gomb feliratát.`)
+      if (!fz.ar?.trim()) hibak.push(`${hol}: a fizetős letöltésnél add meg a kiírt árat.`)
+      if (!/^https?:\/\//.test(fz.vasarlasUrl ?? '')) {
+        hibak.push(`${hol}: a fizetési oldal címe http:// vagy https:// előtaggal kell kezdődjön.`)
+      }
+      if (!fz.termekAzonosito?.trim()) {
+        hibak.push(`${hol}: a fizetős letöltéshez kell a termék azonosítója, különben a kulcsot nem lehet ellenőrizni.`)
+      }
+      if (!['lemonsqueezy', 'gumroad'].includes(fz.szolgaltato)) {
+        hibak.push(`${hol}: válaszd ki a fizetési szolgáltatót.`)
+      }
+      if (!fz.fajl?.trim()) hibak.push(`${hol}: a fizetős letöltéshez jelöld ki a fájlt.`)
+    }
     if (m.video?.trim() && !youtubeAzonosito(m.video)) {
       hibak.push(
         `${hol}: a videó címét nem ismerem fel. YouTube-hivatkozás kell, például https://youtu.be/AZONOSITO.`,
@@ -446,6 +462,8 @@ async function modFajlokFeltoltese() {
   // Csak azok érdekelnek, amelyek tényleg egy létező mod verziójához tartoznak
   const feladatok = []
   for (const f of varakozok) {
+    // A fizetős fájl a Cloudflare zárt útvonalára megy, nem a GitHubra.
+    if (f.verzio === 'fizetos') continue
     const mod = adatok.mods.find((m) => m.id === f.modId)
     const verzio = mod?.versions?.find((v) => v.version === f.verzio)
     if (!mod || !verzio) continue
@@ -544,6 +562,25 @@ async function modFajlokFeltoltese() {
   }
 }
 
+/**
+ * Fizetős fájlok a kész oldalban: a build másolja őket a dist/premium alá.
+ * Ha valamelyik hiányzik, a publikálás megáll - különben az oldal egy
+ * "még nincs feltöltve" hibával fogadná a vásárlót.
+ */
+async function fizetosFajlokEllenorzese(adatok) {
+  for (const m of adatok.mods ?? []) {
+    const f = m.fizetos?.fajl
+    if (!f) continue
+    const cel = path.join(distDir, 'premium', m.slug, f)
+    if (!fs.existsSync(cel)) {
+      throw new Error(
+        `A(z) "${m.name}" fizetős fájlja (${f}) nincs meg a kiadasok mappában - jelöld ki újra a szerkesztőben.`,
+      )
+    }
+    naploz('sor', `Fizetős fájl a helyén: ${m.name} - ${f}`)
+  }
+}
+
 async function muveletFuttat(nev, uzenet) {
   if (futoMuvelet) throw new Error(`Már fut egy művelet: ${futoMuvelet}`)
   futoMuvelet = nev
@@ -559,6 +596,7 @@ async function muveletFuttat(nev, uzenet) {
       await modFajlokFeltoltese()
 
       await parancs(npm, ['run', 'build'], '2/5 - Weboldal építése')
+      await fizetosFajlokEllenorzese(await adatokBeolvas())
 
       naploz('lepes', '3/5 - Változások mentése')
       await parancs('git', ['add', '-A'], 'Változások összegyűjtése', { halkan: true })
@@ -999,6 +1037,16 @@ const elonezetSzerver = http.createServer(async (req, res) => {
         'font:15px Segoe UI,Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh">' +
         '<p>Még nincs elkészült előnézet. Kattints az <b style="color:#f2f2f4">Előnézet frissítése</b> gombra.</p>',
     )
+  }
+  // Élesben ezeket Cloudflare-függvények kezelik; az előnézet csak jelzi, hogy itt nem élnek.
+  if (ut.startsWith('/api/fizetos/')) {
+    return json(res, 403, {
+      ok: false,
+      hiba: 'Az előnézetben nincs fizetés-ellenőrzés - ez csak az éles oldalon működik.',
+    })
+  }
+  if (ut.startsWith('/premium/')) {
+    return json(res, 403, { ok: false, hiba: 'Zárt útvonal - csak érvényes kulccsal, az éles oldalon.' })
   }
   return statikus(res, distDir, ut === '/' ? '/index.html' : ut, '404.html', ELONEZET_HID)
 })

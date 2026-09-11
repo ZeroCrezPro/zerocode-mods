@@ -42,7 +42,7 @@
     "installationSteps": [
       {
         "title": "A mod telepítése",
-        "detail": "Töltsd le és indítsd el az MP2Mod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot (a kis- és nagybetű számít) - a kódot a <span style=\"color:#f5d90a\">Telepítési útmutató gomb melletti mezőben</span> kapod meg: írd be az ott villogó négyjegyű számot. Ekkor megjelenik a TELEPÍTÉS gomb. A telepítő magától megkeresi a Max Payne 2 mappáját – ha nem találná, a Tallózás gombbal add meg kézzel. Kattints a TELEPÍTÉS gombra: a mod a scripts mappába kerül, a meglévő fájlokat nem írja felül (később a TÖRLÉS gombbal eltávolítható). Végül indítsd a játékot a Steamről, és játék közben nyomd meg az ALT + E-t a panel előhívásához."
+        "detail": "Töltsd le és indítsd el az MP2Mod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot (a kis- és nagybetű számít) - a kódot a <span style=\"color:#f5d90a\">Letöltés gomb melletti mezőben</span> kapod meg: írd be az ott villogó négyjegyű számot. Ekkor megjelenik a TELEPÍTÉS gomb. A telepítő magától megkeresi a Max Payne 2 mappáját – ha nem találná, a Tallózás gombbal add meg kézzel. Kattints a TELEPÍTÉS gombra: a mod a scripts mappába kerül, a meglévő fájlokat nem írja felül (később a TÖRLÉS gombbal eltávolítható). Végül indítsd a játékot a Steamről, és játék közben nyomd meg az ALT + E-t a panel előhívásához."
       }
     ],
     "versions": [
@@ -107,7 +107,7 @@
     "installationSteps": [
       {
         "title": "A magyarítás telepítése",
-        "detail": "Töltsd le és indítsd el az ACBF_Magyaritas.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot (a kis- és nagybetű számít) – a kódot a Telepítési útmutató gomb melletti mezőben kapod meg: írd be az ott villogó négyjegyű számot. A telepítő magától megkeresi a játékot az ACBlackFlag.exe alapján – ha megvan, az útvonal kerete zöldre vált; ha nem találná, a Tallózás gombbal add meg kézzel. Nyomd meg a TELEPÍTÉS gombot: a gombon belüli csík mutatja a haladást, a telepítő a magyarítást a játék verziójához igazítja és beírja. A \"Kész\" üzenet után indítsd a játékot – magyarul fog megszólalni."
+        "detail": "Töltsd le és indítsd el az ACBF_Magyaritas.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot (a kis- és nagybetű számít) – a kódot a Letöltés gomb melletti mezőben kapod meg: írd be az ott villogó négyjegyű számot. A telepítő magától megkeresi a játékot az ACBlackFlag.exe alapján – ha megvan, az útvonal kerete zöldre vált; ha nem találná, a Tallózás gombbal add meg kézzel. Nyomd meg a TELEPÍTÉS gombot: a gombon belüli csík mutatja a haladást, a telepítő a magyarítást a játék verziójához igazítja és beírja. A \"Kész\" üzenet után indítsd a játékot – magyarul fog megszólalni."
       }
     ],
     "versions": [
@@ -189,7 +189,7 @@
     "installationSteps": [
       {
         "title": "A magyarítás telepítése",
-        "detail": "Zárd be a Max Payne 2-t, ha fut. Töltsd le és indítsd el az MP2Magyaritas.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot (a kis- és nagybetű számít) – a kódot a Telepítési útmutató gomb melletti mezőben kapod meg: írd be az ott villogó négyjegyű számot. Ekkor megjelenik a TELEPÍTÉS gomb. A telepítő magától megkeresi a Max Payne 2 mappáját a maxpayne2.exe alapján – ha megvan, az útvonal kerete zöldre vált; ha nem találná, a Tallózás gombbal add meg kézzel. Nyomd meg a TELEPÍTÉS gombot: a gombon belüli csík mutatja a haladást, a telepítő előbb biztonsági másolatot készít a két archívumról, majd beírja a magyar szövegeket és betűtípusokat. A „KÉSZ” üzenet után indítsd el a játékot, és a Beállítások / Játék menüben kapcsold be a Feliratok kapcsolót."
+        "detail": "Zárd be a Max Payne 2-t, ha fut. Töltsd le és indítsd el az MP2Magyaritas.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). Írd be a kért kódot (a kis- és nagybetű számít) – a kódot a Letöltés gomb melletti mezőben kapod meg: írd be az ott villogó négyjegyű számot. Ekkor megjelenik a TELEPÍTÉS gomb. A telepítő magától megkeresi a Max Payne 2 mappáját a maxpayne2.exe alapján – ha megvan, az útvonal kerete zöldre vált; ha nem találná, a Tallózás gombbal add meg kézzel. Nyomd meg a TELEPÍTÉS gombot: a gombon belüli csík mutatja a haladást, a telepítő előbb biztonsági másolatot készít a két archívumról, majd beírja a magyar szövegeket és betűtípusokat. A „KÉSZ” üzenet után indítsd el a játékot, és a Beállítások / Játék menüben kapcsold be a Feliratok kapcsolót."
       }
     ],
     "versions": [
@@ -291,7 +291,7 @@
     "installationSteps": [
       {
         "title": "A mod telepítése",
-        "detail": "Töltsd le és indítsd el az SHCMod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). A telepítő magától megkeresi a Stronghold Crusader: Definitive Edition-t – ha megvan, az útvonal kerete zöldre vált; ha nem találná, a Tallózás gombbal add meg kézzel. Írd be a kért kódot (a kis- és nagybetű számít) – a kódot a Telepítési útmutató gomb melletti mezőben kapod meg: írd be az ott villogó négyjegyű számot. Ekkor megjelenik a TELEPÍTÉS gomb; nyomd meg, a gomb belsejében látszik a folyamat. Végül indítsd a játékot, és játék közben nyomj ALT+E-t a panel előhívásához. Eltávolítás: ugyanez a telepítő – ha a mod fent van, a fő gomb felirata TÖRLÉS."
+        "detail": "Töltsd le és indítsd el az SHCMod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). A telepítő magától megkeresi a Stronghold Crusader: Definitive Edition-t – ha megvan, az útvonal kerete zöldre vált; ha nem találná, a Tallózás gombbal add meg kézzel. Írd be a kért kódot (a kis- és nagybetű számít) – a kódot a Letöltés gomb melletti mezőben kapod meg: írd be az ott villogó négyjegyű számot. Ekkor megjelenik a TELEPÍTÉS gomb; nyomd meg, a gomb belsejében látszik a folyamat. Végül indítsd a játékot, és játék közben nyomj ALT+E-t a panel előhívásához. Eltávolítás: ugyanez a telepítő – ha a mod fent van, a fő gomb felirata TÖRLÉS."
       }
     ],
     "versions": [
