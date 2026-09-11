@@ -78,7 +78,11 @@
       "leiras": "A MP2 Mod Panel teljes forráskódja (C++): a játékba töltődő mod forrása (src, include, loader), az MP2Mod.exe telepítő forrása, build-szkriptek és fordítási útmutató. Saját változat készítéséhez, tanuláshoz.",
       "szolgaltato": "lemonsqueezy",
       "fajl": "MP2ModPanel-Forrasfajlok.zip",
-      "meret": "729 kB"
+      "meret": "729 kB",
+      "vasarlasUrl": "https://zerocode.lemonsqueezy.com/checkout/custom/8be3881b-8272-4922-a9fd-565a978c273b?signature=83678a14921ab603567b43445fb18f68586db5a062db1f0694e5afa3f56a0d18",
+      "termekAzonosito": "2116284",
+      "checkoutAr": 69.99,
+      "checkoutTeszt": true
     }
   },
   {
