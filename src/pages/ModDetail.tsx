@@ -251,7 +251,9 @@ export default function ModDetail() {
                     {vLabel(latest.version)}
                   </a>
                   {/* Fizetős (prémium) letöltés - a szolgáltató kulcsával nyílik. */}
-                  {mod.fizetos?.fajl && <FizetosLetoltes slug={mod.slug} fizetos={mod.fizetos} />}
+                  {mod.fizetos?.fajl && mod.fizetos.vasarlasUrl && mod.fizetos.termekAzonosito && (
+                    <FizetosLetoltes slug={mod.slug} fizetos={mod.fizetos} />
+                  )}
                   {/*
                     A telepítési kód a letöltés gomb mellett, vele egy
                     magasságban: szám + visszaszámláló + beírás, majd a kód.

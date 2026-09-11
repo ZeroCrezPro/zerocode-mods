@@ -331,18 +331,14 @@ function ellenoriz({ site, mods }) {
     const fz = m.fizetos
     const fzBarmi = fz && Object.values(fz).some((v) => typeof v === 'string' && v.trim())
     if (fzBarmi) {
-      if (!fz.cim?.trim()) hibak.push(`${hol}: a fizetős letöltésnél add meg a gomb feliratát.`)
-      if (!fz.ar?.trim()) hibak.push(`${hol}: a fizetős letöltésnél add meg a kiírt árat.`)
-      if (!/^https?:\/\//.test(fz.vasarlasUrl ?? '')) {
+      // Csak a formátumot kérjük számon; a hiányos beállítás menthető, az
+      // oldal addig egyszerűen nem mutatja a gombot.
+      if (fz.vasarlasUrl?.trim() && !/^https?:\/\//.test(fz.vasarlasUrl)) {
         hibak.push(`${hol}: a fizetési oldal címe http:// vagy https:// előtaggal kell kezdődjön.`)
       }
-      if (!fz.termekAzonosito?.trim()) {
-        hibak.push(`${hol}: a fizetős letöltéshez kell a termék azonosítója, különben a kulcsot nem lehet ellenőrizni.`)
+      if (fz.szolgaltato && !['lemonsqueezy', 'gumroad'].includes(fz.szolgaltato)) {
+        hibak.push(`${hol}: ismeretlen fizetési szolgáltató.`)
       }
-      if (!['lemonsqueezy', 'gumroad'].includes(fz.szolgaltato)) {
-        hibak.push(`${hol}: válaszd ki a fizetési szolgáltatót.`)
-      }
-      if (!fz.fajl?.trim()) hibak.push(`${hol}: a fizetős letöltéshez jelöld ki a fájlt.`)
     }
     if (m.video?.trim() && !youtubeAzonosito(m.video)) {
       hibak.push(
@@ -789,8 +785,15 @@ async function varakozoFajlok() {
 }
 
 /** Feltöltésre váró fájl mentése (a korábbit lecseréli). */
+/** "Forrás fájl.zip" -> "Forras fajl.zip": az ékezet lekerül, a betű megmarad. */
+function ekezetNelkul(szoveg) {
+  return String(szoveg ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
 async function modFajlMentes(modId, verzio, nyersNev, adat) {
-  const nev = path.basename(nyersNev).replace(/[^A-Za-z0-9._ -]+/g, '-')
+  const nev = ekezetNelkul(path.basename(nyersNev)).replace(/[^A-Za-z0-9._ -]+/g, '-')
   if (!nev) throw new Error('Érvénytelen fájlnév.')
 
   const mappa = verzioMappa(modId, verzio)

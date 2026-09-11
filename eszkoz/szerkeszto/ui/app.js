@@ -663,7 +663,7 @@ const MOD_SZAKASZOK = [
         tipus: 'csoport',
         teljes: true,
         sugo:
-          'Üresen hagyva nincs fizetős gomb. A fizetést és a számlázást a szolgáltató intézi: nála hozod létre a terméket az árral, ő adja a vásárlónak a licenckulcsot, az oldal pedig a kulcsot ellenőrzi és csak utána adja ki a fájlt.',
+          'A gomb akkor jelenik meg az oldalon, ha a fizetési link, a termék azonosítója és a fájl is megvan - addig nyugodtan menthető félkészen. A fizetést és a számlázást a szolgáltató intézi: nála hozod létre a terméket az árral, ő adja a vásárlónak a licenckulcsot, az oldal pedig a kulcsot ellenőrzi és csak utána adja ki a fájlt.',
         mezok: [
           {
             k: 'cim',
