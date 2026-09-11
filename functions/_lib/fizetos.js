@@ -109,6 +109,107 @@ async function gumroadEllenorzes(beallitas, kulcs, fetchFn) {
   return { ok: true }
 }
 
+/* ================================================================== */
+/* Letöltési jegy                                                      */
+/* ================================================================== */
+
+/*
+ * Sikeres fizetés után a vásárló nem kulcsot ír be, hanem az oldal a
+ * rendelést ellenőrzi a szolgáltatónál, és ad egy aláírt "jegyet". A jegy
+ * a mod azonosítóját, a rendelés számát és a lejáratot hordozza, HMAC-
+ * aláírással - hamisítani a titok nélkül nem lehet, tárolni pedig nem
+ * kell semmit.
+ */
+
+const JEGY_ELET = 365 * 24 * 3600 * 1000 // egy év
+
+const b64 = (bajtok) =>
+  btoa(String.fromCharCode(...new Uint8Array(bajtok))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+const b64vissza = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0))
+
+async function alairas(szoveg, titok) {
+  const kulcs = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(titok),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+  return b64(await crypto.subtle.sign('HMAC', kulcs, new TextEncoder().encode(szoveg)))
+}
+
+export async function jegyKeszit(slug, rendeles, titok) {
+  const lejarat = Date.now() + JEGY_ELET
+  const test = b64(new TextEncoder().encode(JSON.stringify({ slug, rendeles: String(rendeles), lejarat })))
+  return `${test}.${await alairas(test, titok)}`
+}
+
+export async function jegyEllenorzes(slug, jegy, titok) {
+  const [test, ala] = String(jegy ?? '').split('.')
+  if (!test || !ala || !titok) return false
+  if ((await alairas(test, titok)) !== ala) return false
+  try {
+    const adat = JSON.parse(new TextDecoder().decode(b64vissza(test)))
+    return adat.slug === slug && typeof adat.lejarat === 'number' && adat.lejarat > Date.now()
+  } catch {
+    return false
+  }
+}
+
+/* ================================================================== */
+/* Rendelés ellenőrzése (Lemon Squeezy)                                */
+/* ================================================================== */
+
+/**
+ * A fizetőablak sikeres fizetés után megadja a rendelés számát és az
+ * egyedi azonosítóját. Ezt itt a Lemon Squeezy API-nál ellenőrizzük:
+ * tényleg fizetett-e, ehhez a termékhez-e, és egyezik-e az egyedi
+ * azonosító (az UUID kitalálhatatlan, ezért ez bizonyítja, hogy a
+ * rendelés a kérőé). Ehhez API-kulcs kell (LEMON_API_KEY titok).
+ */
+export async function rendelesEllenorzes(beallitas, rendeles, azonosito, apiKulcs, fetchFn = fetch) {
+  if (beallitas.szolgaltato !== 'lemonsqueezy') {
+    return { ok: false, hiba: 'Ennél a szolgáltatónál a licenckulcsot kell beírni.' }
+  }
+  if (!apiKulcs) {
+    return {
+      ok: false,
+      hiba: 'Az automatikus ellenőrzés nincs beállítva - írd be a kapott licenckulcsot.',
+    }
+  }
+  const id = String(rendeles ?? '').trim()
+  const uuid = String(azonosito ?? '').trim()
+  if (!/^\d{1,12}$/.test(id) || !/^[0-9a-f-]{20,40}$/i.test(uuid)) {
+    return { ok: false, hiba: 'Hiányos rendelési adat.' }
+  }
+
+  let valasz
+  try {
+    valasz = await fetchFn(`https://api.lemonsqueezy.com/v1/orders/${id}`, {
+      headers: { Accept: 'application/vnd.api+json', Authorization: `Bearer ${apiKulcs}` },
+    })
+  } catch (e) {
+    return { ok: false, hiba: `A rendelés ellenőrzése most nem elérhető (${e.message}).` }
+  }
+  if (valasz.status === 404) return { ok: false, hiba: 'Nincs ilyen rendelés.' }
+  if (!valasz.ok) return { ok: false, hiba: `A rendelés ellenőrzése nem sikerült (${valasz.status}).` }
+
+  const adat = await valasz.json().catch(() => ({}))
+  const a = adat?.data?.attributes ?? {}
+  if (String(a.identifier ?? '').toLowerCase() !== uuid.toLowerCase()) {
+    return { ok: false, hiba: 'A rendelés azonosítója nem egyezik.' }
+  }
+  if (a.status !== 'paid') {
+    return { ok: false, hiba: a.status === 'refunded' ? 'Ezt a rendelést visszatérítették.' : 'A fizetés még nem zárult le.' }
+  }
+  const tetel = a.first_order_item ?? {}
+  const azonositok = [tetel.variant_id, tetel.product_id].map((x) => String(x ?? ''))
+  if (!azonositok.includes(String(beallitas.termekAzonosito))) {
+    return { ok: false, hiba: 'Ez a rendelés egy másik termékhez tartozik.' }
+  }
+  return { ok: true }
+}
+
 /** JSON válasz, gyorsítótár nélkül. */
 export function jsonValasz(adat, statusz = 200) {
   return new Response(JSON.stringify(adat), {

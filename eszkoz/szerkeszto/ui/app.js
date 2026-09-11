@@ -2071,7 +2071,79 @@ function lapBeallitasok() {
   lap.append(el('h1', { style: 'font-size:22px;margin-bottom:18px', text: 'Beállítások' }))
   lap.append(hianyOsszegzo(allapot.adatok.site, BEALLITAS_SZAKASZOK))
   lap.append(szakaszokRajz(allapot.adatok.site, BEALLITAS_SZAKASZOK))
+  lap.append(titkokPanel())
   return lap
+}
+
+/**
+ * Fizetés - titkos beállítások.
+ *
+ * Ezek NEM a site.json-ba mennek (az nyilvános), hanem helyben egy külön
+ * fájlba, és onnan egyenesen a Cloudflare-re. A felület soha nem kapja
+ * vissza magát a kulcsot, csak azt, hogy be van-e állítva.
+ */
+function titkokPanel() {
+  const be = el('input', {
+    type: 'password',
+    class: 'mono',
+    placeholder: 'Lemon Squeezy → Settings → API → New API key',
+    autocomplete: 'off',
+  })
+  const allapotSor = el('p', { class: 'sugo', text: 'Betöltés…' })
+  const gomb = el('button', {
+    type: 'button',
+    class: 'gomb gomb-elsodleges gomb-apro',
+    text: 'Mentés és feltöltés a Cloudflare-re',
+    onClick: async () => {
+      gomb.disabled = true
+      try {
+        const v = await api('/api/titkok', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lemonApiKey: be.value }),
+        })
+        be.value = ''
+        frissit(v)
+        pirit(v.uzenet || 'Mentve.', 'jo')
+      } catch (hiba) {
+        pirit(`Nem sikerült: ${hiba.message}`, 'rossz')
+      } finally {
+        gomb.disabled = false
+      }
+    },
+  })
+
+  const frissit = (t) => {
+    const sorok = []
+    sorok.push(
+      t.lemonApiKey
+        ? `API-kulcs: ${t.lemonApiKey}${t.lemonFent ? ' - fent van a Cloudflare-en' : ' - még nincs feltöltve'}`
+        : 'API-kulcs: nincs beállítva - addig a vevőnek a licenckulcsot kell beírnia.',
+    )
+    sorok.push(
+      t.jegyTitok
+        ? `Letöltési jegy titka: ${t.jegyFent ? 'fent van' : 'még nincs feltöltve'}`
+        : 'Letöltési jegy titka: az első mentéskor magától elkészül.',
+    )
+    allapotSor.textContent = sorok.join('  ·  ')
+  }
+  api('/api/titkok').then(frissit).catch(() => (allapotSor.textContent = 'Nem olvasható.'))
+
+  return el('section', { class: 'panel' }, [
+    el('div', { class: 'panel-fej' }, [el('h3', { text: 'Fizetés - titkos beállítások' })]),
+    el('div', { class: 'panel-test' }, [
+      el('div', { class: 'mezo teljes' }, [
+        el('span', { class: 'mezo-cim', text: 'Lemon Squeezy API-kulcs' }),
+        be,
+        el('p', {
+          class: 'sugo',
+          text: 'Ettől lesz automatikus a fizetés: sikeres fizetés után az oldal ezzel ellenőrzi a rendelést, és a vevőnek nem kell semmit beírnia. Csak olvasásra elég (Settings → API → New API key). Ez a kulcs helyben marad és a Cloudflare-re megy - a GitHubra nem.',
+        }),
+      ]),
+      el('div', { style: 'display:flex;gap:10px;align-items:center;flex-wrap:wrap' }, [gomb]),
+      allapotSor,
+    ]),
+  ])
 }
 
 /* ---------- Képek ---------- */

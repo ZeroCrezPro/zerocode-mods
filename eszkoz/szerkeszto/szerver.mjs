@@ -577,6 +577,58 @@ async function fizetosFajlokEllenorzese(adatok) {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/* Titkos beállítások (fizetés)                                        */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Az API-kulcs és a letöltési jegy aláíró titka NEM kerülhet a repóba (az
+ * nyilvános). Helyben a .szerkeszto-titkok.json őrzi (gitignore alatt),
+ * és a wrangler viszi fel a Cloudflare Pages titkai közé - onnan a
+ * függvények env változóként kapják.
+ */
+const titkokFajl = path.join(projekt, '.szerkeszto-titkok.json')
+const TITOK_NEVEK = { lemonApiKey: 'LEMON_API_KEY', jegyTitok: 'FIZETOS_TITOK' }
+
+async function titkokBeolvas() {
+  try {
+    return JSON.parse(await fsp.readFile(titkokFajl, 'utf8'))
+  } catch {
+    return {}
+  }
+}
+
+/** Egy titok feltöltése a Cloudflare Pages projekthez (a wrangler a szabványos bemenetről olvassa). */
+function titokFeltoltes(nev, ertek) {
+  return new Promise((kesz, hiba) => {
+    const gyerek = spawn(
+      npx,
+      ['wrangler', 'pages', 'secret', 'put', nev, '--project-name=zerocode-mods'],
+      { cwd: projekt, shell: shellKell(npx), windowsHide: true, env: { ...process.env, NO_COLOR: '1' } },
+    )
+    let ki = ''
+    gyerek.stdout.on('data', (d) => (ki += d))
+    gyerek.stderr.on('data', (d) => (ki += d))
+    gyerek.on('error', (e) => hiba(new Error(`wrangler: ${e.message}`)))
+    gyerek.on('close', (kod) => {
+      if (kod === 0) kesz(ki)
+      else hiba(new Error(`A titok feltöltése nem sikerült (${kod}): ${ki.trim().split('\n').pop()}`))
+    })
+    gyerek.stdin.end(ertek)
+  })
+}
+
+/** Mit tudunk a titkokról (maga az érték soha nem megy ki a felületre). */
+async function titkokAllapot() {
+  const t = await titkokBeolvas()
+  return {
+    lemonApiKey: t.lemonApiKey ? `beállítva (…${String(t.lemonApiKey).slice(-4)})` : '',
+    lemonFent: Boolean(t.lemonFent),
+    jegyTitok: t.jegyTitok ? 'beállítva' : '',
+    jegyFent: Boolean(t.jegyFent),
+  }
+}
+
 async function muveletFuttat(nev, uzenet) {
   if (futoMuvelet) throw new Error(`Már fut egy művelet: ${futoMuvelet}`)
   futoMuvelet = nev
@@ -997,6 +1049,46 @@ const szerver = http.createServer(async (req, res) => {
       muveletFuttat(test.nev, test.uzenet).catch(() => {})
       return json(res, 200, { ok: true, indult: test.nev })
     }
+    /* --- titkos beállítások (fizetés) --- */
+    if (ut === '/api/titkok' && req.method === 'GET') {
+      return json(res, 200, await titkokAllapot())
+    }
+    if (ut === '/api/titkok' && req.method === 'POST') {
+      const test = JSON.parse((await testOlvas(req)).toString('utf8') || '{}')
+      const t = await titkokBeolvas()
+
+      // A jegy aláíró titka magától készül, egyszer.
+      if (!t.jegyTitok) t.jegyTitok = crypto.randomBytes(32).toString('hex')
+
+      if (typeof test.lemonApiKey === 'string') {
+        const uj = test.lemonApiKey.trim()
+        if (uj && uj !== t.lemonApiKey) {
+          t.lemonApiKey = uj
+          t.lemonFent = false
+        }
+        if (!uj) {
+          delete t.lemonApiKey
+          t.lemonFent = false
+        }
+      }
+      await fsp.writeFile(titkokFajl, JSON.stringify(t, null, 2) + '\n', 'utf8')
+
+      // Ami még nincs fent, az megy a Cloudflare-re.
+      const naploSorok = []
+      if (t.jegyTitok && !t.jegyFent) {
+        await titokFeltoltes(TITOK_NEVEK.jegyTitok, t.jegyTitok)
+        t.jegyFent = true
+        naploSorok.push('A letöltési jegy titka fent van a Cloudflare-en.')
+      }
+      if (t.lemonApiKey && !t.lemonFent) {
+        await titokFeltoltes(TITOK_NEVEK.lemonApiKey, t.lemonApiKey)
+        t.lemonFent = true
+        naploSorok.push('A Lemon Squeezy API-kulcs fent van a Cloudflare-en.')
+      }
+      await fsp.writeFile(titkokFajl, JSON.stringify(t, null, 2) + '\n', 'utf8')
+      return json(res, 200, { ok: true, uzenet: naploSorok.join(' '), ...(await titkokAllapot()) })
+    }
+
     if (ut === '/api/allapot' && req.method === 'GET') {
       return json(res, 200, { fut: futoMuvelet, projekt, vanDist: fs.existsSync(distDir) })
     }

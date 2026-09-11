@@ -441,13 +441,18 @@ mellett jelenik meg egy második gomb az árral (például *Prémium csomag · 1
 
 ### Hogyan működik a vásárlónak?
 
-1. A gombra kattintva kinyílik egy panel; a **Megvásárlás** a fizetési oldalra visz
-   (új lapon). Fizetés után **azonnal** kap egy licenckulcsot - a képernyőn és
-   e-mailben is.
-2. A kulcsot beírja a panelbe. Az oldal a szolgáltató nyilvános ellenőrző címén
-   **egy másodperc alatt** ellenőrzi, valódi-e, és ehhez a modhoz tartozik-e.
-3. Érvényes kulcs után él a **Letöltés** gomb. A kulcsot a böngésző megjegyzi, később
-   újra le tudja tölteni keresgélés nélkül.
+**Semmit nem kell beírnia.**
+
+1. A gombra kattintva kinyílik egy panel; a **Megvásárlás** az oldalon belül nyitja
+   meg a fizetőablakot (kártya, Google Pay, Apple Pay, PayPal).
+2. Sikeres fizetéskor a fizetőablak jelez az oldalnak. Az oldal a rendelést a
+   Lemon Squeezy API-jánál **szerveroldalon, másodperc alatt** ellenőrzi (tényleg
+   fizetett-e, ehhez a termékhez-e), és ad egy aláírt **letöltési jegyet**.
+3. A **Letöltés** gomb magától feléled. A jegyet a böngésző megjegyzi, később
+   keresgélés nélkül újra letölthető (egy évig érvényes).
+
+Tartalék út (más gépről, törölt böngészőadatok után): a vásárláskor e-mailben kapott
+**licenckulcs** beírása - ezt a szolgáltató nyilvános ellenőrző címén nézzük meg.
 
 A fájl a Cloudflare-en van, **zárt útvonalon**: közvetlen címről nem tölthető le,
 csak érvényes kulccsal, az oldal saját kis programján keresztül. A GitHubra a fizetős
@@ -470,7 +475,7 @@ mindkettő vásárlás után azonnal licenckulcsot ad, és nyilvános ellenőrz�
 
 1. Regisztrálj: https://app.lemonsqueezy.com - hozz létre egy boltot (*Store*).
 2. **Products → New product.** Add meg a nevet, az árat, és a *Deliverables* résznél
-   kapcsold be a **License keys** opciót (ez adja a vásárlónak a kulcsot). Fájlt
+   kapcsold be a **License keys** opciót (ez a tartalék útnak kell). Fájlt
    NEM kell feltöltened oda - a fájlt az oldal adja.
 3. A terméknél a **Share** gomb adja a vásárlási linket (`https://....lemonsqueezy.com/buy/...`).
 4. A termék **variant ID-je**: a termék oldalán a változat (*Variant*) sorában, vagy a
@@ -480,9 +485,23 @@ mindkettő vásárlás után azonnal licenckulcsot ad, és nyilvános ellenőrz�
    a vásárló, szolgáltató, termék azonosítója, fizetési link - és a **fizetős fájl**
    kijelölése (ugyanúgy, mint a modfájlé).
 6. **Mentés**, majd **Frissítés**. A fájl a Cloudflare zárt útvonalára kerül.
+7. **Az automatikus ellenőrzéshez API-kulcs kell:** a Lemon Squeezy-ben
+   *Settings → API → New API key* (olvasási jog elég). A szerkesztőben
+   **Beállítások → Fizetés - titkos beállítások** mezőjébe beillesztve a
+   *Mentés és feltöltés a Cloudflare-re* gomb egyenesen a Cloudflare titkai közé teszi.
+   **Ez a kulcs a GitHubra nem kerül fel** - helyben a `.szerkeszto-titkok.json` őrzi
+   (gitignore alatt). Amíg nincs beállítva, a vevő a licenckulcs beírásával tud
+   letölteni.
 
 Gumroadnál ugyanez: a terméknél kapcsold be a *Generate a unique license key per sale*
 opciót; a *Termék azonosítója* a termék **product ID**-je (a termék beállításainál).
+Gumroadnál nincs beágyazott fizetőablak, ezért ott a vevő a kulcsot írja be.
+
+### Próba valódi pénz nélkül
+
+A Lemon Squeezy-ben kapcsold be a **Test mode**-ot (bal alul). Ilyenkor a
+`4242 4242 4242 4242` kártyaszámmal (bármilyen lejárat, CVC) fizethetsz próbaként:
+a fizetőablak bezárul, és a Letöltés gomb magától feléled. Ha jó, kapcsold át élesre.
 
 ### Korlátok
 

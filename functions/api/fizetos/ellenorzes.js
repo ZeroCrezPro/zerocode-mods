@@ -4,9 +4,9 @@
  * Megmondja, érvényes-e a kulcs ehhez a modhoz - a letöltés gomb ettől
  * éled fel az oldalon. Magát a fájlt a /api/fizetos/letoltes adja.
  */
-import { fizetosBeallitas, jsonValasz, kulcsEllenorzes } from '../../_lib/fizetos.js'
+import { fizetosBeallitas, jegyKeszit, jsonValasz, kulcsEllenorzes } from '../../_lib/fizetos.js'
 
-export async function onRequestPost({ request }) {
+export async function onRequestPost({ request, env }) {
   let test
   try {
     test = await request.json()
@@ -20,5 +20,7 @@ export async function onRequestPost({ request }) {
   const eredmeny = await kulcsEllenorzes(beallitas, test?.kulcs)
   if (!eredmeny.ok) return jsonValasz({ ok: false, hiba: eredmeny.hiba }, 403)
 
-  return jsonValasz({ ok: true, fajl: beallitas.fajl, meret: beallitas.meret ?? '' })
+  // Jegyet is adunk, hogy a letöltés ne kérdezze meg újra a szolgáltatót.
+  const jegy = env.FIZETOS_TITOK ? await jegyKeszit(beallitas.slug, 'kulcs', env.FIZETOS_TITOK) : ''
+  return jsonValasz({ ok: true, jegy, fajl: beallitas.fajl, meret: beallitas.meret ?? '' })
 }

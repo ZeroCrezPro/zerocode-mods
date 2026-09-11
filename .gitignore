@@ -50,6 +50,8 @@ eszkoz/szerkeszto/program/kiadas/
 eszkoz/szerkeszto/program/ikon.ico
 .szerkeszto-mentes/
 .szerkeszto-uzenet.txt
+# fizetési titkok - SOHA nem kerülhet a repóba
+.szerkeszto-titkok.json
 
 # Ideiglenes parancsikon-szkript
 .szerkeszto-parancsikon.ps1
