@@ -64,9 +64,17 @@ function lemonBetolt(): Promise<void> {
   })
 }
 
-export function FizetosLetoltes({ slug, fizetos }: { slug: string; fizetos: FizetosTartalom }) {
+export function FizetosLetoltes({
+  slug,
+  fizetos,
+  arSzoveg,
+}: {
+  slug: string
+  fizetos: FizetosTartalom
+  arSzoveg: string
+}) {
   const taroloKulcs = `zc-jegy-${slug}`
-  const lemon = fizetos.szolgaltato === 'lemonsqueezy'
+  const lemon = (fizetos.szolgaltato ?? 'lemonsqueezy') === 'lemonsqueezy'
 
   const [nyitva, setNyitva] = useState(false)
   const [allapot, setAllapot] = useState<Allapot>('ures')
@@ -137,7 +145,7 @@ export function FizetosLetoltes({ slug, fizetos }: { slug: string; fizetos: Fize
   /** A fizetőablak megnyitása az oldalon belül. */
   const vasarlas = async () => {
     if (!lemon) {
-      window.open(fizetos.vasarlasUrl, '_blank', 'noopener')
+      window.open(fizetos.vasarlasUrl ?? '', '_blank', 'noopener')
       setKulcsMezo(true)
       return
     }
@@ -153,12 +161,12 @@ export function FizetosLetoltes({ slug, fizetos }: { slug: string; fizetos: Fize
           void rendelesFeldolgoz(rendeles, azonosito)
         },
       })
-      const url = new URL(fizetos.vasarlasUrl)
+      const url = new URL(fizetos.vasarlasUrl ?? '')
       url.searchParams.set('embed', '1')
       window.LemonSqueezy!.Url.Open(url.toString())
     } catch {
       // Ha az ablak nem nyílik (pl. tiltott szkript), új lapon is működik.
-      window.open(fizetos.vasarlasUrl, '_blank', 'noopener')
+      window.open(fizetos.vasarlasUrl ?? '', '_blank', 'noopener')
       setKulcsMezo(true)
     } finally {
       setFizetoNyilik(false)
@@ -202,7 +210,7 @@ export function FizetosLetoltes({ slug, fizetos }: { slug: string; fizetos: Fize
       >
         <span>{fizetos.cim}</span>
         <span className="border border-amber-500/50 bg-amber-500/10 px-2 py-0.5 font-mono text-[11px] font-black tracking-wide text-amber-300 normal-case">
-          {fizetos.ar}
+          {arSzoveg}
         </span>
       </button>
 
@@ -248,7 +256,7 @@ export function FizetosLetoltes({ slug, fizetos }: { slug: string; fizetos: Fize
                   ? 'Fizetés ellenőrzése…'
                   : fizetoNyilik
                     ? 'Fizetőablak nyílik…'
-                    : `Megvásárlás · ${fizetos.ar}`}
+                    : `Megvásárlás · ${arSzoveg}`}
               </button>
               <p className="mt-2 text-xs text-ash-400">
                 Kártya, Google Pay, Apple Pay vagy PayPal. Fizetés után a Letöltés gomb magától feléled.

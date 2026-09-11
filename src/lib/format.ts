@@ -1,4 +1,14 @@
 /** 2026-08-31 -> "2026. 08. 31." */
+/** 69.99 + "EUR" -> "69,99 €" */
+export function penzFormat(osszeg: number | null | undefined, penznem = 'EUR'): string {
+  if (osszeg === null || osszeg === undefined || Number.isNaN(osszeg)) return ''
+  try {
+    return new Intl.NumberFormat('hu-HU', { style: 'currency', currency: penznem }).format(osszeg)
+  } catch {
+    return `${osszeg} ${penznem}`
+  }
+}
+
 export function formatDate(iso: string): string {
   const d = new Date(iso + 'T00:00:00Z')
   if (Number.isNaN(d.getTime())) return iso

@@ -442,11 +442,6 @@ const LETOLTES_VALASZTEK = [
   ['url', 'Közvetlen link'],
 ]
 
-const FIZETES_VALASZTEK = [
-  ['lemonsqueezy', 'Lemon Squeezy (ajánlott)'],
-  ['gumroad', 'Gumroad'],
-]
-
 const LETOLTES_MEZOK = [
   {
     k: 'kind',
@@ -663,56 +658,35 @@ const MOD_SZAKASZOK = [
         tipus: 'csoport',
         teljes: true,
         sugo:
-          'A gomb akkor jelenik meg az oldalon, ha a fizetési link, a termék azonosítója és a fájl is megvan - addig nyugodtan menthető félkészen. A fizetést és a számlázást a szolgáltató intézi: nála hozod létre a terméket az árral, ő adja a vásárlónak a licenckulcsot, az oldal pedig a kulcsot ellenőrzi és csak utána adja ki a fájlt.',
+          'Csak ezt a négyet kell kitölteni. A Frissítés a többit elintézi: a Lemon Squeezy-nél létrehozza a fizetőoldalt ezzel a névvel és árral, a fájlt zárt útvonalra teszi, és a gomb megjelenik az oldalon. Fizetés után a vevőnek a Letöltés gomb magától feléled.',
         mezok: [
           {
             k: 'cim',
             cim: 'A gomb felirata',
             tipus: 'szoveg',
-            sugo: 'Például: Prémium csomag, Teljes verzió, Extra pályák.',
+            sugo: 'Például: Prémium csomag, Teljes verzió, Forrásfájlok.',
           },
           {
             k: 'ar',
-            cim: 'Kiírt ár',
-            tipus: 'szoveg',
-            sugo: 'Csak felirat, például "1 990 Ft". Az összeget a szolgáltatónál állítod be.',
+            cim: 'Ár',
+            tipus: 'szam',
+            sugo: 'A bolt pénznemében (euró), például 69.99. Ezzel az árral készül a fizetőoldal.',
           },
           {
             k: 'leiras',
             cim: 'Mit kap a vásárló?',
             tipus: 'hosszu',
             teljes: true,
-            sugo: 'Egy-két mondat a panelben, a Megvásárlás gomb fölött.',
-          },
-          {
-            k: 'szolgaltato',
-            cim: 'Fizetési szolgáltató',
-            tipus: 'valaszto',
-            valasztek: FIZETES_VALASZTEK,
-            sugo: 'Mindkettő a te nevedben számláz és kezeli az áfát; vásárlás után rögtön licenckulcsot ad.',
-          },
-          {
-            k: 'termekAzonosito',
-            cim: 'Termék azonosítója az ellenőrzéshez',
-            tipus: 'szoveg',
-            mono: true,
-            sugo: 'Lemon Squeezy: a termék változatának (variant) számazonosítója. Gumroad: a termék product ID-je. Ezzel ellenőrzi az oldal, hogy a kulcs ehhez a termékhez tartozik.',
-          },
-          {
-            k: 'vasarlasUrl',
-            cim: 'A fizetési oldal címe',
-            tipus: 'szoveg',
-            mono: true,
-            teljes: true,
-            sugo: 'A szolgáltatónál kapott vásárlási link (checkout). A Megvásárlás gomb ide visz.',
+            sugo: 'Egy-két mondat - a panelben és a fizetőoldalon is ez jelenik meg.',
           },
           {
             k: 'fajl',
             cim: 'A fizetős fájl',
             tipus: 'fizetosFajl',
             teljes: true,
-            sugo: 'Ezt kapja a vásárló a kulcs beírása után. A Frissítés viszi fel a Cloudflare-re, zárt útvonalra - a GitHubra nem kerül fel. Legfeljebb 25 MB lehet.',
+            sugo: 'Ezt kapja a vásárló fizetés után. A Frissítés viszi fel a Cloudflare-re, zárt útvonalra - a GitHubra nem kerül fel. Legfeljebb 25 MB lehet.',
           },
+          { k: 'vasarlasUrl', cim: 'Fizetőoldal', tipus: 'fizetosAllapot', teljes: true },
         ],
       },
     ],
@@ -1167,6 +1141,45 @@ function mezoRajz(objektum, mezo) {
         ]),
       )
 
+      return mezoBurok(mezo, doboz)
+    }
+
+    case 'fizetosAllapot': {
+      const f = objektum
+      const lemon = allapot.adatok?.site?.lemon ?? {}
+      let szoveg
+      let osztaly = 'sugo'
+      if (!f.fajl || !(Number(f.ar) > 0)) {
+        szoveg = 'A fizetőoldal a Frissítéskor készül el, ha az ár és a fájl is megvan.'
+      } else if (!lemon.variantId) {
+        szoveg = 'Hiányzik az alaptermék: Beállítások → Fizetés → Alaptermék. Enélkül a Frissítés megáll.'
+        osztaly = 'sugo figyelmeztetes'
+      } else if (
+        !f.vasarlasUrl ||
+        Number(f.checkoutAr) !== Number(f.ar) ||
+        Boolean(f.checkoutTeszt) !== Boolean(lemon.tesztMod) ||
+        f.termekAzonosito !== String(lemon.variantId)
+      ) {
+        szoveg = `A következő Frissítéskor a Lemon Squeezy-nél elkészül a fizetőoldal: ${f.ar} ${lemon.penznem ?? 'EUR'}${lemon.tesztMod ? ' (próba módban)' : ''}.`
+      } else {
+        szoveg = `Kész: ${f.ar} ${lemon.penznem ?? 'EUR'}${f.checkoutTeszt ? ' (próba mód)' : ''} - a gomb kint van az oldalon.`
+      }
+      const doboz = el('div', { class: 'modfajl' + (f.vasarlasUrl ? ' fent' : '') }, [
+        el('span', { class: 'modfajl-jel', text: f.vasarlasUrl ? '✓' : '…' }),
+        el('span', { style: 'min-width:0;flex:1' }, [
+          el('span', { class: 'modfajl-nev', text: f.vasarlasUrl ? 'Fizetőoldal elkészült' : 'Fizetőoldal még nincs' }),
+          el('span', { class: 'modfajl-allapot ' + osztaly, text: szoveg }),
+        ]),
+        f.vasarlasUrl
+          ? el('a', {
+              class: 'gomb gomb-masodlagos gomb-apro',
+              href: f.vasarlasUrl,
+              target: '_blank',
+              rel: 'noopener',
+              text: 'Megnyitás',
+            })
+          : null,
+      ])
       return mezoBurok(mezo, doboz)
     }
 
@@ -2129,19 +2142,104 @@ function titkokPanel() {
   }
   api('/api/titkok').then(frissit).catch(() => (allapotSor.textContent = 'Nem olvasható.'))
 
+  /* --- Alaptermék: a bolt egyetlen, kézzel létrehozott terméke --- */
+  const site = allapot.adatok.site
+  if (typeof site.lemon !== 'object' || site.lemon === null) site.lemon = {}
+  const lemon = site.lemon
+
+  const valaszto = el('select', {
+    onChange: (e) => {
+      const v = valaszto._termekek?.find((t) => t.variantId === e.target.value)
+      if (!v) return
+      lemon.storeId = v.storeId
+      lemon.variantId = v.variantId
+      lemon.termekNev = v.termekNev
+      lemon.penznem = v.penznem
+      jelolValtozas()
+      alaptermekSor.textContent = alaptermekSzoveg()
+    },
+  })
+  const alaptermekSzoveg = () =>
+    lemon.variantId
+      ? `Alaptermék: ${lemon.termekNev} (${lemon.penznem}) - minden fizetős csomag erre épül, saját névvel és árral.`
+      : 'Még nincs alaptermék kiválasztva. Hozz létre EGY terméket a Lemon Squeezy-ben (License keys bekapcsolva), majd kattints a Termékek lekérése gombra.'
+  const alaptermekSor = el('p', { class: 'sugo', text: alaptermekSzoveg() })
+
+  const lekeres = el('button', {
+    type: 'button',
+    class: 'gomb gomb-masodlagos gomb-apro',
+    text: 'Termékek lekérése',
+    onClick: async () => {
+      lekeres.disabled = true
+      try {
+        const v = await api('/api/lemon/termekek')
+        valaszto._termekek = v.termekek ?? []
+        valaszto.replaceChildren(el('option', { value: '', text: '- válassz -' }))
+        for (const t of valaszto._termekek) {
+          valaszto.append(
+            el('option', {
+              value: t.variantId,
+              selected: t.variantId === lemon.variantId,
+              text: `${t.termekNev}${t.variantNev && t.variantNev !== 'Default' ? ' / ' + t.variantNev : ''} - ${t.penznem}${t.licenckulcs ? '' : ' (nincs License keys!)'}${t.allapot !== 'published' ? ' (' + t.allapot + ')' : ''}`,
+            }),
+          )
+        }
+        if (!valaszto._termekek.length) {
+          pirit('A boltban még nincs termék. Hozz létre egyet a Lemon Squeezy-ben.', 'rossz')
+        } else if (valaszto._termekek.length === 1 && !lemon.variantId) {
+          valaszto.value = valaszto._termekek[0].variantId
+          valaszto.dispatchEvent(new Event('change'))
+          pirit('Az egyetlen termék lett az alaptermék. Mentsd el!', 'jo')
+        } else {
+          pirit(`${valaszto._termekek.length} termék betöltve - válaszd ki az alapterméket.`, 'jo')
+        }
+      } catch (hiba) {
+        pirit(`Nem sikerült lekérni: ${hiba.message}`, 'rossz')
+      } finally {
+        lekeres.disabled = false
+      }
+    },
+  })
+
+  const proba = el('input', {
+    type: 'checkbox',
+    onChange: (e) => {
+      lemon.tesztMod = e.target.checked
+      jelolValtozas()
+    },
+  })
+  proba.checked = Boolean(lemon.tesztMod)
+
   return el('section', { class: 'panel' }, [
-    el('div', { class: 'panel-fej' }, [el('h3', { text: 'Fizetés - titkos beállítások' })]),
+    el('div', { class: 'panel-fej' }, [el('h3', { text: 'Fizetés' })]),
     el('div', { class: 'panel-test' }, [
       el('div', { class: 'mezo teljes' }, [
-        el('span', { class: 'mezo-cim', text: 'Lemon Squeezy API-kulcs' }),
+        el('span', { class: 'mezo-cim', text: 'Lemon Squeezy API-kulcs (titkos)' }),
         be,
         el('p', {
           class: 'sugo',
-          text: 'Ettől lesz automatikus a fizetés: sikeres fizetés után az oldal ezzel ellenőrzi a rendelést, és a vevőnek nem kell semmit beírnia. Csak olvasásra elég (Settings → API → New API key). Ez a kulcs helyben marad és a Cloudflare-re megy - a GitHubra nem.',
+          text: 'Ettől lesz automatikus a fizetés: sikeres fizetés után az oldal ezzel ellenőrzi a rendelést, és a vevőnek nem kell semmit beírnia. Settings → API → New API key. Ez a kulcs helyben marad és a Cloudflare-re megy - a GitHubra nem.',
         }),
       ]),
       el('div', { style: 'display:flex;gap:10px;align-items:center;flex-wrap:wrap' }, [gomb]),
       allapotSor,
+      el('div', { class: 'mezo teljes', style: 'margin-top:18px' }, [
+        el('span', { class: 'mezo-cim', text: 'Alaptermék' }),
+        el('div', { style: 'display:flex;gap:8px;align-items:center;flex-wrap:wrap' }, [valaszto, lekeres]),
+        alaptermekSor,
+        el('p', {
+          class: 'sugo',
+          text: 'A Lemon Squeezy-ben terméket csak kézzel lehet létrehozni, ezért egyetlen közös alaptermék kell (bármilyen névvel és árral, a License keys bekapcsolva). A modok fizetős csomagjai ebből készülnek, egyedi névvel és árral - azokat már a Frissítés csinálja.',
+        }),
+      ]),
+      el('label', { class: 'kapcsolo', style: 'margin-top:12px' }, [
+        proba,
+        el('span', { text: 'Próba mód - a fizetőoldalak teszt módban készülnek (4242 4242 4242 4242 kártyával, valódi pénz nélkül)' }),
+      ]),
+      el('p', {
+        class: 'sugo',
+        text: 'Ha kikapcsolod, a következő Frissítés élesre készíti újra a fizetőoldalakat. A Lemon Squeezy-ben is ugyanabban a módban legyen a bolt.',
+      }),
     ]),
   ])
 }

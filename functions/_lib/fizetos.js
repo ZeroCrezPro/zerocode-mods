@@ -10,13 +10,21 @@
  * függvénynek nincs szüksége adatbázisra.
  */
 import mods from '../../src/data/mods.json' with { type: 'json' }
+import site from '../../src/data/site.json' with { type: 'json' }
 
 /** A mod fizetős beállításai, vagy null, ha nincs ilyen. */
 export function fizetosBeallitas(slug) {
   const mod = mods.find((m) => m.slug === slug)
   const f = mod?.fizetos
-  if (!f || !f.fajl || !f.termekAzonosito || !f.szolgaltato) return null
-  return { ...f, slug: mod.slug, modNev: mod.name }
+  if (!f || !f.fajl || !f.termekAzonosito) return null
+  return {
+    ...f,
+    szolgaltato: f.szolgaltato ?? 'lemonsqueezy',
+    slug: mod.slug,
+    modNev: mod.name,
+    penznem: site.lemon?.penznem ?? 'EUR',
+    tesztMod: Boolean(site.lemon?.tesztMod),
+  }
 }
 
 /** A fájl helye a kiszolgált oldalon - a /premium/* útvonalat a függvény zárja. */
@@ -206,6 +214,20 @@ export async function rendelesEllenorzes(beallitas, rendeles, azonosito, apiKulc
   const azonositok = [tetel.variant_id, tetel.product_id].map((x) => String(x ?? ''))
   if (!azonositok.includes(String(beallitas.termekAzonosito))) {
     return { ok: false, hiba: 'Ez a rendelés egy másik termékhez tartozik.' }
+  }
+
+  // Minden mod ugyanarra az alaptermékre épül, egyedi árral - a rendelés
+  // ára és pénzneme mondja meg, melyik csomagot vették.
+  const arCent = Math.round(Number(beallitas.checkoutAr ?? beallitas.ar ?? 0) * 100)
+  if (arCent > 0 && Number(tetel.price) !== arCent) {
+    return { ok: false, hiba: 'Ez a rendelés egy másik csomaghoz tartozik.' }
+  }
+  if (beallitas.penznem && a.currency && String(a.currency).toUpperCase() !== beallitas.penznem.toUpperCase()) {
+    return { ok: false, hiba: 'A rendelés pénzneme nem egyezik.' }
+  }
+  // Próba módú vásárlás csak akkor jó, ha az oldal is próba módban van.
+  if (a.test_mode && !beallitas.tesztMod) {
+    return { ok: false, hiba: 'Ez egy próba-rendelés, az éles oldalon nem érvényes.' }
   }
   return { ok: true }
 }

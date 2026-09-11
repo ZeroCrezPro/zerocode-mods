@@ -1753,3 +1753,8 @@ body.formazo-nyitva .tartalom {
   vertical-align: bottom;
   animation: zc-typewriter 2.2s steps(40, end) both;
 }
+
+/* Figyelmeztető súgósor (pl. hiányzó alaptermék) */
+.sugo.figyelmeztetes {
+  color: var(--sarga);
+}

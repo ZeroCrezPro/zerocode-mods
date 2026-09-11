@@ -333,11 +333,8 @@ function ellenoriz({ site, mods }) {
     if (fzBarmi) {
       // Csak a formátumot kérjük számon; a hiányos beállítás menthető, az
       // oldal addig egyszerűen nem mutatja a gombot.
-      if (fz.vasarlasUrl?.trim() && !/^https?:\/\//.test(fz.vasarlasUrl)) {
-        hibak.push(`${hol}: a fizetési oldal címe http:// vagy https:// előtaggal kell kezdődjön.`)
-      }
-      if (fz.szolgaltato && !['lemonsqueezy', 'gumroad'].includes(fz.szolgaltato)) {
-        hibak.push(`${hol}: ismeretlen fizetési szolgáltató.`)
+      if (fz.ar !== null && fz.ar !== undefined && fz.ar !== '' && !(Number(fz.ar) > 0)) {
+        hibak.push(`${hol}: a fizetős csomag ára pozitív szám legyen (pl. 69.99).`)
       }
     }
     if (m.video?.trim() && !youtubeAzonosito(m.video)) {
@@ -629,6 +626,150 @@ async function titkokAllapot() {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/* Lemon Squeezy: alaptermék és fizetőoldalak                          */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Terméket a Lemon Squeezy API-n át nem lehet létrehozni - egyet kézzel
+ * kell (a közös "alaptermék"). Fizetőoldalt viszont igen, egyedi árral és
+ * névvel: minden mod fizetős csomagjához a Frissítés készít egyet erre az
+ * alaptermékre. A rendelést az oldal a termék + ár + pénznem alapján
+ * azonosítja.
+ */
+
+async function lemonHivas(ut, { method = 'GET', test } = {}) {
+  const t = await titkokBeolvas()
+  if (!t.lemonApiKey) throw new Error('Nincs Lemon Squeezy API-kulcs (Beállítások → Fizetés).')
+  const v = await fetch(`https://api.lemonsqueezy.com/v1${ut}`, {
+    method,
+    headers: {
+      Accept: 'application/vnd.api+json',
+      'Content-Type': 'application/vnd.api+json',
+      Authorization: `Bearer ${t.lemonApiKey}`,
+    },
+    body: test ? JSON.stringify(test) : undefined,
+  })
+  const adat = await v.json().catch(() => ({}))
+  if (!v.ok) {
+    const reszlet = adat?.errors?.[0]?.detail ?? `HTTP ${v.status}`
+    throw new Error(`Lemon Squeezy: ${reszlet}`)
+  }
+  return adat
+}
+
+/** A bolt termékei a változataikkal - az alaptermék kiválasztásához. */
+async function lemonTermekek() {
+  const boltok = await lemonHivas('/stores')
+  const ki = []
+  for (const b of boltok.data ?? []) {
+    const termekek = await lemonHivas(`/products?filter[store_id]=${b.id}`)
+    for (const p of termekek.data ?? []) {
+      const valtozatok = await lemonHivas(`/variants?filter[product_id]=${p.id}`)
+      for (const v of valtozatok.data ?? []) {
+        ki.push({
+          storeId: String(b.id),
+          boltNev: b.attributes.name,
+          penznem: b.attributes.currency,
+          termekId: String(p.id),
+          termekNev: p.attributes.name,
+          allapot: p.attributes.status,
+          variantId: String(v.id),
+          variantNev: v.attributes.name,
+          licenckulcs: Boolean(v.attributes.has_license_keys),
+          ar: v.attributes.price,
+        })
+      }
+    }
+  }
+  return ki
+}
+
+/**
+ * Fizetőoldal készítése egy mod csomagjához: az alaptermékre, egyedi
+ * névvel, leírással és árral. A választ (a fizetőoldal címét) a mod
+ * adataiba írjuk.
+ */
+async function lemonFizetooldal(site, mod) {
+  const f = mod.fizetos
+  const l = site.lemon
+  const arCent = Math.round(Number(f.ar) * 100)
+  const oldal = `${site.url.replace(/\/$/, '')}/modok/${mod.slug}`
+  const kep = mod.cover ? [`${site.url.replace(/\/$/, '')}${mod.cover}`] : []
+
+  const valasz = await lemonHivas('/checkouts', {
+    method: 'POST',
+    test: {
+      data: {
+        type: 'checkouts',
+        attributes: {
+          custom_price: arCent,
+          product_options: {
+            name: `${mod.name} – ${f.cim}`,
+            description: f.leiras || `${mod.name}: ${f.cim}`,
+            media: kep,
+            redirect_url: oldal,
+            receipt_button_text: 'Vissza a letöltéshez',
+            receipt_link_url: oldal,
+            receipt_thank_you_note:
+              'Köszönjük! A letöltés a mod oldalán magától feléled - ha mégsem, a fenti licenckulcsot írd be ott.',
+          },
+          checkout_options: { embed: true, dark: true },
+          checkout_data: { custom: { mod: mod.slug } },
+          test_mode: Boolean(l.tesztMod),
+        },
+        relationships: {
+          store: { data: { type: 'stores', id: String(l.storeId) } },
+          variant: { data: { type: 'variants', id: String(l.variantId) } },
+        },
+      },
+    },
+  })
+  return valasz?.data?.attributes?.url
+}
+
+/**
+ * A Frissítés lépése: minden fizetős csomaghoz legyen fizetőoldal, a
+ * mostani árral és módban. Ami hiányzik vagy változott, újra készül.
+ */
+async function fizetosCsomagokBeallitasa(adatok) {
+  const modok = (adatok.mods ?? []).filter((m) => m.fizetos?.fajl && Number(m.fizetos.ar) > 0)
+  if (!modok.length) {
+    naploz('sor', 'Nincs fizetős csomag.')
+    return
+  }
+  const l = adatok.site.lemon
+  if (!l?.variantId || !l?.storeId) {
+    throw new Error(
+      'Van fizetős csomag, de nincs kiválasztva a Lemon Squeezy alaptermék (Beállítások → Fizetés → Alaptermék).',
+    )
+  }
+
+  let valtozott = false
+  for (const m of modok) {
+    const f = m.fizetos
+    const kell =
+      !f.vasarlasUrl ||
+      f.termekAzonosito !== String(l.variantId) ||
+      Number(f.checkoutAr) !== Number(f.ar) ||
+      Boolean(f.checkoutTeszt) !== Boolean(l.tesztMod)
+    if (!kell) {
+      naploz('sor', `${m.name}: a fizetőoldal naprakész (${f.ar} ${l.penznem}).`)
+      continue
+    }
+    const url = await lemonFizetooldal(adatok.site, m)
+    if (!url) throw new Error(`${m.name}: a Lemon Squeezy nem adott vissza fizetőoldal-címet.`)
+    f.vasarlasUrl = url
+    f.termekAzonosito = String(l.variantId)
+    f.szolgaltato = 'lemonsqueezy'
+    f.checkoutAr = Number(f.ar)
+    f.checkoutTeszt = Boolean(l.tesztMod)
+    valtozott = true
+    naploz('sor', `${m.name}: fizetőoldal elkészült - ${f.ar} ${l.penznem}${l.tesztMod ? ' (PRÓBA MÓD)' : ''}`)
+  }
+  if (valtozott) await adatMentes('mods', adatok.mods)
+}
+
 async function muveletFuttat(nev, uzenet) {
   if (futoMuvelet) throw new Error(`Már fut egy művelet: ${futoMuvelet}`)
   futoMuvelet = nev
@@ -639,6 +780,10 @@ async function muveletFuttat(nev, uzenet) {
       await parancs(npm, ['run', 'build'], 'Weboldal építése')
       naploz('kesz', 'Az előnézet elkészült.')
     } else if (nev === 'frissites') {
+      // A fizetőoldalak elsőként készülnek, mert a címük bekerül az oldalba.
+      naploz('lepes', '0/5 - Fizetős csomagok a Lemon Squeezy-nél')
+      await fizetosCsomagokBeallitasa(await adatokBeolvas())
+
       // Előbb a modfájlok mennek fel, csak utána az oldal - különben az oldal
       // olyan letöltésre mutatna, ami még nem létezik.
       await modFajlokFeltoltese()
@@ -1049,6 +1194,11 @@ const szerver = http.createServer(async (req, res) => {
       muveletFuttat(test.nev, test.uzenet).catch(() => {})
       return json(res, 200, { ok: true, indult: test.nev })
     }
+    /* --- Lemon Squeezy alaptermék --- */
+    if (ut === '/api/lemon/termekek' && req.method === 'GET') {
+      return json(res, 200, { termekek: await lemonTermekek() })
+    }
+
     /* --- titkos beállítások (fizetés) --- */
     if (ut === '/api/titkok' && req.method === 'GET') {
       return json(res, 200, await titkokAllapot())

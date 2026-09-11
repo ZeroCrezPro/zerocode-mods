@@ -73,20 +73,36 @@ export interface ModVersion {
 export interface FizetosTartalom {
   /** A gomb felirata, pl. "Prémium csomag" */
   cim: string
-  /** A kiírt ár, pl. "1 990 Ft" - magát az összeget a szolgáltatónál állítod be */
-  ar: string
+  /** Az ár a bolt pénznemében (pl. 69.99) - a Frissítés ezzel készíti a fizetőoldalt */
+  ar: number | null
   /** Mit kap a vásárló (rövid) */
   leiras?: string
-  /** A fizetési oldal címe (Lemon Squeezy checkout vagy Gumroad termék) */
-  vasarlasUrl: string
-  /** Ki ellenőrzi a licenckulcsot */
-  szolgaltato: 'lemonsqueezy' | 'gumroad'
-  /** Lemon Squeezy: a termék variant ID-je; Gumroad: a termék product ID-je */
-  termekAzonosito: string
   /** A letölthető fájl neve - a szerkesztő tölti ki, amikor kijelölöd a fájlt */
   fajl: string
   /** A fájl mérete emberi formában (a szerkesztő tölti ki) */
   meret?: string
+
+  /* --- Ezeket a Frissítés tölti ki, nem kell hozzájuk nyúlni --- */
+
+  /** A Lemon Squeezy-nél létrehozott fizetőoldal címe */
+  vasarlasUrl?: string
+  /** A közös alaptermék változatának azonosítója - ezzel ellenőrzi az oldal a rendelést */
+  termekAzonosito?: string
+  szolgaltato?: 'lemonsqueezy' | 'gumroad'
+  /** Milyen árral és módban készült a fizetőoldal - ha eltér, újra készül */
+  checkoutAr?: number
+  checkoutTeszt?: boolean
+}
+
+/** A Lemon Squeezy bolt közös alapterméke - a Beállításokban választható ki. */
+export interface LemonBeallitas {
+  storeId: string
+  variantId: string
+  termekNev: string
+  /** A bolt pénzneme (pl. EUR) - az árak ebben értendők */
+  penznem: string
+  /** Próba mód: a fizetőoldalak teszt módban készülnek, nem valódi pénzzel */
+  tesztMod?: boolean
 }
 
 export interface Mod {
@@ -157,6 +173,8 @@ export interface SiteConfig {
   ogImage: string
   /** A főoldal fejlécének háttérképe. Üresen a sima rácsos háttér látszik. */
   heroImage?: string
+  /** Fizetés: a Lemon Squeezy közös alapterméke (nem titkos adat) */
+  lemon?: LemonBeallitas
   /**
    * Állandó feliratok (szekciócímek, oszlopnevek, gombfeliratok) felülírása.
    * A szerkesztő tölti, amikor színt vagy animációt adsz egy ilyen feliratnak.

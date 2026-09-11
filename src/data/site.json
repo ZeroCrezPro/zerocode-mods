@@ -15,5 +15,12 @@
   "logo": "",
   "favicon": "",
   "feliratok": {},
-  "heroImage": "/images/games/7.webp"
+  "heroImage": "/images/games/7.webp",
+  "lemon": {
+    "storeId": "351867",
+    "variantId": "",
+    "termekNev": "",
+    "penznem": "EUR",
+    "tesztMod": true
+  }
 }

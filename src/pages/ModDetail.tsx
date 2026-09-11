@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getModBySlug, latestVersion, olderVersions, site } from '@/data'
-import { formatDate, vLabel } from '@/lib/format'
+import { formatDate, penzFormat, vLabel } from '@/lib/format'
 import { statusLabel, statusTextClass } from '@/lib/labels'
 import { downloadUrl } from '@/lib/download'
 import { csakSzoveg } from '@/lib/gazdagSzoveg'
@@ -251,8 +251,13 @@ export default function ModDetail() {
                     {vLabel(latest.version)}
                   </a>
                   {/* Fizetős (prémium) letöltés - a szolgáltató kulcsával nyílik. */}
+                  {/* A fizetőoldalt a Frissítés hozza létre; addig nincs gomb. */}
                   {mod.fizetos?.fajl && mod.fizetos.vasarlasUrl && mod.fizetos.termekAzonosito && (
-                    <FizetosLetoltes slug={mod.slug} fizetos={mod.fizetos} />
+                    <FizetosLetoltes
+                      slug={mod.slug}
+                      fizetos={mod.fizetos}
+                      arSzoveg={penzFormat(mod.fizetos.ar, site.lemon?.penznem ?? 'EUR')}
+                    />
                   )}
                   {/*
                     A telepítési kód a letöltés gomb mellett, vele egy

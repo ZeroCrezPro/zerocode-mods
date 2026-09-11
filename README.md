@@ -471,37 +471,53 @@ mindkettő vásárlás után azonnal licenckulcsot ad, és nyilvános ellenőrz�
 | **Lemon Squeezy** (ajánlott) | 5% + 0,50 $ | Szebb fizetőoldal, EU-áfa rendben, magyar bankszámlára vagy PayPalra fizet ki |
 | **Gumroad** | 10% | Egyszerűbb, de drágább |
 
-### Beállítás lépésről lépésre (Lemon Squeezy)
+### Beállítás - egyszer, kb. 15 perc
 
-1. Regisztrálj: https://app.lemonsqueezy.com - hozz létre egy boltot (*Store*).
-2. **Products → New product.** Add meg a nevet, az árat, és a *Deliverables* résznél
-   kapcsold be a **License keys** opciót (ez a tartalék útnak kell). Fájlt
-   NEM kell feltöltened oda - a fájlt az oldal adja.
-3. A terméknél a **Share** gomb adja a vásárlási linket (`https://....lemonsqueezy.com/buy/...`).
-4. A termék **variant ID-je**: a termék oldalán a változat (*Variant*) sorában, vagy a
-   címsorban látszik - egy szám (pl. `123456`). Ezt kéri a szerkesztő *Termék
-   azonosítója* mezője.
-5. A szerkesztőben a mod **Fizetős letöltés** paneljén: gomb felirata, kiírt ár, mit kap
-   a vásárló, szolgáltató, termék azonosítója, fizetési link - és a **fizetős fájl**
-   kijelölése (ugyanúgy, mint a modfájlé).
-6. **Mentés**, majd **Frissítés**. A fájl a Cloudflare zárt útvonalára kerül.
-7. **Az automatikus ellenőrzéshez API-kulcs kell:** a Lemon Squeezy-ben
-   *Settings → API → New API key* (olvasási jog elég). A szerkesztőben
-   **Beállítások → Fizetés - titkos beállítások** mezőjébe beillesztve a
-   *Mentés és feltöltés a Cloudflare-re* gomb egyenesen a Cloudflare titkai közé teszi.
-   **Ez a kulcs a GitHubra nem kerül fel** - helyben a `.szerkeszto-titkok.json` őrzi
-   (gitignore alatt). Amíg nincs beállítva, a vevő a licenckulcs beírásával tud
-   letölteni.
+Terméket a Lemon Squeezy csak a saját felületén enged létrehozni, ezért **egyetlen közös
+alapterméket** kell kézzel megcsinálni. Onnantól minden mod fizetős csomagját a
+szerkesztő intézi.
 
-Gumroadnál ugyanez: a terméknél kapcsold be a *Generate a unique license key per sale*
-opciót; a *Termék azonosítója* a termék **product ID**-je (a termék beállításainál).
-Gumroadnál nincs beágyazott fizetőablak, ezért ott a vevő a kulcsot írja be.
+1. **Fiók:** https://app.lemonsqueezy.com - bolt létrehozása, *Settings → Payouts*
+   (hova fizesse a pénzt), *Settings → Tax* (ő számláz helyetted).
+2. **API-kulcs:** *Settings → API → New API key.* A szerkesztőben **Beállítások →
+   Fizetés** → beilleszted → *Mentés és feltöltés a Cloudflare-re.* Ez a kulcs a
+   GitHubra **nem** kerül fel (helyben a `.szerkeszto-titkok.json`, gitignore alatt).
+3. **Alaptermék:** *Products → New product* - a név és az ár mindegy (pl. *ZeroCode
+   prémium tartalom*, 1 €), a lényeg: *Deliverables* → **License keys** bekapcsolva →
+   *Publish*. Fájlt ne tölts fel hozzá.
+4. A szerkesztőben **Beállítások → Fizetés → Termékek lekérése** → kiválasztod →
+   **Mentés**. (Ha egyetlen termék van, magától kiválasztja.)
+
+### Új fizetős csomag egy modhoz - ennyi a dolgod
+
+A mod **Fizetős letöltés** paneljén négy mező: **a gomb felirata**, **ár** (euróban,
+pl. 69.99), **mit kap a vásárló**, és **a fájl** kijelölése. **Mentés → Frissítés.**
+
+A Frissítés ekkor:
+- a Lemon Squeezy-nél **létrehozza a fizetőoldalt** az alaptermékre, a mod nevével,
+  leírásával, borítóképével és a megadott árral,
+- a fájlt a Cloudflare zárt útvonalára teszi,
+- kiadja az oldalt - és a gomb megjelenik.
+
+Ha később átírod az árat vagy a leírást, a következő Frissítés újra elkészíti a
+fizetőoldalt. A mod panelje alján mindig látszik, hogy a fizetőoldal kész-e, és
+*Megnyitás* gombbal meg is nézheted.
+
+### Hogyan azonosítja az oldal, melyik csomagot vették?
+
+Minden csomag ugyanarra az alaptermékre épül, ezért a rendelést az oldal az
+**alaptermék + a fizetett ár + a pénznem** alapján párosítja a modhoz, és csak
+egyező esetben adja ki a fájlt. Két csomagnak ezért ne legyen pontosan ugyanaz az
+ára.
 
 ### Próba valódi pénz nélkül
 
-A Lemon Squeezy-ben kapcsold be a **Test mode**-ot (bal alul). Ilyenkor a
-`4242 4242 4242 4242` kártyaszámmal (bármilyen lejárat, CVC) fizethetsz próbaként:
-a fizetőablak bezárul, és a Letöltés gomb magától feléled. Ha jó, kapcsold át élesre.
+**Beállítások → Fizetés → Próba mód** bekapcsolva a fizetőoldalak teszt módban
+készülnek. A Lemon Squeezy-ben is kapcsold *Test mode*-ba a boltot (bal alul), és a
+`4242 4242 4242 4242` kártyával (bármilyen lejárat, CVC) fizethetsz próbaként: a
+fizetőablak bezárul, a Letöltés gomb magától feléled. Ha jó, a próba módot kapcsold
+ki, és Frissítés - élesre készülnek újra a fizetőoldalak. Az éles oldal a
+próba-rendeléseket elutasítja.
 
 ### Korlátok
 
