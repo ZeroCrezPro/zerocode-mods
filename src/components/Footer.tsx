@@ -68,20 +68,6 @@ export function Footer() {
           </nav>
         ))}
       </div>
-
-      <div className="border-t border-ink-800">
-        <div className="zc-container flex flex-col gap-4 py-6 text-xs text-ash-400 md:flex-row md:items-center md:justify-between">
-          <p>
-            &copy; {new Date().getFullYear()} {site.name} &middot; Készítette:{' '}
-            <span className="text-ash-200">{site.author}</span>
-          </p>
-          <p className="max-w-2xl leading-relaxed md:text-right">
-            A játékok nevei, logói és egyéb védjegyei a megfelelő tulajdonosaik tulajdonát képezik. A{' '}
-            {site.name} nem áll kapcsolatban a játékok eredeti kiadóival vagy fejlesztőivel, kivéve
-            ha ez külön fel van tüntetve.
-          </p>
-        </div>
-      </div>
     </footer>
   )
 }
