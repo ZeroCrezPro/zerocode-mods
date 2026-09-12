@@ -1,72 +1,24 @@
 import { Link } from 'react-router-dom'
 import { site } from '@/data/site'
 
-const columns: { title: string; links: { label: string; to?: string; href?: string }[] }[] = [
-  {
-    title: 'Tartalom',
-    links: [
-      { label: 'Modok', to: '/modok' },
-    ],
-  },
-  {
-    title: 'ZeroCode',
-    links: [
-      { label: 'Névjegy', to: '/nevjegy' },
-      { label: 'Kapcsolat', to: '/kapcsolat' },
-    ],
-  },
-  {
-    title: 'Jogi',
-    links: [
-      { label: 'Jogi információk', to: '/jogi-informaciok' },
-      { label: 'Adatvédelem', to: '/adatvedelem' },
-    ],
-  },
-]
-
+/** Lábléc: csak a márkajel - se linkek, se leírás, se jogi szöveg. */
 export function Footer() {
   return (
     <footer className="mt-20 border-t border-ink-700 bg-ink-900">
-      <div className="zc-container grid gap-10 py-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
-        <div>
+      <div className="zc-container flex items-center gap-4 py-10">
+        <Link to="/" className="flex items-center gap-4" aria-label={`${site.name} - főoldal`}>
           {site.logo && (
-            <img src={site.logo} alt="" aria-hidden className="mb-3 h-12 w-12 object-contain" />
+            <img src={site.logo} alt="" aria-hidden className="h-12 w-12 object-contain" />
           )}
-          <p className="text-[15px] font-black tracking-[0.18em] text-ash-100">{site.brandTop}</p>
-          <p className="mt-1 text-[10px] font-bold tracking-[0.42em] text-blood-400">
-            {site.brandBottom}
-          </p>
-          <p className="mt-4 max-w-sm text-sm text-ash-400">{site.tagline}</p>
-        </div>
-
-        {columns.map((col) => (
-          <nav key={col.title} aria-label={col.title}>
-            <h2 className="zc-label mb-4 text-ash-100">{col.title}</h2>
-            <ul className="space-y-2.5">
-              {col.links.map((l) => (
-                <li key={l.label}>
-                  {l.to ? (
-                    <Link
-                      to={l.to}
-                      className="text-sm text-ash-400 transition-colors hover:text-blood-400"
-                    >
-                      {l.label}
-                    </Link>
-                  ) : (
-                    <a
-                      href={l.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-ash-400 transition-colors hover:text-blood-400"
-                    >
-                      {l.label}
-                    </a>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ))}
+          <span>
+            <span className="block text-[15px] font-black tracking-[0.18em] text-ash-100">
+              {site.brandTop}
+            </span>
+            <span className="mt-1 block text-[10px] font-bold tracking-[0.42em] text-blood-400">
+              {site.brandBottom}
+            </span>
+          </span>
+        </Link>
       </div>
     </footer>
   )

@@ -3,7 +3,12 @@
 /mods/*       /modok/:splat       301
 /latest       /modok              301
 /legujabb     /modok              301
-/about        /nevjegy            301
+/about        /                   301
+# A szöveges oldalak megszűntek
+/nevjegy      /                   301
+/kapcsolat    /                   301
+/jogi-informaciok /               301
+/adatvedelem  /                   301
 
 # A játékok szekció megszűnt - a régi címek a modokra mutatnak
 /jatekok      /modok              301

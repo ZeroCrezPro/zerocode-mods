@@ -9,7 +9,6 @@ import { SmartImage } from './SmartImage'
 const nav = [
   { to: '/', label: 'Főoldal', end: true },
   { to: '/modok', label: 'Modok' },
-  { to: '/nevjegy', label: 'Névjegy' },
 ]
 
 function Brand() {

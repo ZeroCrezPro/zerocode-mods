@@ -224,10 +224,9 @@ zerocode-mods/
 | `/` | Főoldal (hero, statisztika, kiemelt modok, legújabb frissítések) |
 | `/modok` | Mod katalógus (keresés, rendezés, címkeszűrés) |
 | `/modok/<slug>` | Mod adatlap (leírás, funkciók, képek, telepítés, letöltések, changelog, GYIK) |
-| `/nevjegy`, `/kapcsolat`, `/jogi-informaciok`, `/adatvedelem` | Szöveges oldalak |
 | bármi más | 404 oldal |
 
-Az angol URL-ek (`/mods`, `/latest`, `/about`) 301-gyel átirányítanak a magyar megfelelőre.
+Az angol URL-ek (`/mods`, `/latest`) 301-gyel átirányítanak a magyar megfelelőre; a megszűnt szöveges oldalak (`/nevjegy`, `/kapcsolat`, `/jogi-informaciok`, `/adatvedelem`) a főoldalra. A lábléc csak a márkajel, nincs benne link, leírás vagy jogi szöveg.
 A megszűnt `/jatekok` és `/games` címek a modok listájára mutatnak.
 
 ---
