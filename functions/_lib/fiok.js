@@ -203,6 +203,41 @@ export async function ujJelszoFiok(kv, jegy, titok) {
   return fiok && hashJel(fiok) === adat.h ? fiok : null
 }
 
+/*
+ * A levélben link mellett hatjegyű kód is megy: aki a linket nem tudja
+ * megnyitni (pl. más eszközön olvassa a levelet), az e-mail + kód párossal
+ * igazolja, hogy övé a postaláda. A kód egy óráig él, öt rossz próbálkozás
+ * után törlődik; a KV-ban csak a hash-e van.
+ */
+const KOD_ELET = 3600 // másodperc
+const KOD_PROBAK = 5
+
+async function sha256(szoveg) {
+  return b64(await crypto.subtle.digest('SHA-256', szovegKod(szoveg)))
+}
+
+export async function ujJelszoKodKeszit(kv, fiok) {
+  const kod = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, '0')
+  await kv.put(`kod:${emailKulcs(fiok.email)}`, JSON.stringify({ hash: await sha256(kod), probak: 0 }), { expirationTtl: KOD_ELET })
+  return kod
+}
+
+/** E-mail + kód -> fiók, vagy null. A jó kód egyszer használható. */
+export async function ujJelszoKodFiok(kv, email, kod) {
+  const kulcs = `kod:${emailKulcs(email)}`
+  const adat = await kv.get(kulcs, 'json')
+  if (!adat) return null
+  const tiszta = String(kod ?? '').replace(/\s+/g, '')
+  if (!/^\d{6}$/.test(tiszta) || !egyezik(await sha256(tiszta), adat.hash)) {
+    adat.probak = (adat.probak ?? 0) + 1
+    if (adat.probak >= KOD_PROBAK) await kv.delete(kulcs)
+    else await kv.put(kulcs, JSON.stringify(adat), { expirationTtl: KOD_ELET })
+    return null
+  }
+  await kv.delete(kulcs)
+  return fiokBetolt(kv, email)
+}
+
 /* ---------- próbálkozás-korlát ---------- */
 
 /** Ugyanarról a címről 10 perc alatt legfeljebb ennyi próbálkozás. */

@@ -6,7 +6,15 @@
  * kitalálni, kinek van fiókja.
  */
 import site from '../../../src/data/site.json' with { type: 'json' }
-import { fiokBetolt, fiokRendszerHiba, jsonValasz, keresTest, tulSokProba, ujJelszoJegy } from '../../_lib/fiok.js'
+import {
+  fiokBetolt,
+  fiokRendszerHiba,
+  jsonValasz,
+  keresTest,
+  tulSokProba,
+  ujJelszoJegy,
+  ujJelszoKodKeszit,
+} from '../../_lib/fiok.js'
 import { levelKuldes } from '../../_lib/level.js'
 
 export async function onRequestPost({ request, env }) {
@@ -24,6 +32,7 @@ export async function onRequestPost({ request, env }) {
   const fiok = await fiokBetolt(env.FIOKOK, test.email)
   if (fiok) {
     const jegy = await ujJelszoJegy(fiok, env.FIOK_TITOK)
+    const kod = await ujJelszoKodKeszit(env.FIOKOK, fiok)
     const eredet = new URL(request.url).origin
     const link = `${eredet}/uj-jelszo?jegy=${encodeURIComponent(jegy)}`
     try {
@@ -36,8 +45,10 @@ export async function onRequestPost({ request, env }) {
         targy: `${site.name} - új jelszó`,
         szoveg:
           `Szia ${fiok.nev}!\n\n` +
-          `Valaki (remélhetőleg te) új jelszót kért a ${site.name} fiókodhoz. ` +
-          `Ezen a linken adhatsz meg újat, egy órán belül:\n\n${link}\n\n` +
+          `Valaki (remélhetőleg te) új jelszót kért a ${site.name} fiókodhoz.\n\n` +
+          `Az igazoló kódod: ${kod}\n\n` +
+          `Ezt írd be az oldalon az e-mail címeddel együtt - vagy egyszerűen nyisd meg ezt a linket:\n${link}\n\n` +
+          `A kód és a link egy óráig érvényes.\n\n` +
           `Ha nem te kérted, nincs teendőd - a jelszavad változatlan marad.\n\n${site.name}`,
       })
     } catch (e) {

@@ -532,9 +532,11 @@ próba-rendeléseket elutasítja.
 ## Fiókok: regisztráció és belépés
 
 A látogatók **névvel, e-mail címmel és jelszóval** regisztrálhatnak, és névvel vagy
-e-maillel léphetnek be. Elfelejtett jelszónál az oldal **Gmailen át** küld egy egy
-óráig élő linket, amivel újat adhatnak meg. Bejelentkezve a fiók oldalán (`/fiok`)
-jelszót lehet módosítani és kilépni.
+e-maillel léphetnek be. Sikeres regisztráció után üdvözlő levél megy. Elfelejtett
+jelszónál az oldal **Gmailen át** küld egy **hatjegyű igazoló kódot** és egy linket -
+mindkettő egy óráig él, és csak az tud új jelszót adni, aki a levelet megkapta (ez
+igazolja, hogy a fiók postaládája az övé). A kód öt rossz próbálkozás után törlődik.
+Bejelentkezve a fiók oldalán (`/fiok`) jelszót lehet módosítani és kilépni.
 
 ### Bekapcsolás a szerkesztőben
 
