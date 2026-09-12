@@ -533,9 +533,9 @@ próba-rendeléseket elutasítja.
 
 A látogatók **névvel, e-mail címmel és jelszóval** regisztrálhatnak, és névvel vagy
 e-maillel léphetnek be. Sikeres regisztráció után üdvözlő levél megy. Elfelejtett
-jelszónál az oldal **Gmailen át** küld egy **hatjegyű igazoló kódot** és egy linket -
-mindkettő egy óráig él, és csak az tud új jelszót adni, aki a levelet megkapta (ez
-igazolja, hogy a fiók postaládája az övé). A kód öt rossz próbálkozás után törlődik.
+jelszónál az oldal **Gmailen át** küld egy egy óráig élő linket a regisztrált címre;
+rákattintva az oldal az új jelszót és a megerősítését kéri, az felülírja a régit, és
+egyből be is lép. Csak az tud így jelszót cserélni, aki a fiók postaládájához hozzáfér.
 Bejelentkezve a fiók oldalán (`/fiok`) jelszót lehet módosítani és kilépni.
 
 ### Bekapcsolás a szerkesztőben

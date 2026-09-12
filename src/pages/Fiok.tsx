@@ -210,12 +210,11 @@ export function Regisztracio() {
 /* ---------- Elfelejtett jelszó ---------- */
 
 /**
- * Két lépés: e-mail cím -> levél megy, benne hatjegyű kód és link. A kód
- * (vagy a link) igazolja, hogy a kérő hozzáfér a postaládához - más nem
- * tud jelszót cserélni.
+ * A regisztrált címre levél megy egy linkkel. A link igazolja, hogy a kérő
+ * hozzáfér a fiók postaládájához: rákattintva az oldal új jelszót kér, az
+ * felülírja a régit, és egyből be is lép.
  */
 export function ElfelejtettJelszo() {
-  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const u = useUrlap()
 
@@ -225,45 +224,41 @@ export function ElfelejtettJelszo() {
     e.preventDefault()
     u.futtat(async () => {
       const v = await fiokHivas('elfelejtett', { email })
-      if (v.ok) navigate(`/uj-jelszo?email=${encodeURIComponent(email.trim())}`)
+      if (v.ok) u.setSiker('Elküldtük a levelet. Nyisd meg, kattints a benne lévő linkre, és add meg az új jelszavad. Ha nem látod, nézd meg a levélszemetet is.')
       return v
     })
   }
 
   return (
-    <Kartya
-      cim="Elfelejtett jelszó"
-      alcim="Küldünk egy hatjegyű kódot az e-mail címedre - csak azzal lehet új jelszót megadni."
-    >
+    <Kartya cim="Elfelejtett jelszó" alcim="A regisztrált e-mail címedre küldünk egy linket, azzal adhatsz meg új jelszót.">
       <Seo title={pageTitle('Elfelejtett jelszó')} description="Új jelszó kérése e-mailben." path="/elfelejtett-jelszo" noIndex />
-      <form onSubmit={kuld} className="space-y-4">
-        <Mezo cimke="E-mail" ertek={email} beallit={setEmail} tipus="email" autoComplete="email" />
-        <Uzenet szoveg={u.hiba} tipus="hiba" />
-        <Button type="submit" size="lg" className="w-full" disabled={u.kuldes}>
-          {u.kuldes ? 'Küldés…' : 'Kód küldése'}
-        </Button>
-      </form>
-      <div className="mt-5 flex flex-col gap-2 text-sm text-ash-400 sm:flex-row sm:justify-between">
+      {u.siker ? (
+        <Uzenet szoveg={u.siker} tipus="siker" />
+      ) : (
+        <form onSubmit={kuld} className="space-y-4">
+          <Mezo cimke="E-mail" ertek={email} beallit={setEmail} tipus="email" autoComplete="email" />
+          <Uzenet szoveg={u.hiba} tipus="hiba" />
+          <Button type="submit" size="lg" className="w-full" disabled={u.kuldes}>
+            {u.kuldes ? 'Küldés…' : 'Link küldése'}
+          </Button>
+        </form>
+      )}
+      <p className="mt-5 text-sm text-ash-400">
         <Link to="/belepes" className="hover:text-ash-100">
           Vissza a belépéshez
         </Link>
-        <Link to="/uj-jelszo" className="text-blood-400 hover:underline">
-          Már van kódom
-        </Link>
-      </div>
+      </p>
     </Kartya>
   )
 }
 
-/* ---------- Új jelszó (kóddal vagy a levél linkjével) ---------- */
+/* ---------- Új jelszó (a levél linkjéről) ---------- */
 
 export function UjJelszo() {
   const [params] = useSearchParams()
   const jegy = params.get('jegy') ?? ''
   const { beallit } = useFiok()
   const navigate = useNavigate()
-  const [email, setEmail] = useState(params.get('email') ?? '')
-  const [kod, setKod] = useState('')
   const [jelszo, setJelszo] = useState('')
   const [jelszo2, setJelszo2] = useState('')
   const u = useUrlap()
@@ -274,7 +269,7 @@ export function UjJelszo() {
     e.preventDefault()
     u.futtat(async () => {
       if (jelszo !== jelszo2) return { ok: false, hiba: 'A két jelszó nem egyezik.' }
-      const v = await fiokHivas<{ fiok: Fiok }>('uj-jelszo', jegy ? { jegy, jelszo } : { email, kod, jelszo })
+      const v = await fiokHivas<{ fiok: Fiok }>('uj-jelszo', { jegy, jelszo })
       if (v.ok) {
         beallit(v.adat.fiok)
         navigate('/fiok', { replace: true })
@@ -284,41 +279,26 @@ export function UjJelszo() {
   }
 
   return (
-    <Kartya
-      cim="Új jelszó"
-      alcim={
-        jegy
-          ? 'A levélben kapott link rendben - add meg az új jelszavad, utána egyből be is lépünk.'
-          : 'Írd be a levélben kapott hatjegyű kódot és az új jelszavad.'
-      }
-    >
-      <Seo title={pageTitle('Új jelszó')} description="Új jelszó megadása." path="/uj-jelszo" noIndex />
-      <form onSubmit={kuld} className="space-y-4">
-        {!jegy && (
-          <>
-            <Mezo cimke="E-mail" ertek={email} beallit={setEmail} tipus="email" autoComplete="email" />
-            <Mezo
-              cimke="Igazoló kód a levélből"
-              ertek={kod}
-              beallit={(v) => setKod(v.replace(/\D/g, '').slice(0, 6))}
-              autoComplete="one-time-code"
-              segito="Hat számjegy; egy óráig érvényes. Nézd meg a levélszemetet is."
-            />
-          </>
-        )}
-        <Mezo cimke="Új jelszó" ertek={jelszo} beallit={setJelszo} tipus="password" autoComplete="new-password" segito="Legalább 8 karakter." />
-        <Mezo cimke="Új jelszó még egyszer" ertek={jelszo2} beallit={setJelszo2} tipus="password" autoComplete="new-password" />
-        <Uzenet szoveg={u.hiba} tipus="hiba" />
-        <Button type="submit" size="lg" className="w-full" disabled={u.kuldes}>
-          {u.kuldes ? 'Mentés…' : 'Jelszó mentése'}
-        </Button>
-      </form>
-      <p className="mt-5 text-sm text-ash-400">
-        Nem jött meg a kód?{' '}
-        <Link to="/elfelejtett-jelszo" className="text-blood-400 hover:underline">
-          Kérj újat
-        </Link>
-      </p>
+    <Kartya cim="Jelszó módosítása" alcim="Add meg az új jelszavad - ez felülírja a régit, és egyből be is lépünk.">
+      <Seo title={pageTitle('Jelszó módosítása')} description="Új jelszó megadása." path="/uj-jelszo" noIndex />
+      {jegy ? (
+        <form onSubmit={kuld} className="space-y-4">
+          <Mezo cimke="Új jelszó" ertek={jelszo} beallit={setJelszo} tipus="password" autoComplete="new-password" segito="Legalább 8 karakter." />
+          <Mezo cimke="Új jelszó megerősítése" ertek={jelszo2} beallit={setJelszo2} tipus="password" autoComplete="new-password" />
+          <Uzenet szoveg={u.hiba} tipus="hiba" />
+          <Button type="submit" size="lg" className="w-full" disabled={u.kuldes}>
+            {u.kuldes ? 'Mentés…' : 'Jelszó mentése'}
+          </Button>
+        </form>
+      ) : (
+        <p className="text-sm text-ash-400">
+          Ez az oldal a levélben kapott linkről nyílik. Ha nincs leveled, kérj újat az{' '}
+          <Link to="/elfelejtett-jelszo" className="text-blood-400 hover:underline">
+            elfelejtett jelszó
+          </Link>{' '}
+          oldalon.
+        </p>
+      )}
     </Kartya>
   )
 }
