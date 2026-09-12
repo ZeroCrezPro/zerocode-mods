@@ -2210,6 +2210,15 @@ function titkokPanel() {
   })
   proba.checked = Boolean(lemon.tesztMod)
 
+  const rejtes = el('input', {
+    type: 'checkbox',
+    onChange: (e) => {
+      lemon.rejtett = e.target.checked
+      jelolValtozas()
+    },
+  })
+  rejtes.checked = Boolean(lemon.rejtett)
+
   return el('section', { class: 'panel' }, [
     el('div', { class: 'panel-fej' }, [el('h3', { text: 'Fizetés' })]),
     el('div', { class: 'panel-test' }, [
@@ -2239,6 +2248,14 @@ function titkokPanel() {
       el('p', {
         class: 'sugo',
         text: 'Ha kikapcsolod, a következő Frissítés élesre készíti újra a fizetőoldalakat. A Lemon Squeezy-ben is ugyanabban a módban legyen a bolt.',
+      }),
+      el('label', { class: 'kapcsolo', style: 'margin-top:12px' }, [
+        rejtes,
+        el('span', { text: 'A fizetős gombok elrejtése az oldalon - a látogatók nem látják, amíg ez be van kapcsolva' }),
+      ]),
+      el('p', {
+        class: 'sugo',
+        text: 'Amíg a bolt csak teszt, ezzel tartsd rejtve. A csomagok beállításai megmaradnak; ha kikapcsolod és Frissítesz, a gombok megjelennek.',
       }),
     ]),
   ])

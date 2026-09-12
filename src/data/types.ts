@@ -103,6 +103,8 @@ export interface LemonBeallitas {
   penznem: string
   /** Próba mód: a fizetőoldalak teszt módban készülnek, nem valódi pénzzel */
   tesztMod?: boolean
+  /** A fizetős gombok elrejtve az oldalon (pl. amíg a bolt csak teszt) */
+  rejtett?: boolean
 }
 
 export interface Mod {

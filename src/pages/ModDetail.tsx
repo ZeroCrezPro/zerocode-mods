@@ -252,7 +252,8 @@ export default function ModDetail() {
                   </a>
                   {/* Fizetős (prémium) letöltés - a szolgáltató kulcsával nyílik. */}
                   {/* A fizetőoldalt a Frissítés hozza létre; addig nincs gomb. */}
-                  {mod.fizetos?.fajl && mod.fizetos.vasarlasUrl && mod.fizetos.termekAzonosito && (
+                  {/* Beállítások → Fizetés → elrejtés: amíg a bolt csak teszt, nincs gomb. */}
+                  {!site.lemon?.rejtett && mod.fizetos?.fajl && mod.fizetos.vasarlasUrl && mod.fizetos.termekAzonosito && (
                     <FizetosLetoltes
                       slug={mod.slug}
                       fizetos={mod.fizetos}
