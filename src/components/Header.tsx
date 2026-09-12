@@ -3,7 +3,8 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { site } from '@/data/site'
 import { quickSearch } from '@/lib/search'
 import { cx } from '@/lib/format'
-import { IconClose, IconMenu, IconSearch } from './Icons'
+import { fiokokBekapcsolva, useFiok } from '@/lib/fiok'
+import { IconClose, IconMenu, IconSearch, IconUser } from './Icons'
 import { SmartImage } from './SmartImage'
 
 const nav = [
@@ -172,6 +173,26 @@ function SearchBox({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
+/** Belépés gomb, vagy a bejelentkezett név (a fiók oldalára visz). */
+function FiokGomb({ className, onNavigate }: { className?: string; onNavigate?: () => void }) {
+  const { fiok } = useFiok()
+  if (!fiokokBekapcsolva) return null
+  return (
+    <Link
+      to={fiok ? '/fiok' : '/belepes'}
+      onClick={onNavigate}
+      className={cx(
+        'flex h-10 items-center gap-2 border border-ink-700 px-3 text-[12px] font-bold tracking-[0.08em] uppercase transition-colors hover:border-blood-600 hover:text-ash-100',
+        fiok ? 'text-ash-100' : 'text-ash-300',
+        className,
+      )}
+    >
+      <IconUser width={16} height={16} aria-hidden />
+      <span className="max-w-[9rem] truncate">{fiok ? fiok.nev : 'Belépés'}</span>
+    </Link>
+  )
+}
+
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileSearch, setMobileSearch] = useState(false)
@@ -214,6 +235,8 @@ export function Header() {
           <div className="hidden w-56 xl:block">
             <SearchBox />
           </div>
+
+          <FiokGomb className="hidden lg:flex" />
 
           <button
             type="button"
@@ -267,6 +290,9 @@ export function Header() {
                 </NavLink>
               </li>
             ))}
+            <li className="pt-3">
+              <FiokGomb className="w-full justify-center" onNavigate={() => setMenuOpen(false)} />
+            </li>
           </ul>
         </nav>
       )}

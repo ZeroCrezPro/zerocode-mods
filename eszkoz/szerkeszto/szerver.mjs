@@ -585,7 +585,13 @@ async function fizetosFajlokEllenorzese(adatok) {
  * függvények env változóként kapják.
  */
 const titkokFajl = path.join(projekt, '.szerkeszto-titkok.json')
-const TITOK_NEVEK = { lemonApiKey: 'LEMON_API_KEY', jegyTitok: 'FIZETOS_TITOK' }
+const TITOK_NEVEK = {
+  lemonApiKey: 'LEMON_API_KEY',
+  jegyTitok: 'FIZETOS_TITOK',
+  fiokTitok: 'FIOK_TITOK',
+  gmailCim: 'GMAIL_CIM',
+  gmailJelszo: 'GMAIL_JELSZO',
+}
 
 async function titkokBeolvas() {
   try {
@@ -623,7 +629,45 @@ async function titkokAllapot() {
     lemonFent: Boolean(t.lemonFent),
     jegyTitok: t.jegyTitok ? 'beállítva' : '',
     jegyFent: Boolean(t.jegyFent),
+    fiokTitok: t.fiokTitok ? 'beállítva' : '',
+    fiokFent: Boolean(t.fiokFent),
+    gmailCim: t.gmailCim ?? '',
+    gmailJelszo: t.gmailJelszo ? 'beállítva' : '',
+    gmailFent: Boolean(t.gmailFent),
   }
+}
+
+/**
+ * Ami a titkokból még nincs fent a Cloudflare-en, az felmegy. A fizetős jegy
+ * és a fiókok aláíró titka magától készül. Visszaadja, mit töltött fel.
+ */
+async function titkokFeltoltese(t) {
+  if (!t.jegyTitok) t.jegyTitok = crypto.randomBytes(32).toString('hex')
+  if (!t.fiokTitok) t.fiokTitok = crypto.randomBytes(32).toString('hex')
+  const sorok = []
+  if (!t.jegyFent) {
+    await titokFeltoltes(TITOK_NEVEK.jegyTitok, t.jegyTitok)
+    t.jegyFent = true
+    sorok.push('A letöltési jegy titka fent van a Cloudflare-en.')
+  }
+  if (!t.fiokFent) {
+    await titokFeltoltes(TITOK_NEVEK.fiokTitok, t.fiokTitok)
+    t.fiokFent = true
+    sorok.push('A fiókok aláíró titka fent van a Cloudflare-en.')
+  }
+  if (t.lemonApiKey && !t.lemonFent) {
+    await titokFeltoltes(TITOK_NEVEK.lemonApiKey, t.lemonApiKey)
+    t.lemonFent = true
+    sorok.push('A Lemon Squeezy API-kulcs fent van a Cloudflare-en.')
+  }
+  if (t.gmailCim && t.gmailJelszo && !t.gmailFent) {
+    await titokFeltoltes(TITOK_NEVEK.gmailCim, t.gmailCim)
+    await titokFeltoltes(TITOK_NEVEK.gmailJelszo, t.gmailJelszo)
+    t.gmailFent = true
+    sorok.push('A Gmail cím és az alkalmazásjelszó fent van a Cloudflare-en.')
+  }
+  await fsp.writeFile(titkokFajl, JSON.stringify(t, null, 2) + '\n', 'utf8')
+  return sorok
 }
 
 /* ------------------------------------------------------------------ */
@@ -782,6 +826,25 @@ async function fizetosCsomagokBeallitasa(adatok) {
   if (valtozott) await adatMentes('mods', adatok.mods)
 }
 
+/**
+ * Ha a fiókok be vannak kapcsolva, a hozzájuk tartozó titkok legyenek fent
+ * (az aláíró titok magától készül). Gmail nélkül a belépés működik, csak
+ * a jelszó-visszaállító levél nem megy - ezt csak jelezzük.
+ */
+async function fiokokEllenorzese(adatok) {
+  if (!adatok.site?.fiok?.bekapcsolva) return
+  const t = await titkokBeolvas()
+  for (const sor of await titkokFeltoltese(t)) naploz('sor', sor)
+  if (!t.gmailFent) {
+    naploz(
+      'sor',
+      'Figyelem: a fiókok be vannak kapcsolva, de a Gmail (elfelejtett jelszó levél) nincs beállítva - Beállítások → Fiókok.',
+    )
+  } else {
+    naploz('sor', 'Fiókok: a titkok és a Gmail beállítva.')
+  }
+}
+
 async function muveletFuttat(nev, uzenet) {
   if (futoMuvelet) throw new Error(`Már fut egy művelet: ${futoMuvelet}`)
   futoMuvelet = nev
@@ -795,6 +858,7 @@ async function muveletFuttat(nev, uzenet) {
       // A fizetőoldalak elsőként készülnek, mert a címük bekerül az oldalba.
       naploz('lepes', '0/5 - Fizetős csomagok a Lemon Squeezy-nél')
       await fizetosCsomagokBeallitasa(await adatokBeolvas())
+      await fiokokEllenorzese(await adatokBeolvas())
 
       // Előbb a modfájlok mennek fel, csak utána az oldal - különben az oldal
       // olyan letöltésre mutatna, ami még nem létezik.
@@ -1219,8 +1283,22 @@ const szerver = http.createServer(async (req, res) => {
       const test = JSON.parse((await testOlvas(req)).toString('utf8') || '{}')
       const t = await titkokBeolvas()
 
-      // A jegy aláíró titka magától készül, egyszer.
-      if (!t.jegyTitok) t.jegyTitok = crypto.randomBytes(32).toString('hex')
+      if (typeof test.gmailCim === 'string') {
+        const uj = test.gmailCim.trim()
+        if (uj !== (t.gmailCim ?? '')) {
+          t.gmailCim = uj
+          t.gmailFent = false
+        }
+        if (!uj) delete t.gmailCim
+      }
+      if (typeof test.gmailJelszo === 'string') {
+        // A Google szóközökkel mutatja az alkalmazásjelszót - azok nem részei.
+        const uj = test.gmailJelszo.replace(/\s+/g, '')
+        if (uj && uj !== t.gmailJelszo) {
+          t.gmailJelszo = uj
+          t.gmailFent = false
+        }
+      }
 
       if (typeof test.lemonApiKey === 'string') {
         const uj = test.lemonApiKey.trim()
@@ -1236,18 +1314,7 @@ const szerver = http.createServer(async (req, res) => {
       await fsp.writeFile(titkokFajl, JSON.stringify(t, null, 2) + '\n', 'utf8')
 
       // Ami még nincs fent, az megy a Cloudflare-re.
-      const naploSorok = []
-      if (t.jegyTitok && !t.jegyFent) {
-        await titokFeltoltes(TITOK_NEVEK.jegyTitok, t.jegyTitok)
-        t.jegyFent = true
-        naploSorok.push('A letöltési jegy titka fent van a Cloudflare-en.')
-      }
-      if (t.lemonApiKey && !t.lemonFent) {
-        await titokFeltoltes(TITOK_NEVEK.lemonApiKey, t.lemonApiKey)
-        t.lemonFent = true
-        naploSorok.push('A Lemon Squeezy API-kulcs fent van a Cloudflare-en.')
-      }
-      await fsp.writeFile(titkokFajl, JSON.stringify(t, null, 2) + '\n', 'utf8')
+      const naploSorok = await titkokFeltoltese(t)
       return json(res, 200, { ok: true, uzenet: naploSorok.join(' '), ...(await titkokAllapot()) })
     }
 
@@ -1304,6 +1371,12 @@ const elonezetSzerver = http.createServer(async (req, res) => {
   }
   if (ut.startsWith('/premium/')) {
     return json(res, 403, { ok: false, hiba: 'Zárt útvonal - csak érvényes kulccsal, az éles oldalon.' })
+  }
+  if (ut.startsWith('/api/fiok/')) {
+    return json(res, ut.endsWith('/en') ? 401 : 403, {
+      ok: false,
+      hiba: 'Az előnézetben nincs bejelentkezés - a fiókok csak az éles oldalon működnek.',
+    })
   }
   return statikus(res, distDir, ut === '/' ? '/index.html' : ut, '404.html', ELONEZET_HID)
 })

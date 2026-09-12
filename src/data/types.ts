@@ -177,6 +177,8 @@ export interface SiteConfig {
   heroImage?: string
   /** Fizetés: a Lemon Squeezy közös alapterméke (nem titkos adat) */
   lemon?: LemonBeallitas
+  /** Felhasználói fiókok: ha be van kapcsolva, a fejlécben ott a Belépés gomb */
+  fiok?: { bekapcsolva: boolean }
   /**
    * Állandó feliratok (szekciócímek, oszlopnevek, gombfeliratok) felülírása.
    * A szerkesztő tölti, amikor színt vagy animációt adsz egy ilyen feliratnak.

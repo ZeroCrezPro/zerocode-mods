@@ -2085,7 +2085,110 @@ function lapBeallitasok() {
   lap.append(hianyOsszegzo(allapot.adatok.site, BEALLITAS_SZAKASZOK))
   lap.append(szakaszokRajz(allapot.adatok.site, BEALLITAS_SZAKASZOK))
   lap.append(titkokPanel())
+  lap.append(fiokokPanel())
   return lap
+}
+
+/**
+ * Fiókok - regisztráció és belépés az oldalon.
+ *
+ * A kapcsoló a site.json-ba megy (ettől jelenik meg a Belépés gomb). A
+ * Gmail cím és az alkalmazásjelszó titok: helyben marad, és a Cloudflare-re
+ * megy - ezzel küldi az oldal az elfelejtett-jelszó levelet.
+ */
+function fiokokPanel() {
+  const site = allapot.adatok.site
+  if (typeof site.fiok !== 'object' || site.fiok === null) site.fiok = {}
+
+  const kapcsolo = el('input', {
+    type: 'checkbox',
+    onChange: (e) => {
+      site.fiok.bekapcsolva = e.target.checked
+      jelolValtozas()
+    },
+  })
+  kapcsolo.checked = Boolean(site.fiok.bekapcsolva)
+
+  const cim = el('input', { type: 'email', placeholder: 'valaki@gmail.com', autocomplete: 'off' })
+  const jelszo = el('input', {
+    type: 'password',
+    class: 'mono',
+    placeholder: '16 betűs alkalmazásjelszó',
+    autocomplete: 'off',
+  })
+  const allapotSor = el('p', { class: 'sugo', text: 'Betöltés…' })
+
+  const frissit = (t) => {
+    const sorok = []
+    if (t.gmailCim) {
+      cim.value = t.gmailCim
+      sorok.push(
+        t.gmailJelszo
+          ? `Gmail: ${t.gmailCim}${t.gmailFent ? ' - fent van a Cloudflare-en' : ' - még nincs feltöltve'}`
+          : `Gmail: ${t.gmailCim} - az alkalmazásjelszó hiányzik`,
+      )
+    } else {
+      sorok.push('Gmail: nincs beállítva - a belépés működik, de az elfelejtett-jelszó levél nem megy ki.')
+    }
+    sorok.push(
+      t.fiokTitok
+        ? `Fiókok aláíró titka: ${t.fiokFent ? 'fent van' : 'még nincs feltöltve'}`
+        : 'Fiókok aláíró titka: az első mentéskor magától elkészül.',
+    )
+    allapotSor.textContent = sorok.join('  ·  ')
+  }
+  api('/api/titkok').then(frissit).catch(() => (allapotSor.textContent = 'Nem olvasható.'))
+
+  const gomb = el('button', {
+    type: 'button',
+    class: 'gomb gomb-elsodleges gomb-apro',
+    text: 'Mentés és feltöltés a Cloudflare-re',
+    onClick: async () => {
+      gomb.disabled = true
+      try {
+        const v = await api('/api/titkok', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ gmailCim: cim.value, gmailJelszo: jelszo.value }),
+        })
+        jelszo.value = ''
+        frissit(v)
+        pirit(v.uzenet || 'Mentve.', 'jo')
+      } catch (hiba) {
+        pirit(`Nem sikerült: ${hiba.message}`, 'rossz')
+      } finally {
+        gomb.disabled = false
+      }
+    },
+  })
+
+  return el('section', { class: 'panel' }, [
+    el('div', { class: 'panel-fej' }, [el('h3', { text: 'Fiókok' })]),
+    el('div', { class: 'panel-test' }, [
+      el('label', { class: 'kapcsolo' }, [
+        kapcsolo,
+        el('span', { text: 'Bejelentkezés az oldalon - a fejlécben Belépés gomb, regisztráció névvel, e-mail címmel és jelszóval' }),
+      ]),
+      el('p', {
+        class: 'sugo',
+        text: 'A fiókok a Cloudflare-en tárolódnak (KV), a jelszavakból csak hash marad. Mentés után Frissítés kell, hogy a gomb megjelenjen.',
+      }),
+      el('div', { class: 'mezo teljes', style: 'margin-top:18px' }, [
+        el('span', { class: 'mezo-cim', text: 'Gmail cím (ez küldi az elfelejtett-jelszó levelet)' }),
+        cim,
+      ]),
+      el('div', { class: 'mezo teljes' }, [
+        el('span', { class: 'mezo-cim', text: 'Gmail alkalmazásjelszó (titkos)' }),
+        jelszo,
+        el('p', {
+          class: 'sugo',
+          text: 'Google-fiók → Biztonság → Kétlépcsős azonosítás bekapcsolva → Alkalmazásjelszavak → új jelszó (bármilyen névvel). A 16 betűs kódot ide. Nem a Gmail rendes jelszava!',
+        }),
+      ]),
+      el('div', { style: 'display:flex;gap:10px;align-items:center;flex-wrap:wrap' }, [gomb]),
+      allapotSor,
+    ]),
+  ])
 }
 
 /**

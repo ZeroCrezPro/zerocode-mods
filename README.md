@@ -19,6 +19,7 @@ React + TypeScript + Vite + Tailwind CSS, statikusan előrenderelve, Cloudflare 
 4. [Hogyan adok hozzá új modot?](#hogyan-adok-hozzá-új-modot)
 5. [Szövegformázás: szín és animáció](#szövegformázás-szín-és-animáció)
 5b. [Fizetős (prémium) letöltés](#fizetős-prémium-letöltés)
+5c. [Fiókok: regisztráció és belépés](#fiókok-regisztráció-és-belépés)
 6. [Hogyan adok ki új verziót?](#hogyan-adok-ki-új-verziót)
 7. [Hogyan működik a letöltés (GitHub Releases)?](#hogyan-működik-a-letöltés-github-releases)
 8. [Hogyan változtatom meg a letöltési URL-t?](#hogyan-változtatom-meg-a-letöltési-url-t)
@@ -525,6 +526,48 @@ próba-rendeléseket elutasítja.
 - Az előnézetben a kulcs-ellenőrzés nem fut - az csak az éles oldalon működik.
 - A kulcs ellenőrzése a szolgáltató szerverén történik; ha az nem elérhető, az oldal
   ezt kiírja, és kéri, hogy próbálja újra egy perc múlva.
+
+---
+
+## Fiókok: regisztráció és belépés
+
+A látogatók **névvel, e-mail címmel és jelszóval** regisztrálhatnak, és névvel vagy
+e-maillel léphetnek be. Elfelejtett jelszónál az oldal **Gmailen át** küld egy egy
+óráig élő linket, amivel újat adhatnak meg. Bejelentkezve a fiók oldalán (`/fiok`)
+jelszót lehet módosítani és kilépni.
+
+### Bekapcsolás a szerkesztőben
+
+**Beállítások → Fiókok:**
+
+1. **Bejelentkezés az oldalon** kapcsoló → ettől jelenik meg a fejlécben a Belépés gomb.
+2. **Gmail cím** + **alkalmazásjelszó** → *Mentés és feltöltés a Cloudflare-re.*
+   Az alkalmazásjelszót a Google-fiókban kapod: *Biztonság → Kétlépcsős azonosítás*
+   (kötelező bekapcsolni) → *Alkalmazásjelszavak* → új jelszó bármilyen névvel → a
+   16 betűs kód. **Nem a Gmail rendes jelszava.** Ez a kód sehová nem kerül ki: helyben
+   a `.szerkeszto-titkok.json`-ban van (gitignore), és a Cloudflare titkai közé megy.
+3. **Frissítés.** A fiókok aláíró titka (`FIOK_TITOK`) magától elkészül és felmegy.
+
+Gmail nélkül a regisztráció és a belépés működik, csak az elfelejtett-jelszó levél
+nem megy ki - a Frissítés ezt jelzi.
+
+### Hogyan működik?
+
+- A fiókok a Cloudflare **KV** tárban vannak (`FIOKOK`, a `wrangler.toml` köti be).
+  A jelszóból csak sózott PBKDF2-hash tárolódik, maga a jelszó soha.
+- A belépés egy HttpOnly sütiben tartott, HMAC-aláírt jegy - a szerveren nem kell
+  munkamenetet tárolni. Jelszóváltáskor minden korábbi belépés lejár.
+- A levelet a függvény közvetlenül az `smtp.gmail.com`-nak adja át (Cloudflare
+  socket, TLS), külön levélküldő szolgáltatás nélkül.
+- Végpontok: `/api/fiok/regisztracio`, `belepes`, `kilepes`, `en`, `elfelejtett`,
+  `uj-jelszo`, `jelszo`. Egy címről tíz percenként korlátozott számú próbálkozás megy.
+- Oldalak: `/belepes`, `/regisztracio`, `/elfelejtett-jelszo`, `/uj-jelszo`, `/fiok`.
+- Az előnézetben a fiók-végpontok nem élnek (403), csak az éles oldalon.
+
+### Fiókok kezelése
+
+A fiókokat a Cloudflare-en a **Workers & Pages → KV → FIOKOK** alatt látod
+(`fiok:<e-mail>` kulcsok); egy fiók törléséhez a `fiok:…` és a `nev:…` kulcsot is töröld.
 
 ---
 

@@ -23,5 +23,8 @@
     "penznem": "EUR",
     "tesztMod": true,
     "rejtett": true
+  },
+  "fiok": {
+    "bekapcsolva": true
   }
 }

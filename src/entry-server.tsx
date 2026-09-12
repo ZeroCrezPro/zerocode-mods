@@ -10,6 +10,11 @@ export function allRoutes(): string[] {
   return [
     '/',
     '/modok',
+    '/belepes',
+    '/regisztracio',
+    '/elfelejtett-jelszo',
+    '/uj-jelszo',
+    '/fiok',
     ...mods.map((m) => `/modok/${m.slug}`),
   ]
 }

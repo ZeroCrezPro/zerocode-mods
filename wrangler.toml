@@ -1,0 +1,11 @@
+# Cloudflare Pages - a függvények kötései.
+# A titkok (FIZETOS_TITOK, LEMON_API_KEY, FIOK_TITOK, GMAIL_CIM, GMAIL_JELSZO)
+# nem itt vannak: azokat a szerkesztő tölti fel (wrangler pages secret put).
+name = "zerocode-mods"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-01"
+
+# A felhasználói fiókok tára (functions/_lib/fiok.js)
+[[kv_namespaces]]
+binding = "FIOKOK"
+id = "02cb40bd66154031a9543cdb01e46db6"
