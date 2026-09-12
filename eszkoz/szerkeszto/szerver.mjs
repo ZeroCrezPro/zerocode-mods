@@ -725,7 +725,19 @@ async function lemonFizetooldal(site, mod) {
       },
     },
   })
-  return valasz?.data?.attributes?.url
+  const a = valasz?.data?.attributes ?? {}
+  // A Lemon Squeezy a nem aktivált boltnál (vagy próba módú alapterméknél)
+  // szó nélkül próba módban készíti el a fizetőoldalt - ezt nem szabad
+  // élesként kiadni, mert az oldal minden rendelést elutasítana.
+  if (!l.tesztMod && a.test_mode) {
+    throw new Error(
+      `${mod.name}: a Lemon Squeezy csak PRÓBA módú fizetőoldalt tud készíteni. ` +
+        'Ok: a bolt még nincs aktiválva (Lemon Squeezy → Activate your store), vagy az alaptermék és az ' +
+        'API-kulcs próba módban készült - élesben újra kell létrehozni őket, aztán Beállítások → Fizetés → ' +
+        'Termékek lekérése. Addig kapcsold vissza a Próba módot.',
+    )
+  }
+  return a.url
 }
 
 /**
