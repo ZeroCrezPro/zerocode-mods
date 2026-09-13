@@ -596,7 +596,12 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
 - Ellenfelek: drón, vadász, vezér (2 élet), villám (3. hullámtól); bejövetel görbén,
   formáció, kiválás és támadás (hullám, ív, zuhanás, rajtaütés); hullámról hullámra
   nehezedik. 3 élet, sérthetetlenségi idő, 20 000 pontnál extra élet.
-- A rekord és a beállítások a böngésző tárolójában maradnak.
+- Fegyverfejlődés hullámonként: egyes → iker → hármas → erős hármas → dupla (1/2/3
+  oszlop) → robbanó (1/2/3, területi sebzés) → lézer (1/2/3 sugár). A 13. hullám
+  főellenség: életcsíkkal, legyező-lövéssel, kísérőkkel - itt a teljes normál + robbanó
+  arzenál jár, lézer nélkül. Utána a lézer marad, a főellenség 13 hullámonként visszatér.
+- A rekord és a beállítások a böngésző tárolójában maradnak. (Fejlesztői segéd: a
+  `zc-galaga-teszt` localStorage-kulcs egy hullámszámmal onnan indítja a játékot.)
 
 ---
 
