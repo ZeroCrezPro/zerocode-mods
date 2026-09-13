@@ -422,6 +422,8 @@ interface Ellenfel {
   lovesIdo: number
 }
 
+type Alak = 'rud' | 'gomb' | 'nyil' | 'gyemant' | 'gyuru' | 'csillag' | 'villam' | 'csepp' | 'mag' | 'penge' | 'orveny'
+
 interface Lovedek {
   x: number
   y: number
@@ -429,8 +431,80 @@ interface Lovedek {
   vy: number
   sajat: boolean
   sebzes: number
-  /** robbanó: találatkor a környéket is sebzi */
+  /** robbanó: találatkor a környéket is sebzi (sugár egységben; 0 = nem) */
   robbano: boolean
+  robbanSugar: number
+  alak: Alak
+  szin: string
+  meret: number
+  /** ennyi ellenfélen még átmegy */
+  atut: number
+  /** követés: ennyire fordul a legközelebbi ellenfél felé (0 = nem) */
+  koveto: number
+  /** kígyózás: kitérés amplitúdója (0 = egyenes) */
+  hullamAmp: number
+  /** a falról visszapattan */
+  pattog: boolean
+  /** találatkor kettéválik */
+  szetvalik: boolean
+  /** örvénylő pálya */
+  orveny: boolean
+  ido: number
+  alapX: number
+  talalt: Set<Ellenfel>
+}
+
+/*
+ * Fegyvercsaládok a 13. hullám után: 12 anyag × 10 forma = 120 különböző
+ * lövedékfajta, mindegyik három változatban (egyes, iker, hármas) - egy
+ * család három hullámot ölel fel. A forma adja a viselkedést, az anyag a
+ * színt és a nevet; a sorszámmal a sebzés is nő.
+ */
+const ANYAGOK = ['PLAZMA', 'FOTON', 'KRISTÁLY', 'ION', 'KVANTUM', 'NEUTRON', 'ANTIANYAG', 'TACHION', 'GRAVITON', 'NOVA', 'PULZÁR', 'KVAZÁR']
+interface Forma {
+  nev: string
+  alak: Alak
+  seb: number
+  sebzes: number
+  meret: number
+  atut?: number
+  robbanSugar?: number
+  koveto?: number
+  hullamAmp?: number
+  pattog?: boolean
+  szetvalik?: boolean
+  orveny?: boolean
+  varakozas: number
+}
+const FORMAK: Forma[] = [
+  { nev: 'GÖMB', alak: 'gomb', seb: 520, sebzes: 3, meret: 7, varakozas: 0.18 },
+  { nev: 'NYÍL', alak: 'nyil', seb: 760, sebzes: 2, meret: 6, atut: 1, varakozas: 0.14 },
+  { nev: 'SZILÁNK', alak: 'gyemant', seb: 480, sebzes: 3, meret: 6, hullamAmp: 34, varakozas: 0.16 },
+  { nev: 'GYŰRŰ', alak: 'gyuru', seb: 320, sebzes: 5, meret: 13, varakozas: 0.3 },
+  { nev: 'CSILLAG', alak: 'csillag', seb: 500, sebzes: 2, meret: 8, szetvalik: true, varakozas: 0.2 },
+  { nev: 'VILLÁM', alak: 'villam', seb: 460, sebzes: 3, meret: 7, koveto: 4, varakozas: 0.2 },
+  { nev: 'CSEPP', alak: 'csepp', seb: 440, sebzes: 3, meret: 7, pattog: true, varakozas: 0.18 },
+  { nev: 'MAG', alak: 'mag', seb: 380, sebzes: 4, meret: 9, robbanSugar: 64, varakozas: 0.32 },
+  { nev: 'PENGE', alak: 'penge', seb: 600, sebzes: 2, meret: 8, atut: 99, varakozas: 0.24 },
+  { nev: 'ÖRVÉNY', alak: 'orveny', seb: 430, sebzes: 3, meret: 8, orveny: true, varakozas: 0.18 },
+]
+interface Csalad extends Forma {
+  szin: string
+  mag: string
+}
+function csaladAdat(i: number): Csalad {
+  const forma = FORMAK[i % FORMAK.length]
+  const anyag = ANYAGOK[(i * 7) % ANYAGOK.length]
+  const h = (i * 37) % 360
+  const nev = anyag + (/^[AÁEÉIÍOÓÖŐUÚÜŰ]/.test(forma.nev) ? '-' : '') + forma.nev
+  return {
+    ...forma,
+    nev,
+    // a sorszámmal erősödik, hogy a későbbi hullámok nagyobb létszámával lépést tartson
+    sebzes: forma.sebzes + Math.floor(i / 3),
+    szin: `hsl(${h} 90% 60%)`,
+    mag: `hsl(${h} 100% 88%)`,
+  }
 }
 
 /**
@@ -445,6 +519,9 @@ interface Fegyver {
   sebzes: number
   robbano: number // egymás melletti robbanó lövedékek
   lezer: number // párhuzamos lézersugarak
+  /** a 13. hullám utáni fegyvercsalád sorszáma és változata (1 = egyes, 2 = iker, 3 = hármas) */
+  csalad?: number
+  valtozat?: 1 | 2 | 3
 }
 
 const FEGYVEREK: Fegyver[] = [
@@ -1046,17 +1123,16 @@ export class Galaga {
       }
     }
 
-    if (this.foellensegHullam()) {
-      this.foellensegHullamIndit()
-      return
-    }
+    // Főellenség-hullámon a főellenség mellett egy (kisebb) formáció is támad.
+    const foellenseg = this.foellensegHullam()
+    if (foellenseg) this.foellensegHullamIndit()
 
     // Formáció: a hullámmal nő a sorok száma és az oszlopok száma.
     const oszlopok = Math.min(10, 6 + Math.floor((this.hullam - 1) / 2))
     this.oszlopok = oszlopok
-    const sorok: EllenfelFajta[] = ['vezer', 'vadasz', 'dron', 'dron']
-    if (this.hullam >= 3) sorok.splice(1, 0, 'vadasz')
-    if (this.hullam >= 6) sorok.push('dron')
+    const sorok: EllenfelFajta[] = foellenseg ? ['vadasz', 'dron'] : ['vezer', 'vadasz', 'dron', 'dron']
+    if (!foellenseg && this.hullam >= 3) sorok.splice(1, 0, 'vadasz')
+    if (!foellenseg && this.hullam >= 6) sorok.push('dron')
     let sorszam = 0
     sorok.forEach((fajta, sor) => {
       const db = fajta === 'vezer' ? Math.max(2, oszlopok - 4) : oszlopok
@@ -1088,7 +1164,7 @@ export class Galaga {
       }
     })
     // Villámok (kamikaze) a 3. hullámtól: nem a formációból, a képernyő tetejéről csapnak le.
-    if (this.hullam >= 3) {
+    if (this.hullam >= 3 && !foellenseg) {
       const db = Math.min(6, this.hullam - 2)
       for (let i = 0; i < db; i++) {
         this.ellenfelek.push({
@@ -1108,7 +1184,8 @@ export class Galaga {
         })
       }
     }
-    this.olesPont = Math.floor(this.hullamKeret / this.ellenfelek.length)
+    // Főellenségnél: a kísérők és a formáció fix értékűek, a főellenség a maradékot kapja.
+    this.olesPont = foellenseg ? 500 : Math.floor(this.hullamKeret / this.ellenfelek.length)
   }
 
   private foellensegHullam() {
@@ -1117,14 +1194,24 @@ export class Galaga {
 
   /** Az aktuális fegyver: a hullámok számából; főellenségnél a teljes arzenál (lézer nélkül). */
   private fegyver(): Fegyver {
-    if (this.foellensegHullam()) return FOELLENSEG_FEGYVER
-    return FEGYVEREK[Math.min(FEGYVEREK.length - 1, this.hullam - 1)]
+    if (this.hullam === FOELLENSEG_HULLAM) return FOELLENSEG_FEGYVER
+    if (this.hullam < FOELLENSEG_HULLAM) return FEGYVEREK[this.hullam - 1]
+    // A 13. után a lézer elmarad: családok jönnek, minden harmadik hullámnál
+    // egyes → iker → hármas. Főellenség-hullámon az előző fegyver marad.
+    let h = this.hullam
+    if (this.foellensegHullam()) h--
+    const n = h - FOELLENSEG_HULLAM - (Math.floor(h / FOELLENSEG_HULLAM) - 1) - 1 // 0-tól
+    const csalad = Math.floor(n / 3)
+    const valtozat = ((n % 3) + 1) as 1 | 2 | 3
+    const adat = csaladAdat(csalad)
+    const nev = (valtozat === 2 ? 'IKER ' : valtozat === 3 ? 'HÁRMAS ' : '') + adat.nev
+    return { nev, oszlopok: 0, dupla: false, sebzes: adat.sebzes, robbano: 0, lezer: 0, csalad, valtozat }
   }
 
   /** Főellenség-hullám: egyetlen nagy ellenfél, ami lő, kitér és kísérőket hív. */
   private foellensegHullamIndit() {
     const kor = Math.floor(this.hullam / FOELLENSEG_HULLAM) // hányadik főellenség
-    const elet = 90 + (kor - 1) * 50
+    const elet = 200 + (kor - 1) * 120
     this.foellensegElet = elet
     this.ellenfelek.push({
       fajta: 'foellenseg',
@@ -1141,8 +1228,7 @@ export class Galaga {
       villan: 0,
       lovesIdo: 2.5,
     })
-    this.tamadasVarakozas = 999 // a főellenség maga hívja a kísérőit
-    this.olesPont = 500 // a kísérők értéke; a főellenség kapja a maradékot
+    this.tamadasVarakozas = 4 // a formáció is támad, a főellenség ráadásul kísérőket hív
   }
 
   /** A főellenség viselkedése: beúszik, kígyózik, legyezőben lő, kísérőket küld. */
@@ -1152,7 +1238,7 @@ export class Galaga {
     else e.x = this.w / 2 + Math.sin(e.ido * 0.6) * Math.max(0, this.w / 2 - 90)
     e.lovesIdo -= dt
     if (e.lovesIdo <= 0 && e.y >= 100) {
-      e.lovesIdo = Math.max(0.7, 1.6 - this.hullam * 0.02)
+      e.lovesIdo = Math.max(0.55, 1.3 - this.hullam * 0.02)
       // 5 lövedék legyezőben, a hajó felé
       const dx = this.hajoX - e.x
       const dy = this.hajoY - e.y
@@ -1165,7 +1251,7 @@ export class Galaga {
       this.hang.loves()
     }
     // kísérők: minden 5 mp-ben két drón a főellenségtől indulva támad
-    if (Math.floor(e.ido / 5) !== Math.floor((e.ido - dt) / 5) && e.ido > 4) {
+    if (Math.floor(e.ido / 4) !== Math.floor((e.ido - dt) / 4) && e.ido > 3) {
       for (let i = 0; i < 2; i++) {
         const k: Ellenfel = {
           fajta: i === 0 ? 'dron' : 'vadasz',
@@ -1191,7 +1277,8 @@ export class Galaga {
   private formacioHely(oszlop: number, sor: number, oszlopok = 8): Pont {
     const koz = Math.min(52, (this.w - 60) / oszlopok)
     const bal = (this.w - koz * (oszlopok - 1)) / 2
-    return { x: bal + oszlop * koz, y: 90 + sor * 40 }
+    // főellenség-hullámon a formáció a főellenség alatt áll
+    return { x: bal + oszlop * koz, y: (this.foellensegHullam() ? 190 : 90) + sor * 40 }
   }
 
   private nehezseg() {
@@ -1219,14 +1306,59 @@ export class Galaga {
     e.tSeb = TEMPO
   }
 
-  private lo(x: number, y: number, vx: number, vy: number, sajat: boolean, sebzes = 1, robbano = false) {
-    this.lovedekek.push({ x, y, vx, vy, sajat, sebzes, robbano })
+  private lo(x: number, y: number, vx: number, vy: number, sajat: boolean, sebzes = 1, robbano = false, extra: Partial<Lovedek> = {}) {
+    this.lovedekek.push({
+      x,
+      y,
+      vx,
+      vy,
+      sajat,
+      sebzes,
+      robbano,
+      robbanSugar: robbano ? ROBBANAS_SUGAR : 0,
+      alak: robbano ? 'mag' : 'rud',
+      szin: robbano ? '#ff8c1a' : sebzes >= 2 ? '#ffffff' : '#5cc8ff',
+      meret: robbano ? 6 : 3,
+      atut: 0,
+      koveto: 0,
+      hullamAmp: 0,
+      pattog: false,
+      szetvalik: false,
+      orveny: false,
+      ido: 0,
+      alapX: x,
+      talalt: new Set(),
+      ...extra,
+    })
+  }
+
+  /** Egy családbeli lövedék a megadott helyről, a forma viselkedésével. */
+  private csaladLoves(cs: Csalad, x: number, y: number, sebzes: number, szog = 0, szetvalhat = true) {
+    const vx = Math.sin(szog) * cs.seb
+    const vy = -Math.cos(szog) * cs.seb
+    this.lo(x, y, vx, vy, true, sebzes, false, {
+      alak: cs.alak,
+      szin: cs.szin,
+      meret: cs.meret,
+      atut: cs.atut ?? 0,
+      robbanSugar: cs.robbanSugar ?? 0,
+      koveto: cs.koveto ?? 0,
+      hullamAmp: cs.hullamAmp ?? 0,
+      pattog: Boolean(cs.pattog),
+      szetvalik: Boolean(cs.szetvalik) && szetvalhat,
+      orveny: Boolean(cs.orveny),
+    })
   }
 
   /** A hajó tüzel az aktuális fegyverrel (lézer nélkül - az folyamatos). */
   private tuzel(f: Fegyver) {
     const y = this.hajoY - 18
     const oszlopHely = (db: number, koz: number) => (db === 1 ? [0] : db === 2 ? [-koz, koz] : [-koz * 1.7, 0, koz * 1.7])
+    if (f.csalad !== undefined) {
+      const cs = csaladAdat(f.csalad)
+      for (const dx of oszlopHely(f.valtozat ?? 1, cs.meret + 4)) this.csaladLoves(cs, this.hajoX + dx, y, f.sebzes)
+      return
+    }
     for (const dx of f.oszlopok ? oszlopHely(f.oszlopok, 7) : []) {
       this.lo(this.hajoX + dx, y, 0, -520, true, f.sebzes)
       // dupla: a másodikat 8 egységgel lemaradva indítjuk
@@ -1238,13 +1370,13 @@ export class Galaga {
   }
 
   /** Robbanó lövedék: a környéken lévő ellenfeleket is sebzi. */
-  private robbanoTalalat(x: number, y: number) {
-    this.robbanas(x, y, '#ff8c1a', 30, true)
+  private robbanoTalalat(x: number, y: number, sugar = ROBBANAS_SUGAR, szin = '#ff8c1a') {
+    this.robbanas(x, y, szin, 30, true)
     this.hang.robbanas(true)
     this.razas = Math.max(this.razas, 0.15)
     for (const e of this.ellenfelek) {
       if (e.elet <= 0 || (e.allapot === 'bejon' && e.t < 0)) continue
-      if (Math.hypot(e.x - x, e.y - y) < ROBBANAS_SUGAR) {
+      if (Math.hypot(e.x - x, e.y - y) < sugar) {
         e.elet -= 2
         e.villan = 0.1
         if (e.elet <= 0) this.ellenfelPusztul(e)
@@ -1376,7 +1508,7 @@ export class Galaga {
       this.lezerAktiv = f.lezer > 0 && akarLoni
       if (!f.lezer && akarLoni && this.lovesVarakozas <= 0 && this.lovedekek.filter((l) => l.sajat).length < 40) {
         this.tuzel(f)
-        this.lovesVarakozas = f.robbano && !f.oszlopok ? 0.3 : 0.16
+        this.lovesVarakozas = f.csalad !== undefined ? csaladAdat(f.csalad).varakozas : f.robbano && !f.oszlopok ? 0.3 : 0.16
         this.hang.loves()
       }
       if (this.lezerAktiv) {
@@ -1500,8 +1632,44 @@ export class Galaga {
 
     // --- lövedékek ---
     for (const l of this.lovedekek) {
-      l.x += l.vx * dt
+      l.ido += dt
+      if (l.koveto && l.sajat) {
+        // a legközelebbi, még előtte lévő ellenfél felé fordul
+        let cel: Ellenfel | null = null
+        let tav = 1e9
+        for (const e of this.ellenfelek) {
+          if (e.elet <= 0 || e.y > l.y || (e.allapot === 'bejon' && e.t < 0)) continue
+          const d = Math.hypot(e.x - l.x, e.y - l.y)
+          if (d < tav) {
+            tav = d
+            cel = e
+          }
+        }
+        if (cel) {
+          const seb = Math.hypot(l.vx, l.vy)
+          const cx = (cel.x - l.x) / tav
+          const cy = (cel.y - l.y) / tav
+          l.vx += (cx * seb - l.vx) * l.koveto * dt
+          l.vy += (cy * seb - l.vy) * l.koveto * dt
+          const uj = Math.hypot(l.vx, l.vy) || 1
+          l.vx = (l.vx / uj) * seb
+          l.vy = (l.vy / uj) * seb
+        }
+      }
+      if (l.orveny) {
+        const seb = Math.hypot(l.vx, l.vy)
+        const a = -Math.PI / 2 + Math.sin(l.ido * 9) * 0.9
+        l.vx = Math.cos(a) * seb
+        l.vy = Math.sin(a) * seb
+      }
+      l.alapX += l.vx * dt
       l.y += l.vy * dt
+      l.x = l.hullamAmp ? l.alapX + Math.sin(l.ido * 12) * l.hullamAmp : l.alapX
+      if (l.pattog && (l.x < 4 || l.x > this.w - 4)) {
+        l.vx = -l.vx
+        l.alapX = szorit(l.alapX, 4, this.w - 4)
+        l.x = l.alapX
+      }
     }
     this.lovedekek = this.lovedekek.filter((l) => l.y > -20 && l.y < H + 20 && l.x > -20 && l.x < this.w + 20)
 
@@ -1513,15 +1681,29 @@ export class Galaga {
         if (e.oszlop < 0 && e.allapot === 'formacio') continue // várakozó villám a képen kívül
         const s = this.fajtak[e.fajta].sprite
         if (e.elet <= 0) continue
-        if (Math.abs(l.x - e.x) < s.w / 2 && Math.abs(l.y - e.y) < s.h / 2 + 4) {
-          l.y = -999 // eldobjuk
+        if (l.talalt.has(e)) continue
+        if (Math.abs(l.x - e.x) < s.w / 2 + l.meret / 2 && Math.abs(l.y - e.y) < s.h / 2 + 4) {
+          l.talalt.add(e)
+          if (l.atut > 0) l.atut--
+          else l.y = -999 // eldobjuk
           e.elet -= l.sebzes
           e.villan = 0.09
           this.hang.talalat()
           if (e.elet <= 0) this.ellenfelPusztul(e)
           else this.robbanas(l.x, e.y + 6, '#fff', 4)
-          if (l.robbano) this.robbanoTalalat(l.x, e.y)
-          break
+          if (l.robbanSugar) this.robbanoTalalat(l.x, e.y, l.robbanSugar, l.szin)
+          if (l.szetvalik) {
+            // kettéválik: két kisebb, ferde lövedék, amelyek már nem válnak tovább
+            const seb = Math.hypot(l.vx, l.vy)
+            for (const sz of [-0.5, 0.5]) {
+              this.lo(l.x, e.y, Math.sin(sz) * seb, -Math.cos(sz) * seb, true, Math.max(1, l.sebzes - 1), false, {
+                alak: l.alak,
+                szin: l.szin,
+                meret: Math.max(4, l.meret - 2),
+              })
+            }
+          }
+          if (l.y === -999) break
         }
       }
     }
@@ -1758,13 +1940,8 @@ export class Galaga {
       if (!l.sajat) {
         g.fillStyle = '#ff6b6b'
         g.fillRect(l.x - 2, l.y - 4, 4, 8)
-      } else if (l.robbano) {
-        g.fillStyle = Math.floor(this.ido * 20) % 2 ? '#ffb347' : '#ff8c1a'
-        g.beginPath()
-        g.arc(l.x, l.y, 6, 0, Math.PI * 2)
-        g.fill()
-        g.fillStyle = '#fff'
-        g.fillRect(l.x - 1.5, l.y - 3, 3, 3)
+      } else if (l.alak !== 'rud') {
+        this.lovedekRajz(l)
       } else if (l.sebzes >= 2) {
         g.fillStyle = '#ffffff'
         g.fillRect(l.x - 2, l.y - 9, 4, 16)
@@ -1869,6 +2046,106 @@ export class Galaga {
       this.szoveg(this.fegyverNev, this.w / 2, H / 2 + 36, 24, '#ffffff')
       g.globalAlpha = 1
     }
+  }
+
+  /** A családbeli (és a robbanó) lövedékek alakjai. */
+  private lovedekRajz(l: Lovedek) {
+    const g = this.ctx
+    const m = l.meret
+    const villog = Math.floor(this.ido * 20) % 2 === 0
+    g.save()
+    g.translate(l.x, l.y)
+    g.fillStyle = l.szin
+    switch (l.alak) {
+      case 'gomb':
+      case 'mag':
+        g.beginPath()
+        g.arc(0, 0, m, 0, Math.PI * 2)
+        g.fill()
+        g.fillStyle = villog ? '#fff' : 'rgba(255,255,255,0.6)'
+        g.fillRect(-m / 4, -m / 2, m / 2, m / 2)
+        break
+      case 'nyil':
+        g.beginPath()
+        g.moveTo(0, -m * 1.6)
+        g.lineTo(m * 0.7, m * 0.4)
+        g.lineTo(0, 0)
+        g.lineTo(-m * 0.7, m * 0.4)
+        g.closePath()
+        g.fill()
+        g.fillStyle = '#fff'
+        g.fillRect(-1, -m, 2, m)
+        break
+      case 'gyemant':
+        g.beginPath()
+        g.moveTo(0, -m * 1.4)
+        g.lineTo(m * 0.8, 0)
+        g.lineTo(0, m * 1.4)
+        g.lineTo(-m * 0.8, 0)
+        g.closePath()
+        g.fill()
+        break
+      case 'gyuru':
+        g.lineWidth = 3
+        g.strokeStyle = l.szin
+        g.beginPath()
+        g.arc(0, 0, m, 0, Math.PI * 2)
+        g.stroke()
+        g.strokeStyle = 'rgba(255,255,255,0.7)'
+        g.lineWidth = 1
+        g.beginPath()
+        g.arc(0, 0, m - 3, 0, Math.PI * 2)
+        g.stroke()
+        break
+      case 'csillag': {
+        g.rotate(l.ido * 8)
+        g.beginPath()
+        for (let i = 0; i < 10; i++) {
+          const r = i % 2 ? m * 0.45 : m
+          const a = (i / 10) * Math.PI * 2
+          g.lineTo(Math.cos(a) * r, Math.sin(a) * r)
+        }
+        g.closePath()
+        g.fill()
+        break
+      }
+      case 'villam':
+        g.beginPath()
+        g.moveTo(-m * 0.3, -m * 1.4)
+        g.lineTo(m * 0.4, -m * 0.3)
+        g.lineTo(-m * 0.1, -m * 0.1)
+        g.lineTo(m * 0.3, m * 1.4)
+        g.lineTo(-m * 0.4, m * 0.2)
+        g.lineTo(m * 0.1, 0)
+        g.closePath()
+        g.fill()
+        break
+      case 'csepp':
+        g.beginPath()
+        g.moveTo(0, -m * 1.5)
+        g.quadraticCurveTo(m, 0, 0, m)
+        g.quadraticCurveTo(-m, 0, 0, -m * 1.5)
+        g.fill()
+        break
+      case 'penge':
+        g.rotate(Math.atan2(l.vy, l.vx) + Math.PI / 2)
+        g.fillRect(-1.5, -m * 2, 3, m * 4)
+        g.fillStyle = '#fff'
+        g.fillRect(-0.5, -m * 2, 1, m * 4)
+        break
+      case 'orveny':
+        g.rotate(l.ido * 10)
+        for (let i = 0; i < 3; i++) {
+          g.rotate((Math.PI * 2) / 3)
+          g.fillRect(0, -1.5, m, 3)
+        }
+        g.fillStyle = '#fff'
+        g.fillRect(-1.5, -1.5, 3, 3)
+        break
+      default:
+        g.fillRect(-1.5, -8, 3, 14)
+    }
+    g.restore()
   }
 
   /* ---------- főciklus ---------- */

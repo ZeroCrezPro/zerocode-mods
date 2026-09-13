@@ -609,7 +609,11 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
 - Fegyverfejlődés hullámonként: egyes → iker → hármas → erős hármas → dupla (1/2/3
   oszlop) → robbanó (1/2/3, területi sebzés) → lézer (1/2/3 sugár). A 13. hullám
   főellenség: életcsíkkal, legyező-lövéssel, kísérőkkel - itt a teljes normál + robbanó
-  arzenál jár, lézer nélkül. Utána a lézer marad, a főellenség 13 hullámonként visszatér.
+  arzenál jár, lézer nélkül; mellette a formáció is támad, és a főellenség kísérőket hív.
+  A 13. után a lézer elmarad: 120 lövedékcsalád jön (12 anyag × 10 forma: gömb, nyíl,
+  szilánk, gyűrű, csillag, villám, csepp, mag, penge, örvény - mind más viselkedéssel),
+  családonként három hullám: egyes → iker → hármas. A főellenség 13 hullámonként visszatér,
+  egyre több élettel.
   3 élet, pontért nem jár extra; kerek pontozás: az n. hullám n×10 000 pontot ér.
 - Ranglista a főmenü bal oldalán (helyezés · profilkép · név · pont): a bejelentkezett
   játékos eredménye a játék végén magától felkerül (`/api/jatek/pont`), a lista nyilvános
