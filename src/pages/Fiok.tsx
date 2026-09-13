@@ -3,7 +3,8 @@ import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Seo, pageTitle } from '@/components/Seo'
 import { Button, btnClass } from '@/components/ui'
 import { cx } from '@/lib/format'
-import { fiokHivas, fiokokBekapcsolva, kepElokeszit, kepHivas, useFiok, type Fiok } from '@/lib/fiok'
+import { fiokHivas, fiokokBekapcsolva, kepBetolt, kepHivas, useFiok, type Fiok } from '@/lib/fiok'
+import { KepSzerkeszto } from '@/components/KepSzerkeszto'
 
 /*
  * Fiók-oldalak: belépés, regisztráció, elfelejtett jelszó, új jelszó a
@@ -320,21 +321,28 @@ function Szakasz({ cim, leiras, children }: { cim: string; leiras?: string; chil
 function Profilkep({ fiok, beallit }: { fiok: Fiok; beallit: (f: Fiok) => void }) {
   const [fut, setFut] = useState(false)
   const [hiba, setHiba] = useState('')
+  const [szerkesztett, setSzerkesztett] = useState<HTMLImageElement | null>(null)
   const inputId = useId()
 
-  const feltolt = async (fajl: File | undefined) => {
+  // A kiválasztott fájl a szerkesztőbe kerül: ott lehet mozgatni, nagyítani.
+  const kivalaszt = async (fajl: File | undefined) => {
     if (!fajl) return
-    setFut(true)
     setHiba('')
     try {
-      const kep = await kepElokeszit(fajl)
-      const v = await kepHivas(kep)
-      if (v.ok) beallit(v.adat.fiok)
-      else setHiba(v.hiba)
+      setSzerkesztett(await kepBetolt(fajl))
     } catch (e) {
-      setHiba(e instanceof Error ? e.message : 'A képet nem sikerült feldolgozni.')
+      setHiba(e instanceof Error ? e.message : 'A képet nem sikerült megnyitni.')
     }
+  }
+  const feltolt = async (kep: Blob) => {
+    setFut(true)
+    const v = await kepHivas(kep)
+    if (v.ok) {
+      beallit(v.adat.fiok)
+      setSzerkesztett(null)
+    } else setHiba(v.hiba)
     setFut(false)
+    if (!v.ok) throw new Error(v.hiba)
   }
   const torol = async () => {
     setFut(true)
@@ -365,7 +373,7 @@ function Profilkep({ fiok, beallit }: { fiok: Fiok; beallit: (f: Fiok) => void }
           className="sr-only"
           disabled={fut}
           onChange={(e) => {
-            feltolt(e.target.files?.[0])
+            kivalaszt(e.target.files?.[0])
             e.target.value = ''
           }}
         />
@@ -380,10 +388,11 @@ function Profilkep({ fiok, beallit }: { fiok: Fiok; beallit: (f: Fiok) => void }
           )}
         </div>
         <p className="mt-2 text-xs text-ash-400">
-          JPG, PNG vagy WebP. A képet az oldal négyzetre vágja és 256×256-ra kicsinyíti - a fejlécben a neved mellett jelenik meg.
+          JPG, PNG vagy WebP, bármekkora. Kiválasztás után beállíthatod, melyik része látsszon; az oldal 256×256-ra kicsinyíti és weboptimalizált WebP-t készít belőle.
         </p>
         <Uzenet szoveg={hiba} tipus="hiba" />
       </div>
+      {szerkesztett && <KepSzerkeszto img={szerkesztett} mentes={feltolt} megse={() => setSzerkesztett(null)} />}
     </div>
   )
 }
