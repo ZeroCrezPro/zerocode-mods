@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getModBySlug, latestVersion, olderVersions, site } from '@/data'
+import { getModBySlug, latestVersion, site } from '@/data'
 import { formatDate, penzFormat, vLabel } from '@/lib/format'
 import { statusLabel, statusTextClass } from '@/lib/labels'
 import { downloadUrl } from '@/lib/download'
@@ -16,13 +16,12 @@ import { AccordionItem } from '@/components/Accordion'
 import { VersionCard } from '@/components/VersionCard'
 import { Felirat, Szoveg } from '@/components/Szoveg'
 import { Badge, ExternalButton, Panel, btnClass } from '@/components/ui'
-import { IconCheck, IconChevronDown, IconDownload, IconExternal } from '@/components/Icons'
+import { IconCheck, IconDownload, IconExternal } from '@/components/Icons'
 import NotFound from './NotFound'
 
 export default function ModDetail() {
   const { slug } = useParams()
   const mod = slug ? getModBySlug(slug) : undefined
-  const [showOlder, setShowOlder] = useState(false)
   // A letöltés addig nem él, amíg a látogató fel nem fedi a telepítési kódot.
   const [kodFeloldva, setKodFeloldva] = useState(false)
 
@@ -45,7 +44,6 @@ export default function ModDetail() {
   const zarolt = Boolean(mod.installCode) && !kodFeloldva
 
   const latest = latestVersion(mod)
-  const older = olderVersions(mod)
   const path = `/modok/${mod.slug}`
 
   // A címsorban és a keresőnek szánt szövegekben nem lehet formázás.
@@ -365,37 +363,7 @@ export default function ModDetail() {
           >
             {latest && <VersionCard mod={mod} version={latest} latest zarolt={zarolt} />}
 
-            {older.length > 0 && (
-              <div className="border border-ink-800">
-                <button
-                  type="button"
-                  onClick={() => setShowOlder((v) => !v)}
-                  aria-expanded={showOlder}
-                  aria-controls="regebbi-verziok"
-                  className="flex w-full items-center gap-3 bg-ink-850 px-4 py-3 text-left transition-colors hover:bg-ink-800"
-                >
-                  <IconChevronDown
-                    width={16}
-                    height={16}
-                    className={`shrink-0 text-blood-500 transition-transform duration-200 ${
-                      showOlder ? 'rotate-180' : ''
-                    }`}
-                  />
-                  <Felirat
-                    elem="span"
-                    className="zc-label flex-1 text-ash-200"
-                    kulcs="mod.regebbi"
-                    alap="Régebbi verziók"
-                  />
-                  <span className="font-mono text-xs text-ash-400">{older.length} db</span>
-                </button>
-                <div id="regebbi-verziok" hidden={!showOlder} className="space-y-3 p-3">
-                  {older.map((v) => (
-                    <VersionCard key={v.version} mod={mod} version={v} zarolt={zarolt} />
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Csak a legújabb kiadás látszik - a régebbiek a GitHubon maradnak, de itt nem. */}
           </Panel>
 
           {/* GYIK */}
@@ -430,7 +398,6 @@ export default function ModDetail() {
               <p className="mt-1 font-mono text-2xl font-black text-ash-100">
                 {vLabel(latest.version)}
               </p>
-              <p className="mt-0.5 text-xs text-ash-400">{formatDate(latest.releaseDate)}</p>
               <a
                 href={zarolt ? undefined : downloadUrl(latest.download)}
                 rel="noopener noreferrer"
@@ -444,9 +411,6 @@ export default function ModDetail() {
               >
                 <IconDownload width={16} height={16} />
                 <Felirat kulcs="gomb.letoltes" alap="Letöltés" />
-              </a>
-              <a href="#letoltesek" className={btnClass('ghost', 'sm', 'mt-1.5 w-full')}>
-                <Felirat kulcs="gomb.osszesVerzio" alap="Összes verzió" />
               </a>
             </div>
           )}
@@ -466,24 +430,7 @@ export default function ModDetail() {
             </div>
           )}
 
-          {mod.game && (
-            <div className="border border-ink-700 bg-ink-900 p-4">
-              <Felirat
-                elem="p"
-                className="zc-label text-ash-400"
-                kulcs="mod.melyikJatek"
-                alap="Melyik játékhoz"
-              />
-              <Szoveg
-                elem="p"
-                className="mt-2 text-sm font-bold text-ash-100"
-                ertek={mod.game}
-                mezo={`${mod.slug}:game`}
-              />
-            </div>
-          )}
-
-          {/* Hozzászólások: a Melyik játékhoz alatt; a fiókrendszer nélkül nincs. */}
+          {/* Hozzászólások - a fiókrendszer nélkül nincs. */}
           {site.fiok?.bekapcsolva && <Hozzaszolasok slug={mod.slug} />}
 
           {mod.externalLinks && mod.externalLinks.length > 0 && (
