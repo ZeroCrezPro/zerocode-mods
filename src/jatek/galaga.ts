@@ -571,7 +571,7 @@ interface Csillag {
   fenyes: number
 }
 
-type Kepernyo = 'fomenu' | 'beallitasok' | 'jatek' | 'szunet' | 'vege'
+type Kepernyo = 'fomenu' | 'beallitasok' | 'jatek' | 'szunet' | 'vege' | 'ranglista'
 
 /* ================================================================== */
 /* A játék                                                             */
@@ -926,7 +926,9 @@ export class Galaga {
   private menuTetelek(): string[] {
     switch (this.kepernyo) {
       case 'fomenu':
-        return ['JÁTÉK', 'BEÁLLÍTÁSOK', 'KILÉPÉS']
+        return this.ranglistaElfer() ? ['JÁTÉK', 'BEÁLLÍTÁSOK', 'KILÉPÉS'] : ['JÁTÉK', 'RANGLISTA', 'BEÁLLÍTÁSOK', 'KILÉPÉS']
+      case 'ranglista':
+        return ['VISSZA']
       case 'szunet':
         return ['FOLYTATÁS', 'ÚJRAKEZDÉS', 'BEÁLLÍTÁSOK', 'FŐMENÜ', 'KILÉPÉS']
       case 'vege':
@@ -989,8 +991,13 @@ export class Galaga {
   }
 
   private menuSorY(i: number): number {
-    const kezd = this.kepernyo === 'beallitasok' ? 200 : this.kepernyo === 'vege' ? 430 : 330
+    const kezd = this.kepernyo === 'beallitasok' ? 200 : this.kepernyo === 'vege' ? 430 : this.kepernyo === 'ranglista' ? H - 50 : 330
     return kezd + i * (this.kepernyo === 'beallitasok' ? 46 : 52)
+  }
+
+  /** A főmenü mellett bal oldalt elfér-e a ranglista (asztali szélesség). */
+  private ranglistaElfer() {
+    return Math.min(340, this.w / 2 - 190) >= 220
   }
 
   /** Az egér alatti menüsor lesz az aktív; igaz, ha van ilyen sor. */
@@ -1026,6 +1033,7 @@ export class Galaga {
     } else if (k === 'Escape') {
       if (this.kepernyo === 'beallitasok') this.kepernyoValt(this.elozoKepernyo)
       else if (this.kepernyo === 'szunet') this.kepernyoValt('jatek')
+      else if (this.kepernyo === 'ranglista') this.kepernyoValt('fomenu')
       else if (this.kepernyo === 'fomenu') this.bezar()
     }
   }
@@ -1045,9 +1053,13 @@ export class Galaga {
     }
     this.hang.valaszt()
     if (s === 'fomenu') {
-      if (i === 0) this.ujJatek()
-      else if (i === 1) this.beallitasokNyit()
+      const tetel = this.menuTetelek()[i]
+      if (tetel === 'JÁTÉK') this.ujJatek()
+      else if (tetel === 'RANGLISTA') this.kepernyoValt('ranglista')
+      else if (tetel === 'BEÁLLÍTÁSOK') this.beallitasokNyit()
       else this.bezar()
+    } else if (s === 'ranglista') {
+      this.kepernyoValt('fomenu')
     } else if (s === 'szunet') {
       if (i === 0) this.kepernyoValt('jatek')
       else if (i === 1) this.ujJatek()
@@ -1868,6 +1880,11 @@ export class Galaga {
       case 'fomenu':
         this.fomenuRajz()
         break
+      case 'ranglista':
+        this.sotetit()
+        this.ranglistaRajz(Math.max(12, (this.w - Math.min(this.w - 24, 420)) / 2), 40, Math.min(this.w - 24, 420), 14)
+        this.menuRajz()
+        break
       case 'beallitasok':
         this.beallitasokRajz()
         break
@@ -1926,8 +1943,7 @@ export class Galaga {
     this.szoveg(`REKORD  ${this.rekord}`, this.w / 2, H - 32, 13, '#ffd23f')
 
     // Ranglista: bal oldalt, ha elfér a menü mellett; különben nem zavar bele.
-    const szeles = Math.min(340, this.w / 2 - 190)
-    if (szeles >= 220) this.ranglistaRajz(24, 60, szeles, 12)
+    if (this.ranglistaElfer()) this.ranglistaRajz(24, 60, Math.min(340, this.w / 2 - 190), 12)
   }
 
   private beallitasokRajz() {
