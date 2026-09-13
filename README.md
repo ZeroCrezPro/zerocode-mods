@@ -582,6 +582,24 @@ A fiókokat a Cloudflare-en a **Workers & Pages → KV → FIOKOK** alatt látod
 
 ---
 
+## Rejtett játék: Csillagraj
+
+A fejléc **Z-kockájára három gyors kattintás** megnyit egy Galaga ihlette arcade
+űrhajós játékot ( + ). Minden
+grafika saját pixelsprite, minden hang WebAudio-szintézis - nincs benne idegen anyag.
+A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
+
+- Irányítás: A/D vagy nyilak, SPACE lövés, ESC szünet; egérrel a hajó követi a
+  kurzort, bal gomb lő (nyomva tartva folyamatosan). A két mód egyszerre él.
+- Főmenü (Játék / Beállítások / Kilépés), Beállítások (zene, hang, teljes képernyő,
+  egér-érzékenység, automatikus lövés, felbontás), szünet menü, Game Over képernyő.
+- Ellenfelek: drón, vadász, vezér (2 élet), villám (3. hullámtól); bejövetel görbén,
+  formáció, kiválás és támadás (hullám, ív, zuhanás, rajtaütés); hullámról hullámra
+  nehezedik. 3 élet, sérthetetlenségi idő, 20 000 pontnál extra élet.
+- A rekord és a beállítások a böngésző tárolójában maradnak.
+
+---
+
 ## Hogyan adok ki új verziót?
 
 **A legegyszerűbb út:** a szerkesztő program **Modok** lapján, az adott modnál a

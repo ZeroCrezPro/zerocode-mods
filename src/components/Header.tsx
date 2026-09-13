@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useId, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { site } from '@/data/site'
 import { quickSearch } from '@/lib/search'
@@ -7,15 +7,34 @@ import { fiokokBekapcsolva, useFiok } from '@/lib/fiok'
 import { IconClose, IconMenu, IconSearch, IconUser } from './Icons'
 import { SmartImage } from './SmartImage'
 
+// A rejtett játék csak akkor töltődik be, ha valaki előhívja.
+const GalagaJatek = lazy(() => import('./GalagaJatek'))
+
 const nav = [
   { to: '/', label: 'Főoldal', end: true },
   { to: '/modok', label: 'Modok' },
 ]
 
-function Brand() {
+/**
+ * A márkajel. Rejtett játék: három gyors kattintás a Z-kockára (vagy a
+ * logóra) megnyitja a Csillagraj arcade játékot - az első kattintás még a
+ * főoldalra visz, a második-harmadik már nem navigál.
+ */
+function Brand({ jatekNyit }: { jatekNyit: () => void }) {
+  const kattintasok = useRef<number[]>([])
+  const kattint = (e: ReactMouseEvent) => {
+    const most = Date.now()
+    kattintasok.current = [...kattintasok.current.filter((t) => most - t < 700), most]
+    if (kattintasok.current.length >= 2) e.preventDefault()
+    if (kattintasok.current.length >= 3) {
+      kattintasok.current = []
+      jatekNyit()
+    }
+  }
   return (
     <Link
       to="/"
+      onClick={kattint}
       className="group flex items-center gap-3"
       aria-label={`${site.name} - főoldal`}
     >
@@ -200,6 +219,8 @@ function FiokGomb({ className, onNavigate }: { className?: string; onNavigate?: 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileSearch, setMobileSearch] = useState(false)
+  const [jatek, setJatek] = useState(false)
+  const jatekBezar = useCallback(() => setJatek(false), [])
   const location = useLocation()
 
   useEffect(() => {
@@ -225,7 +246,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-ink-700 bg-ink-950/92 backdrop-blur-md">
       <div className="zc-container flex h-16 items-center gap-4 lg:h-[72px]">
-        <Brand />
+        <Brand jatekNyit={() => setJatek(true)} />
 
         <nav aria-label="Fő navigáció" className="ml-4 hidden items-center gap-6 lg:flex">
           {nav.map((n) => (
@@ -299,6 +320,12 @@ export function Header() {
             </li>
           </ul>
         </nav>
+      )}
+
+      {jatek && (
+        <Suspense fallback={null}>
+          <GalagaJatek bezar={jatekBezar} />
+        </Suspense>
       )}
     </header>
   )
