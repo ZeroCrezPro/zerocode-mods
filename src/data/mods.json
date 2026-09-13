@@ -274,12 +274,22 @@
     "name": "Stronghold Crusader DE Mod Panel",
     "game": "Stronghold Crusader: Definitive Edition",
     "createdAt": "2026-09-09",
-    "shortDescription": "Játékon belüli mod panel a Stronghold Crusader: Definitive Edition-höz. ALT+E-re előugró panelről adhatsz és vehetsz el aranyat, tölthetsz árut a raktárba, a magtárba és a fegyvertárba, és állíthatod az állatok meg a termények hozamát. Egyetlen telepítő, ami mindent visz magával.",
+    "shortDescription": "Játékon belüli mod panel a Stronghold Crusader: Definitive Edition-höz, 30 nyelven. Az ALT+E-re előugró panel 11 lapot nyit: arany és készletek, állatok és termények finomhangolása, időjárás és vadpótlás, térképi kijelzések, játéksebesség és automatikus mentés, épület-infó és automatikus javítás, gazdasági áttekintő, automatikus piaci kereskedés, egységvezérlés (attack-move, útvonalpontok, okos célválasztás, automatikus toborzás) és az ellenséges AI erősségének állítása. Egyetlen telepítő, ami mindent visz magával.",
     "description": [
-      "Játékon belüli mod panel a Stronghold Crusader: Definitive Edition-höz. Nem külön program: a játékkal együtt indul, és az ALT+E-re előugró panelről, egérrel kezelheted.",
-      "MI TUD?<br />- ARANY – adott mennyiség hozzáadása vagy elvétele egy gombnyomásra<br />- RAKTÁR, MAGTÁR, FEGYVERTÁR – bármelyik áru feltöltése vagy elvétele (búza, alma, bőr, fegyverek, páncélok és a többi)<br />- ÁLLATOK – az elejtett vadak hozamának állítása, és az AI kő/ökör aranyának szabályozása<br />- NÖVÉNYEK – a termények hozamának szorzója, akár a többszörösére<br />A saját beállításaidat a mod megjegyzi.",
-      "A TELEPÍTŐ<br />Egyetlen fájl (SHCMod.exe), minden benne van: a BepInEx betöltő és maga a mod is – nem kell mellé semmit másolni, kicsomagolni sem. Magától megkeresi a játékot a gépeden (Steam-kulcs, az összes Steam könyvtár, gyakori mappák), és ha a mod már fent van, ugyanez a telepítő el is távolítja.",
-      "FONTOS:<br />- Ha a játékban már van BepInEx, azt nem írja felül – csak a modot teszi mellé.<br />- A játék eredeti fájljaihoz nem nyúl.<br />- A vírusirtó a csomagolt telepítőt tévesen bejelezheti – nem vírus."
+      "Játékon belüli mod panel a Stronghold Crusader: Definitive Edition-höz. Nem külön program: a játékkal együtt indul, és az ALT+E-re előugró panelről, egérrel kezelheted. A fő panelről 11 lap nyílik (plusz a nyelvválasztó), mindegyik külön ablakban a fő panel mellett. Minden sor mellett egy piros „?” kocka van: rákattintva bal oldalt egy súgóablak írja le röviden és érthetően, mit csinál az adott beállítás. A panel 30 nyelven beszél (magyar, angol, német, francia, spanyol, olasz, portugál, orosz, lengyel, kínai, japán, koreai, török, holland, cseh, román, svéd, dán, norvég, finn, görög, ukrán, arab, thai, vietnámi, indonéz, bolgár, horvát, szerb, szlovák) – a nyelvet a panel tetején választod ki, és a mod megjegyzi. A jobb felső sarok kis emlékeztető sávja („ZeroCode – Panel: ALT+E”) ki- és bekapcsolható.",
+      "<strong>ARANY ÉS NYERSANYAGOK</strong><br />- Arany: adott mennyiség hozzáadása vagy elvétele egy gombnyomásra (Enter = hozzáad).<br />- Nyersanyagok: a raktár, a magtár és a fegyvertár feltöltése vagy csökkentése árunként – fa, kő, vas, szurok; búza, liszt, komló, sör, alma, sajt, hús, kenyér; íj, számszeríj, lándzsa, pika, buzogány, kard; bőr- és fémpáncél. A MIND AD / MIND ELVESZ gomb egyszerre mozgatja az összes beírt mennyiséget.<br />- Áru csak akkor kerül be, ha van hozzá tároló épületed (raktár, magtár vagy fegyvertár) – piac nem kell hozzá.",
+      "<strong>ÁLLATOK</strong> (csak egyjátékosban)<br />- Tehén: legfeljebb hány tehén lehet egy tejgazdaságban (1–3), a szaporodás üteme (%), és hogy neveljen-e újat.<br />- Ló: legfeljebb hány ló lehet egy istállóban (1–4), az újratermelés üteme (%), és hogy szülessen-e új ló.<br />- Ökör: mozgási sebesség (%), mennyi követ visz egy úton, valamint az ellenséges AI ökörállásainak maximuma és kő/ökör aránya.<br />- Harci kutya: életerő, sebzés és sebesség (%).<br />- Vadászat be- és kikapcsolása.<br />- A −/+ gombokkal a meglévő farmjaidban és istállóidban élő állatok száma is egyszerre állítható.<br />- Vanilla mód (a beállításaid megmaradnak, de a játék eredeti értékei élnek – egy kattintással összehasonlíthatod a kettőt) és „minden állat visszaállítása” gomb.",
+      "<strong>SZORZÓ</strong> (csak egyjátékosban)<br />Termelékenységi szorzó a saját farmjaidra, termékenként: búza, komló, alma, sajt, hús. 100% a játék alapja, 200% kétszer annyi termék ugyanannyi idő alatt, 50% a fele. A MINDENT ALAPRA gomb mindent visszaállít 100%-ra.",
+      "<strong>HATÁSOK</strong><br />- Eső: esős időszakok esővel, esőhanggal, villámlással és mennydörgéssel; önmagában csak látvány és hang.<br />- Játékmeneti hatások: eső alatt a termelés és a tenyésztés is változik, amíg esik.<br />- Vadállomány pótlása (csak egyjátékosban): a játék nem pótolja a levadászott vadat – a mod beállítható időközönként új csordát telepít, amíg a faj létszáma vissza nem áll a pálya indulási szintjére. Fajonként kapcsolható (szarvas, nyúl, teve, kecske, oroszlán, hiéna); az AZONNAL gomb rögtön telepít egy csordát.",
+      "<strong>KIJELZÉS</strong> (csak megjelenít, a játékmenetet nem változtatja)<br />- Építési rács a térkép csempéin, mindig az épületek mögött – kérésre csak addig látszik, amíg épületet vagy falat raksz le.<br />- Termékeny föld zölddel (ahová farm telepíthető); a panel mutatja, hány ilyen csempe van a képernyőn.<br />- Nem építhető terület pirossal (víz, szikla, meredek lejtő, már elfoglalt hely).<br />- Életerő-sávok az egységek fölött – beállítható, hogy csak a sérülteknél, az ellenségnél és az épületeknél is látszódjon.<br />- Hatótáv-kör a kijelölt íjászok, számszeríjászok és ostromgépek köré; a mod a valódi lövésekből tanulja meg a távolságot.",
+      "<strong>RENDSZER</strong><br />- Játéksebesség: 1×, 2×, 5× és 10× (a játék +/− gombjai is működnek; többjátékosban nem elérhető).<br />- Nagyobb nagyítás: az egérgörgővel az alapnézetnél közelebb és távolabb is mehetsz.<br />- Peek nézet (ALT+S): átlátszó épületek és falak, hogy lásd, mi van mögöttük; a láthatóság százalékban állítható.<br />- Automatikus mentés beállítható időközönként, három körbe forgó mentésbe (ZeroCode_auto_1, _2, _3), és MENTÉS MOST gomb.",
+      "<strong>ÉPÜLETEK</strong><br />- Épület-infó: a kijelölt saját épület részletes állapota a képernyő bal alsó sarkában – dolgozók, tárolt áru, mit termel és mit fogyaszt, és ha áll, annak az oka.<br />- Gyors másolás: vidd az egeret egy saját épületre, nyomd meg a görgőt, és ugyanabból azonnal újat rakhatsz le (Tab forgat, jobb gombbal húzva több példány kerül le).<br />- Automatikus javítás (ALT+R): a sérült épületeket és falakat magától javítja; beállítható, hogy csak egy adott életerő-százalék alatt javítson, és egyjátékosban ingyen is.<br />- Inaktív épületek listája az okkal együtt (nincs munkás, nincs alapanyag, tele a tároló, alszik) és ÉBRESZT gombbal.",
+      "<strong>GAZDASÁG</strong> (áttekintő)<br />Népesség és lakhatás, a tábortűznél várakozók és a hatékonyság; élelem-készlet, havi fogyás és hogy hány hónapra elég; munkahelyek (összes, betöltött, üres); valamint árunként a készlet és a havi nettó változás.",
+      "<strong>PIAC</strong> – automatikus kereskedés<br />Árunként megadható egy minimum (ez alatt vásárol) és egy maximum (e fölött elad), a mod pedig magától kereskedik, ugyanazon az úton, mint a piac gombjai – piac épület nem kell hozzá, csak a megfelelő tároló. Arany-padló, ami alatt nem vásárol; három menthető profil; a 0-IG gomb egy árut teljesen elad. A szabályok a játék saját piaci automatikájába is bekerülnek.",
+      "<strong>EGYSÉGEK</strong><br />- Attack-move (ALT+A): a csapat útközben minden útjába kerülő ellenséget megtámad, majd továbbmegy a célig.<br />- Útvonalpontok (ALT+W): legfeljebb 10 pont, a csapat sorban végigjárja.<br />- Okos célválasztás: a falat ütő csapat a közelben felbukkanó ellenséges katonára ront, majd visszatér a falhoz (a keresési sugár állítható).<br />- Ostromgép-prioritás: a katapultok és trebuchet-k először az ellenséges ostromgépeket lövik, utána a katonákat.<br />- Beduin gyógyító: nagyobb körben keresi a sebesülteket, és állítható, mennyit gyógyít (csak egyjátékosban).<br />- Automatikus toborzás: egységtípusonként megadott cél-létszámig magától toboroz a kaszárnyában, arany-padlóval; a tábortűznél várakozók plafonja is emelhető (csak egyjátékosban).",
+      "<strong>ELLENFÉL AI</strong> (csak egyjátékosban)<br />Az ellenséges AI-lordok ereje: gazdaság (%), támadó sereg (%), agresszió (0–100), összehangolt szövetséges támadás, célválasztás (a lord saját szokása, a legerősebb, a leggyengébb és legközelebbi, a legközelebbi, a legközelebbi vártornyos játékos), valamint több várterv lordonként: a beépített 17 közül véletlenül választ a játék 8-a helyett, így változatosabb várak épülnek. Kikapcsoláskor minden visszaáll.",
+      "<strong>A TELEPÍTŐ</strong><br />Egyetlen fájl (SHCMod.exe), minden benne van: a BepInEx betöltő és maga a mod is – nem kell mellé semmit másolni, kicsomagolni sem. Magától megkeresi a játékot a gépeden (Steam-kulcs, az összes Steam könyvtár, gyakori mappák), és ha a mod már fent van, ugyanez a telepítő el is távolítja.",
+      "<strong>FONTOS</strong><br />- Ami a játék motorját módosítja (állatok, szorzó, ellenfél AI, ingyenes javítás, toborzási plafon, vadpótlás, játéksebesség, mentés), az csak egyjátékosban él – többjátékosban a mod ezeket magától kikapcsolja, hogy a játék ne csússzon szét.<br />- A saját beállításaidat a mod megjegyzi.<br />- Ha a játékban már van BepInEx, azt nem írja felül – csak a modot teszi mellé.<br />- A játék eredeti fájljaihoz nem nyúl.<br />- A vírusirtó a csomagolt telepítőt tévesen bejelezheti – nem vírus."
     ],
     "cover": "/images/mods/stronghold-crusader-de-mod-panel/3.webp",
     "banner": "/images/mods/stronghold-crusader-de-mod-panel/2.webp",
@@ -291,22 +301,56 @@
       "Mod"
     ],
     "features": [
-      "ALT+E - játék közben előugró, egérrel kezelhető panel",
-      "Arany hozzáadása és elvétele egy gombnyomásra",
-      "Raktár, magtár és fegyvertár feltöltése bármelyik áruval",
-      "Állatok: az elejtett vad hozama és az AI kő/ökör aranya",
-      "Növények: a termények hozamának szorzója",
-      "Megjegyzi a beállításaidat",
-      "A meglévő BepInEx-et nem írja felül, a játék fájljaihoz nem nyúl"
+      "ALT+E – játék közben előugró, egérrel kezelhető panel, minden sor mellett „?” súgóval",
+      "30 nyelv, a panel tetején váltható",
+      "Arany hozzáadása és elvétele; raktár, magtár és fegyvertár feltöltése bármelyik áruval",
+      "Állatok finomhangolása: tehén, ló, ökör, harci kutya, vadászat",
+      "Termények szorzója: búza, komló, alma, sajt, hús",
+      "Időjárás (eső, villámlás, játékmeneti hatások) és a vadállomány pótlása",
+      "Térképi kijelzések: építési rács, termékeny föld, nem építhető terület, életerő-sávok, hatótáv",
+      "Játéksebesség 1×–10×, nagyobb nagyítás, átlátszó épületek (ALT+S), automatikus mentés",
+      "Épület-infó, gyors épületmásolás a görgővel, automatikus javítás (ALT+R), inaktív épületek listája",
+      "Gazdasági áttekintő: népesség, élelem, munkahelyek, áruk havi változása",
+      "Automatikus piaci kereskedés árunként beállított limitekkel és profilokkal",
+      "Attack-move, útvonalpontok, okos célválasztás, ostromgép-prioritás, gyógyító, automatikus toborzás",
+      "Az ellenséges AI erőssége: gazdaság, sereg, agresszió, célválasztás, több várterv",
+      "Megjegyzi a beállításaidat; a meglévő BepInEx-et nem írja felül, a játék fájljaihoz nem nyúl"
     ],
     "installCode": "ZeroCode",
     "installationSteps": [
       {
         "title": "A mod telepítése",
         "detail": "Töltsd le és indítsd el az SHCMod.exe telepítőt (a vírusirtó tévesen jelezheti – nem vírus). A telepítő magától megkeresi a Stronghold Crusader: Definitive Edition-t – ha megvan, az útvonal kerete zöldre vált; ha nem találná, a Tallózás gombbal add meg kézzel. Írd be a kért kódot (a kis- és nagybetű számít) – a kódot a Letöltés gomb melletti mezőben kapod meg: írd be az ott villogó négyjegyű számot. Ekkor megjelenik a TELEPÍTÉS gomb; nyomd meg, a gomb belsejében látszik a folyamat. Végül indítsd a játékot, és játék közben nyomj ALT+E-t a panel előhívásához. Eltávolítás: ugyanez a telepítő – ha a mod fent van, a fő gomb felirata TÖRLÉS."
+      },
+      {
+        "title": "A panel használata",
+        "detail": "Játék közben nyomj ALT+E-t: megjelenik a fő panel, ahonnan a lapok (Nyersanyagok, Állatok, Szorzó, Hatások, Kijelzés, Rendszer, Épületek, Gazdaság, Piac, Egységek, Ellenfél AI) a NYIT gombbal nyílnak ki a panel mellett. Minden sor mellett egy piros „?” kocka van – rákattintva bal oldalt egy súgóablak mondja el, mit csinál az adott beállítás. A nyelvet a legfelső, Nyelv / Language sorban választod ki. Gyorsbillentyűk: ALT+S átlátszó épületek, ALT+R automatikus javítás, ALT+A attack-move, ALT+W útvonalpontok, görgő-kattintás egy saját épületen = gyors másolás."
       }
     ],
     "versions": [
+      {
+        "version": "3.2.0",
+        "releaseDate": "2026-09-13",
+        "platform": "Windows",
+        "type": "Installer",
+        "author": "ZeroCode",
+        "changes": [
+          "30 nyelv (magyar, angol, német, francia, spanyol, olasz, portugál, orosz, lengyel, kínai, japán, koreai, török, holland, cseh, román, svéd, dán, norvég, finn, görög, ukrán, arab, thai, vietnámi, indonéz, bolgár, horvát, szerb, szlovák), nyelvválasztó a panel tetején, a nyelvek saját nevével",
+          "Minden sor mellett piros „?” kocka: bal oldalt nyíló, érthető súgó",
+          "Új lapok: Hatások (eső, játékmeneti hatások, vadállomány pótlása), Kijelzés (építési rács, termékeny föld, nem építhető terület, életerő-sávok, hatótáv), Rendszer (játéksebesség, nagyítás, peek nézet, automatikus mentés)",
+          "Új lapok: Épületek (épület-infó, gyors másolás, automatikus javítás, inaktív épületek), Gazdaság (áttekintő), Piac (automatikus kereskedés limitekkel és profilokkal)",
+          "Új lapok: Egységek (attack-move, útvonalpontok, okos célválasztás, ostromgép-prioritás, gyógyító, automatikus toborzás), Ellenfél AI (gazdaság, sereg, agresszió, célválasztás, több várterv)",
+          "Állatok: tehén, ló, ökör, harci kutya és vadászat részletes beállítása, vanilla mód és visszaállítás",
+          "Gyors épületmásolás a görgő lenyomásával; az építési rács mindig az épületek mögött",
+          "Sok belső javítás: a motorhívások a játék saját zárja alatt futnak, a csapat-parancsok minden pályán elérhetők"
+        ],
+        "download": {
+          "kind": "github-tag",
+          "tag": "stronghold-crusader-de-mod-panel-v3.2.0",
+          "file": "SHCMod.exe"
+        },
+        "size": "6.2 MB"
+      },
       {
         "version": "1.0.0",
         "releaseDate": "2026-09-09",
@@ -340,6 +384,22 @@
       {
         "question": "Melyik kiadással működik?",
         "answer": "A Steames Stronghold Crusader: Definitive Edition-nel. A telepítő a Steam alapján magától megtalálja, de a Tallózás gombbal kézzel is megadható a játék mappája."
+      },
+      {
+        "question": "Működik többjátékosban?",
+        "answer": "A kijelzések, az épület-infó, a gyors másolás, a gazdasági áttekintő, a piac és az egységvezérlés igen. Ami a játék motorját módosítja (állatok, szorzó, ellenfél AI, ingyenes javítás, toborzási plafon, vadpótlás, játéksebesség, mentés), az csak egyjátékosban él – többjátékosban a mod ezeket magától kikapcsolja, hogy a játék ne csússzon szét."
+      },
+      {
+        "question": "Milyen nyelven van a panel?",
+        "answer": "Harminc nyelven: magyar, angol, német, francia, spanyol, olasz, portugál, orosz, lengyel, kínai, japán, koreai, török, holland, cseh, román, svéd, dán, norvég, finn, görög, ukrán, arab, thai, vietnámi, indonéz, bolgár, horvát, szerb, szlovák. A nyelvet a panel tetején, a Nyelv / Language sorban választod, a lista a nyelvek saját nevével jelenik meg, és a választás megmarad."
+      },
+      {
+        "question": "Elrontja a mentéseimet?",
+        "answer": "Nem. A mod a játék saját mentését használja; az automatikus mentés három külön nevű mentésbe (ZeroCode_auto_1, _2, _3) ír, körbe forogva, a saját mentéseidhez nem nyúl."
+      },
+      {
+        "question": "Mi történik, ha frissül a játék?",
+        "answer": "A mod indításkor ellenőrzi, hogy a játék kódjában megtalálja-e, amire szüksége van. Ha egy frissítés után valamelyik funkció nem találja a helyét, azon a soron „Nem elérhető” felirat jelenik meg, a többi funkció ettől még működik. Ilyenkor a modhoz frissítés jön."
       }
     ],
     "slideshow": [],
