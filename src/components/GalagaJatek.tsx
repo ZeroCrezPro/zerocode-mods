@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Galaga } from '@/jatek/galaga'
+import { useFiok } from '@/lib/fiok'
 
 /**
  * A rejtett arcade játék ablaka: a vászon az egész képernyőt kitölti
@@ -13,6 +14,9 @@ import { Galaga } from '@/jatek/galaga'
 export default function GalagaJatek({ bezar }: { bezar: () => void }) {
   const vaszon = useRef<HTMLCanvasElement>(null)
   const keret = useRef<HTMLDivElement>(null)
+  const { fiok } = useFiok()
+  // A játék egyszer indul; a bejelentkezett játékost induláskor kapja meg.
+  const jatekos = useRef(fiok ? { nev: fiok.nev, kepUrl: fiok.kepUrl } : null)
 
   useEffect(() => {
     const c = vaszon.current
@@ -20,6 +24,7 @@ export default function GalagaJatek({ bezar }: { bezar: () => void }) {
     if (!c || !k) return
     const jatek = new Galaga(c, {
       bezar,
+      jatekos: jatekos.current,
       teljesKepernyo: (be) => {
         try {
           if (be && !document.fullscreenElement) k.requestFullscreen?.()

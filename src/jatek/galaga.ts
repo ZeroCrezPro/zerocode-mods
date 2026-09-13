@@ -23,6 +23,19 @@ const DT = 1 / 60
 const TAROLO_BEALLITAS = 'zc-galaga-beallitasok'
 const TAROLO_REKORD = 'zc-galaga-rekord'
 
+/** A bejelentkezett játékos (a ranglistához); null, ha vendég. */
+export interface Jatekos {
+  nev: string
+  kepUrl: string
+}
+
+interface RangSor {
+  hely: number
+  nev: string
+  kepUrl: string
+  pont: number
+}
+
 export interface Beallitasok {
   zene: number // 0..1
   hang: number // 0..1
@@ -542,11 +555,21 @@ export class Galaga {
 
   private bezarCb: () => void
   private teljesKepernyoCb: (be: boolean) => void
+  private jatekos: Jatekos | null
+  private ranglista: RangSor[] = []
+  private ranglistaAllapot: 'betolt' | 'kesz' | 'hiba' = 'betolt'
+  private bekuldes: 'nincs' | 'megy' | 'kesz' | 'hiba' = 'nincs'
+  private kepTar = new Map<string, HTMLImageElement | null>()
 
   private vaszon: HTMLCanvasElement
 
-  constructor(vaszon: HTMLCanvasElement, opciok: { bezar: () => void; teljesKepernyo: (be: boolean) => void }) {
+  constructor(
+    vaszon: HTMLCanvasElement,
+    opciok: { bezar: () => void; teljesKepernyo: (be: boolean) => void; jatekos?: Jatekos | null },
+  ) {
     this.vaszon = vaszon
+    this.jatekos = opciok.jatekos ?? null
+    this.ranglistaBetolt()
     this.ctx = vaszon.getContext('2d')!
     this.b = beallitasBetolt()
     this.hang = new Hangok(this.b)
@@ -585,6 +608,111 @@ export class Galaga {
     this.hajoX = szorit(this.hajoX, 22, this.w - 22)
     for (const c of this.csillagok) if (c.x > this.w) c.x = Math.random() * this.w
     this.felbontasAlkalmaz()
+  }
+
+  /* ---------- ranglista ---------- */
+
+  private async ranglistaBetolt() {
+    try {
+      const v = await fetch('/api/jatek/ranglista', { credentials: 'same-origin' })
+      const j = (await v.json()) as { ok?: boolean; lista?: RangSor[] }
+      if (!this.fut) return
+      this.ranglista = j.ok && Array.isArray(j.lista) ? j.lista : []
+      this.ranglistaAllapot = 'kesz'
+    } catch {
+      this.ranglistaAllapot = 'hiba'
+    }
+  }
+
+  /** Játék végén a bejelentkezett játékos eredménye felmegy a ranglistára. */
+  private async pontBekuld() {
+    if (!this.jatekos || this.pont <= 0) return
+    this.bekuldes = 'megy'
+    try {
+      const v = await fetch('/api/jatek/pont', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ pont: this.pont }),
+      })
+      const j = (await v.json()) as { ok?: boolean; lista?: RangSor[] }
+      if (!this.fut) return
+      if (j.ok && Array.isArray(j.lista)) {
+        this.ranglista = j.lista
+        this.bekuldes = 'kesz'
+      } else this.bekuldes = 'hiba'
+    } catch {
+      this.bekuldes = 'hiba'
+    }
+  }
+
+  /** Profilkép a ranglistához - egyszer töltjük, utána a tárból jön. */
+  private profilkep(url: string): HTMLImageElement | null {
+    if (!url) return null
+    if (this.kepTar.has(url)) return this.kepTar.get(url) ?? null
+    this.kepTar.set(url, null)
+    const img = new Image()
+    img.onload = () => this.kepTar.set(url, img)
+    img.src = url
+    return null
+  }
+
+  /**
+   * A ranglista rajza: helyezés (kockában), kép, név, pont. A főmenü bal
+   * oldalán fér el, ha van rá hely; keskeny képernyőn a menü alatt, rövidebben.
+   */
+  private ranglistaRajz(x: number, y: number, szeles: number, sorok: number) {
+    const g = this.ctx
+    const SOR = 34
+    g.fillStyle = 'rgba(20,20,26,0.85)'
+    g.fillRect(x, y, szeles, 44 + sorok * SOR + 10)
+    g.fillStyle = '#d61f27'
+    g.fillRect(x, y, 3, 44 + sorok * SOR + 10)
+    this.szoveg('RANGLISTA', x + 16, y + 22, 13, '#eef0f5', 'left')
+    this.szoveg(this.jatekos ? `te: ${this.jatekos.nev}` : 'lépj be, hogy felkerülj', x + szeles - 12, y + 22, 10, '#6b6f80', 'right', false)
+
+    if (this.ranglistaAllapot === 'betolt') {
+      this.szoveg('betöltés…', x + 16, y + 44 + 16, 12, '#6b6f80', 'left', false)
+      return
+    }
+    if (this.ranglistaAllapot === 'hiba') {
+      this.szoveg('a ranglista most nem érhető el', x + 16, y + 44 + 16, 12, '#6b6f80', 'left', false)
+      return
+    }
+    if (!this.ranglista.length) {
+      this.szoveg('még nincs eredmény - legyél az első!', x + 16, y + 44 + 16, 12, '#8a8a94', 'left', false)
+      return
+    }
+    this.ranglista.slice(0, sorok).forEach((r, i) => {
+      const sy = y + 44 + i * SOR + SOR / 2
+      const enyem = this.jatekos && r.nev === this.jatekos.nev
+      if (enyem) {
+        g.fillStyle = 'rgba(214,31,39,0.18)'
+        g.fillRect(x + 3, sy - SOR / 2, szeles - 3, SOR)
+      }
+      // helyezés kockában
+      g.fillStyle = i === 0 ? '#d61f27' : i < 3 ? '#3a2326' : '#1f1f26'
+      g.fillRect(x + 12, sy - 12, 24, 24)
+      this.szoveg(String(r.hely), x + 24, sy + 1, 12, i === 0 ? '#fff' : '#eef0f5')
+      // kép (vagy kezdőbetű)
+      const kep = this.profilkep(r.kepUrl)
+      if (kep) {
+        g.drawImage(kep, x + 44, sy - 12, 24, 24)
+      } else {
+        g.fillStyle = '#2a2a30'
+        g.fillRect(x + 44, sy - 12, 24, 24)
+        this.szoveg(r.nev.slice(0, 1).toUpperCase(), x + 56, sy + 1, 12, '#ff5a60')
+      }
+      // név (levágva, ha hosszú) és pont
+      const pontSz = String(r.pont)
+      g.font = '700 13px "Segoe UI", Roboto, Arial, sans-serif'
+      const pontW = g.measureText(pontSz).width
+      const nevMax = szeles - 76 - pontW - 24
+      let nev = r.nev
+      while (g.measureText(nev).width > nevMax && nev.length > 2) nev = nev.slice(0, -2) + '…'
+      this.szoveg(nev, x + 76, sy + 1, 13, enyem ? '#fff' : '#c9c9cf', 'left', false)
+      this.szoveg(pontSz, x + szeles - 12, sy + 1, 13, i === 0 ? '#ffd23f' : '#eef0f5', 'right')
+    })
   }
 
   /* ---------- vászon és beállítások ---------- */
@@ -1165,6 +1293,8 @@ export class Galaga {
       if (this.jatekVegeIdo <= 0) {
         this.kepernyoValt('vege')
         this.hang.jatekVege()
+        this.bekuldes = 'nincs'
+        void this.pontBekuld()
       }
     }
 
@@ -1525,6 +1655,10 @@ export class Galaga {
     this.menuRajz()
     this.szoveg('A/D vagy ← →  mozgás  ·  SPACE / bal egérgomb  lövés  ·  ESC  szünet', this.w / 2, H - 60, 11, '#6b6f80', 'center', false)
     this.szoveg(`REKORD  ${this.rekord}`, this.w / 2, H - 32, 13, '#ffd23f')
+
+    // Ranglista: bal oldalt, ha elfér a menü mellett; különben nem zavar bele.
+    const szeles = Math.min(340, this.w / 2 - 190)
+    if (szeles >= 220) this.ranglistaRajz(24, 60, szeles, 12)
   }
 
   private beallitasokRajz() {
@@ -1554,6 +1688,16 @@ export class Galaga {
     this.szoveg(`PONTSZÁM  ${this.pont}`, this.w / 2, 280, 22, '#eef0f5')
     this.szoveg(`REKORD  ${this.rekord}`, this.w / 2, 320, 18, this.pont >= this.rekord && this.pont > 0 ? '#ffd23f' : '#aeb2c4')
     this.szoveg(`ELÉRT HULLÁM  ${this.hullam}`, this.w / 2, 356, 18, '#aeb2c4')
+    const allapot = !this.jatekos
+      ? 'Lépj be az oldalon, és az eredményed felkerül a ranglistára.'
+      : this.bekuldes === 'megy'
+        ? 'Eredmény küldése a ranglistára…'
+        : this.bekuldes === 'kesz'
+          ? 'Az eredményed fent van a ranglistán.'
+          : this.bekuldes === 'hiba'
+            ? 'A ranglistát most nem sikerült elérni.'
+            : ''
+    if (allapot) this.szoveg(allapot, this.w / 2, 392, 12, '#8a8a94', 'center', false)
     this.menuRajz()
   }
 
