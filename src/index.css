@@ -366,3 +366,26 @@
   vertical-align: bottom;
   animation: zc-typewriter 2.2s steps(40, end) both;
 }
+
+/* Tartalomvédelem (src/lib/vedelem.ts kapcsolja be az élő oldalon) */
+.zc-vedett body {
+  -webkit-user-select: none;
+  user-select: none;
+}
+.zc-vedett input,
+.zc-vedett textarea,
+.zc-vedett select,
+.zc-vedett [contenteditable='true'] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+.zc-vedett img,
+.zc-vedett video,
+.zc-vedett canvas {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+/* A képek nem fogadnak egeret: nincs jobb klikk, húzás, letöltő-sáv rajtuk - a kattintás a szülőé. */
+.zc-vedett img {
+  pointer-events: none;
+}

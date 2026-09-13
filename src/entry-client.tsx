@@ -3,6 +3,9 @@ import { createRoot, hydrateRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { App } from './App'
 import './index.css'
+import { vedelemBekapcsol } from './lib/vedelem'
+
+vedelemBekapcsol()
 
 const root = document.getElementById('root')!
 
