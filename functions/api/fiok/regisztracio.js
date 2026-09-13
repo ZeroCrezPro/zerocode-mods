@@ -6,7 +6,7 @@
  * regisztrációt.
  */
 import site from '../../../src/data/site.json' with { type: 'json' }
-import { levelKuldes } from '../../_lib/level.js'
+import { levelKuldes, levelSablon } from '../../_lib/level.js'
 import {
   fiokLetrehoz,
   fiokRendszerHiba,
@@ -19,6 +19,16 @@ import {
 
 function udvozloLevel(env, request, fiok) {
   const eredet = new URL(request.url).origin
+  const level = levelSablon({
+    oldalNev: site.name,
+    oldalUrl: site.url,
+    cim: 'Üdv a fedélzeten!',
+    koszontes: `Szia ${fiok.nev}!`,
+    bekezdesek: [`A fiókod elkészült a ${site.name} oldalon. Ezekkel az adatokkal léphetsz be:`],
+    adatok: [`Név: ${fiok.nev}`, `E-mail: ${fiok.email}`],
+    gomb: { szoveg: 'Belépés', url: `${eredet}/belepes` },
+    gombAlatt: `Ha egyszer elfelejtenéd a jelszavad, a belépésnél az "Elfelejtett jelszó" linkkel kérhetsz újat. Ha nem te regisztráltál, egyszerűen hagyd figyelmen kívül ezt a levelet.`,
+  })
   return levelKuldes({
     felhasznalo: env.GMAIL_CIM,
     jelszo: env.GMAIL_JELSZO,
@@ -26,13 +36,8 @@ function udvozloLevel(env, request, fiok) {
     feladoNev: site.name,
     cimzett: fiok.email,
     targy: `${site.name} - sikeres regisztráció`,
-    szoveg:
-      `Szia ${fiok.nev}!\n\n` +
-      `A fiókod elkészült a ${site.name} oldalon.\n\n` +
-      `Név: ${fiok.nev}\nE-mail: ${fiok.email}\n\n` +
-      `Belépés: ${eredet}/belepes\n` +
-      `Ha egyszer elfelejtenéd a jelszavad, itt kérhetsz újat: ${eredet}/elfelejtett-jelszo\n\n` +
-      `Ha nem te regisztráltál, egyszerűen hagyd figyelmen kívül ezt a levelet.\n\n${site.name}`,
+    szoveg: level.szoveg,
+    html: level.html,
   })
 }
 

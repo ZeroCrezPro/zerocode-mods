@@ -7,7 +7,7 @@
  */
 import site from '../../../src/data/site.json' with { type: 'json' }
 import { fiokBetolt, fiokRendszerHiba, jsonValasz, keresTest, tulSokProba, ujJelszoJegy } from '../../_lib/fiok.js'
-import { levelKuldes } from '../../_lib/level.js'
+import { levelKuldes, levelSablon } from '../../_lib/level.js'
 
 export async function onRequestPost({ request, env }) {
   const rendszerHiba = fiokRendszerHiba(env)
@@ -26,6 +26,18 @@ export async function onRequestPost({ request, env }) {
     const jegy = await ujJelszoJegy(fiok, env.FIOK_TITOK)
     const eredet = new URL(request.url).origin
     const link = `${eredet}/uj-jelszo?jegy=${encodeURIComponent(jegy)}`
+    const level = levelSablon({
+      oldalNev: site.name,
+      oldalUrl: site.url,
+      cim: 'Új jelszó',
+      koszontes: `Szia ${fiok.nev}!`,
+      bekezdesek: [
+        `Valaki (remélhetőleg te) új jelszót kért a ${site.name} fiókodhoz. A gombra kattintva adhatsz meg újat - ez felülírja a régit, és egyből be is lépünk.`,
+        'Ha nem te kérted, nincs teendőd: a jelszavad változatlan marad.',
+      ],
+      gomb: { szoveg: 'Új jelszó megadása', url: link },
+      gombAlatt: 'A link egy óráig érvényes, és csak egyszer használható.',
+    })
     try {
       await levelKuldes({
         felhasznalo: env.GMAIL_CIM,
@@ -34,11 +46,8 @@ export async function onRequestPost({ request, env }) {
         feladoNev: site.name,
         cimzett: fiok.email,
         targy: `${site.name} - új jelszó`,
-        szoveg:
-          `Szia ${fiok.nev}!\n\n` +
-          `Valaki (remélhetőleg te) új jelszót kért a ${site.name} fiókodhoz. ` +
-          `Ezen a linken adhatsz meg újat, egy órán belül:\n\n${link}\n\n` +
-          `Ha nem te kérted, nincs teendőd - a jelszavad változatlan marad.\n\n${site.name}`,
+        szoveg: level.szoveg,
+        html: level.html,
       })
     } catch (e) {
       return jsonValasz({ ok: false, hiba: `A levelet nem sikerült elküldeni (${e.message}).` }, 502)
