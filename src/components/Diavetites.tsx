@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { cx } from '@/lib/format'
 import {
   BORITO_MERETEK,
@@ -50,6 +50,37 @@ export function Diavetites({
     },
     [elemek.length],
   )
+
+  /*
+   * Lapozás húzással (ujjal vagy egérrel): vízszintes húzásnál a kép
+   * követi a kezet, elengedéskor 40 px fölött lapozunk. Függőleges
+   * mozgásnál nem avatkozunk be, hogy telefonon görgetni lehessen.
+   */
+  const huzas = useRef<{ id: number; x: number; y: number } | null>(null)
+  const [eltolas, setEltolas] = useState(0)
+  const huzasKezd = (e: React.PointerEvent) => {
+    if (!tobbElem || (e.pointerType === 'mouse' && e.button !== 0)) return
+    huzas.current = { id: e.pointerId, x: e.clientX, y: e.clientY }
+    setEltolas(0)
+  }
+  const huzasMozog = (e: React.PointerEvent) => {
+    const h = huzas.current
+    if (!h || h.id !== e.pointerId) return
+    const dx = e.clientX - h.x
+    const dy = e.clientY - h.y
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 6) {
+      e.currentTarget.setPointerCapture(e.pointerId)
+      setEltolas(dx)
+    }
+  }
+  const huzasVege = (e: React.PointerEvent) => {
+    const h = huzas.current
+    if (!h || h.id !== e.pointerId) return
+    huzas.current = null
+    const dx = e.clientX - h.x
+    setEltolas(0)
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(e.clientY - h.y)) lep(dx < 0 ? 1 : -1)
+  }
 
   // Ha közben kevesebb elem lett, ne mutasson a semmibe.
   useEffect(() => {
@@ -130,8 +161,20 @@ export function Diavetites({
       }}
       className="border border-ink-700 bg-ink-950"
     >
-      {/* A kép semmivel nincs letakarva */}
-      <div className="aspect-[16/9] w-full overflow-hidden bg-black">
+      {/* A kép semmivel nincs letakarva; húzással is lapozható */}
+      <div
+        className={`aspect-[16/9] w-full overflow-hidden bg-black ${tobbElem ? 'touch-pan-y select-none' : ''}`}
+        style={{
+          transform: eltolas ? `translateX(${eltolas}px)` : undefined,
+          transition: eltolas ? 'none' : 'transform 200ms ease-out',
+          cursor: tobbElem && eltolas ? 'grabbing' : undefined,
+        }}
+        onPointerDown={huzasKezd}
+        onPointerMove={huzasMozog}
+        onPointerUp={huzasVege}
+        onPointerCancel={huzasVege}
+        onDragStart={(e) => e.preventDefault()}
+      >
         {elem.fajta === 'kep' && (
           <img
             key={elem.ertek}

@@ -269,6 +269,10 @@ Kézzel, fájlból:
 
 ## A diavetítő
 
+A képek között a nyilakkal, a pöttyökkel, a billentyűzet nyilaival, és **húzással** is lehet
+lapozni - ujjal telefonon és tableten, egérrel PC-n (a kép követi a kezet, elengedéskor
+lapoz; függőleges görgetést nem zavar).
+
 A mod adatlapján a letöltés gomb és a leírás között megjelenik egy diavetítő: egy nagy
 kép, két oldalán nyíllal, alatta ponttal minden képhez. Ez a mod gyors bemutatására való.
 
