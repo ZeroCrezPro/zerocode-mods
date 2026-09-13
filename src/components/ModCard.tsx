@@ -9,15 +9,7 @@ import { SmartImage } from './SmartImage'
 import { Felirat, Szoveg } from './Szoveg'
 import { csakSzoveg } from '@/lib/gazdagSzoveg'
 
-function Adat({
-  cim,
-  kulcs,
-  children,
-}: {
-  cim: string
-  kulcs: string
-  children: ReactNode
-}) {
+function Adat({ cim, kulcs, children }: { cim: string; kulcs: string; children: ReactNode }) {
   return (
     <div>
       <Felirat elem="dt" className="zc-label text-ash-400" kulcs={kulcs} alap={cim} />
@@ -38,7 +30,6 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
   const [kozelben, setKozelben] = useState(false)
 
   useEffect(() => {
-    if (!mod.magyaritas) return
     // Ahol van egér, ott a rávitel intézi.
     if (window.matchMedia('(hover: hover)').matches) return
     const cel = kartya.current
@@ -49,7 +40,7 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
     )
     figyelo.observe(cel)
     return () => figyelo.disconnect()
-  }, [mod.magyaritas])
+  }, [])
 
   const nev = csakSzoveg(mod.name)
 
@@ -93,17 +84,18 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
           szövegek mögött. Negatív rétegen ül, az isolate tartja a kártyán
           belül - így a szöveg mindig fölötte marad.
         */}
-        {mod.magyaritas && (
-          <img
-            src="/images/games/magyar-forditas.webp"
-            alt=""
-            aria-hidden
-            loading="lazy"
-            className={`pointer-events-none absolute inset-0 -z-10 h-full w-full object-contain p-6 transition-opacity duration-300 group-hover:opacity-20 ${
-              kozelben ? 'opacity-20' : 'opacity-0'
-            }`}
-          />
-        )}
+        {/* Magyarosításnál a fordítás-jel, játékmodnál a mod-jel. */}
+        <img
+          src={
+            mod.magyaritas ? '/images/games/magyar-forditas.webp' : '/images/games/jatekmod.webp'
+          }
+          alt=""
+          aria-hidden
+          loading="lazy"
+          className={`pointer-events-none absolute inset-0 -z-10 h-full w-full object-contain p-6 transition-opacity duration-300 group-hover:opacity-20 ${
+            kozelben ? 'opacity-20' : 'opacity-0'
+          }`}
+        />
         <h3 className="text-lg leading-tight font-extrabold tracking-tight text-ash-100">
           <Link to={`/modok/${mod.slug}`} className="transition-colors group-hover:text-blood-400">
             <Szoveg ertek={mod.name} mezo={`${mod.slug}:name`} />
