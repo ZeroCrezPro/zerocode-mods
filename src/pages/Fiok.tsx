@@ -411,8 +411,8 @@ function Profilkep({ fiok, beallit }: { fiok: Fiok; beallit: (f: Fiok) => void }
   }
 
   return (
-    <div className="flex items-start gap-5">
-      <div className="relative h-24 w-24 shrink-0 border border-ink-600 bg-ink-900">
+    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
+      <div className="relative h-28 w-28 shrink-0 border border-ink-600 bg-ink-900 sm:h-24 sm:w-24">
         {fiok.kepUrl ? (
           <img src={fiok.kepUrl} alt="Profilkép" className="h-full w-full object-cover" />
         ) : (
@@ -422,7 +422,7 @@ function Profilkep({ fiok, beallit }: { fiok: Fiok; beallit: (f: Fiok) => void }
         )}
         <span className="absolute -right-px -bottom-px h-2 w-2 bg-blood-500" aria-hidden />
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="w-full min-w-0 flex-1">
         <input
           id={inputId}
           type="file"
@@ -434,8 +434,11 @@ function Profilkep({ fiok, beallit }: { fiok: Fiok; beallit: (f: Fiok) => void }
             e.target.value = ''
           }}
         />
-        <div className="flex flex-wrap gap-2">
-          <label htmlFor={inputId} className={btnClass('secondary', 'sm', fut ? 'pointer-events-none opacity-50' : 'cursor-pointer')}>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          <label
+            htmlFor={inputId}
+            className={btnClass('secondary', 'sm', cx(fut ? 'pointer-events-none opacity-50' : 'cursor-pointer', !fiok.kepUrl && 'col-span-2 sm:col-auto'))}
+          >
             {fut ? 'Feltöltés…' : fiok.kepUrl ? 'Kép cseréje' : 'Kép feltöltése'}
           </label>
           {fiok.kepUrl && (
@@ -444,7 +447,7 @@ function Profilkep({ fiok, beallit }: { fiok: Fiok; beallit: (f: Fiok) => void }
             </Button>
           )}
         </div>
-        <p className="mt-2 text-xs text-ash-400">
+        <p className="mt-2 text-center text-xs text-ash-400 sm:text-left">
           JPG, PNG vagy WebP, bármekkora. Kiválasztás után beállíthatod, melyik része látsszon; az oldal 256×256-ra kicsinyíti és weboptimalizált WebP-t készít belőle.
         </p>
         <Uzenet szoveg={hiba} tipus="hiba" />
@@ -503,7 +506,7 @@ export function FiokOldal() {
         <div className="space-y-5">
           <Szakasz cim="Profil" leiras="Így látnak mások az oldalon.">
             <Profilkep fiok={fiok} beallit={beallit} />
-            <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-5 gap-y-2 border-t border-ink-700 pt-4 text-sm">
+            <dl className="mt-5 grid gap-y-1 border-t border-ink-700 pt-4 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-5 sm:gap-y-2">
               <dt className="zc-label text-ash-400">Név</dt>
               <dd className="font-semibold text-ash-100">{fiok.nev}</dd>
               <dt className="zc-label text-ash-400">E-mail</dt>
@@ -512,7 +515,7 @@ export function FiokOldal() {
           </Szakasz>
 
           <Szakasz cim="Fiók" leiras="Kilépés erről a gépről, vagy a fiók végleges törlése.">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:justify-between">
               <Button
                 type="button"
                 variant="secondary"
