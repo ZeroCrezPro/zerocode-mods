@@ -311,6 +311,9 @@ export function FiokOldal() {
   const [regi, setRegi] = useState('')
   const [uj, setUj] = useState('')
   const [uj2, setUj2] = useState('')
+  const [torlesKerdes, setTorlesKerdes] = useState(false)
+  const [torlesFut, setTorlesFut] = useState(false)
+  const [torlesHiba, setTorlesHiba] = useState('')
   const u = useUrlap()
 
   useEffect(() => {
@@ -364,7 +367,7 @@ export function FiokOldal() {
         </Button>
       </form>
 
-      <div className="mt-8 border-t border-ink-700 pt-5">
+      <div className="mt-8 flex items-center justify-between gap-3 border-t border-ink-700 pt-5">
         <Button
           type="button"
           variant="ghost"
@@ -375,7 +378,91 @@ export function FiokOldal() {
         >
           Kilépés
         </Button>
+        <Button type="button" onClick={() => setTorlesKerdes(true)}>
+          Fiók törlése
+        </Button>
       </div>
+
+      {torlesKerdes && (
+        <TorlesMegerosites
+          folyamatban={torlesFut}
+          hiba={torlesHiba}
+          nem={() => setTorlesKerdes(false)}
+          igen={async () => {
+            setTorlesFut(true)
+            setTorlesHiba('')
+            const v = await fiokHivas('torles', {})
+            if (!v.ok) {
+              setTorlesHiba(v.hiba)
+              setTorlesFut(false)
+              return
+            }
+            beallit(null)
+            navigate('/', { replace: true })
+          }}
+        />
+      )}
     </Kartya>
+  )
+}
+
+/** Külön ablak: a törlés végleges, ezért IGEN / NEM kérdés. */
+function TorlesMegerosites({
+  igen,
+  nem,
+  folyamatban,
+  hiba,
+}: {
+  igen: () => void
+  nem: () => void
+  folyamatban: boolean
+  hiba: string
+}) {
+  // Az Igen gomb öt másodpercig tiltva van, hogy ne lehessen véletlenül rákattintani.
+  const [hatra, setHatra] = useState(5)
+  useEffect(() => {
+    if (hatra <= 0) return
+    const t = setTimeout(() => setHatra((h) => h - 1), 1000)
+    return () => clearTimeout(t)
+  }, [hatra])
+
+  useEffect(() => {
+    const billentyu = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') nem()
+    }
+    document.addEventListener('keydown', billentyu)
+    return () => document.removeEventListener('keydown', billentyu)
+  }, [nem])
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="torles-cim"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !folyamatban) nem()
+      }}
+    >
+      <div className="w-full max-w-sm border border-blood-600/70 bg-ink-900 p-6 shadow-2xl shadow-black/70">
+        <h2 id="torles-cim" className="text-lg font-black tracking-tight uppercase text-ash-100">
+          Biztos törlöd a fiókod?
+        </h2>
+        <p className="mt-2 text-sm text-ash-400">
+          A törlés <span className="font-bold text-blood-400">végleges és azonnal megtörténik</span> - a
+          fiókot nem lehet visszaállítani. Minden elvész, ami hozzá tartozik: az elért eredményeid, a
+          hozzá kötött előnyök és minden adatod.
+        </p>
+        <Uzenet szoveg={hiba} tipus="hiba" />
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <Button type="button" onClick={igen} disabled={folyamatban || hatra > 0}>
+            {folyamatban ? 'Törlés…' : hatra > 0 ? `Igen (${hatra})` : 'Igen'}
+          </Button>
+          <Button type="button" variant="secondary" onClick={nem} disabled={folyamatban} autoFocus>
+            Nem
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }
