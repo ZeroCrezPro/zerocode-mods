@@ -1698,7 +1698,6 @@ export class Galaga {
   private fomenuRajz() {
     this.szoveg('ZEROCODE', this.w / 2, 150, 18, '#ff5a60')
     this.cim('CSILLAGRAJ', 200)
-    this.szoveg('Galaga ihlette arcade', this.w / 2, 240, 14, '#8a8a94', 'center', false)
     // a hajó díszként
     const s = this.sprites.hajo
     this.ctx.drawImage(s.kep, this.w / 2 - s.w / 2, 275 - s.h / 2)
