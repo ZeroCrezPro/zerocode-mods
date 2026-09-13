@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { cx } from '@/lib/format'
 import {
   BORITO_MERETEK,
   youtubeAzonosito,
@@ -140,6 +139,7 @@ export function Diavetites({
 
   // A képek sorszáma a videót nem számolja bele.
   const kepSorszam = (i: number) => (azonosito ? i : i + 1)
+  const kepekSzama = kepek.length
 
   const nyilOsztaly =
     'flex h-11 w-11 shrink-0 items-center justify-center border border-ink-600 bg-ink-900 text-ash-200 transition-colors hover:border-blood-600 hover:text-white'
@@ -237,22 +237,24 @@ export function Diavetites({
             <IconChevronLeft width={20} height={20} />
           </button>
 
-          <div className="flex flex-wrap justify-center gap-1.5">
-            {elemek.map((e, i) => (
-              <button
-                key={e.ertek + i}
-                type="button"
-                aria-label={e.fajta === 'video' ? 'Videó' : `${kepSorszam(i)}. kép`}
-                aria-current={i === jelenlegi}
-                onClick={() => setIndex(i)}
-                className={cx(
-                  'h-2.5 transition-colors',
-                  // A videó pontja szélesebb, hogy első pillantásra látszódjon.
-                  e.fajta === 'video' ? 'w-11' : 'w-7',
-                  i === jelenlegi ? 'bg-blood-500' : 'bg-ink-600 hover:bg-ink-500',
-                )}
-              />
-            ))}
+          {/* Pöttyök helyett számláló: hány kép (K) és videó (V) van; az aktuális pirossal, sorszámmal. */}
+          <div
+            className="flex items-center gap-4 font-mono text-sm font-bold tracking-widest"
+            aria-live="polite"
+            aria-label={
+              elem.fajta === 'video'
+                ? `Videó, ${kepekSzama} kép`
+                : `${kepSorszam(jelenlegi)}. kép a ${kepekSzama}-ből${azonosito ? ', 1 videó' : ''}`
+            }
+          >
+            {kepekSzama > 0 && (
+              <span className={elem.fajta === 'kep' ? 'text-blood-400' : 'text-ash-500'}>
+                K {elem.fajta === 'kep' ? `${kepSorszam(jelenlegi)}/${kepekSzama}` : kepekSzama}
+              </span>
+            )}
+            {azonosito && (
+              <span className={elem.fajta === 'video' ? 'text-blood-400' : 'text-ash-500'}>V 1</span>
+            )}
           </div>
 
           <button
