@@ -290,7 +290,7 @@ export default function ModDetail() {
             <Diavetites kepek={mod.slideshow ?? []} video={mod.video} nev={nev} />
           )}
 
-          <Panel title="Leírás" cimKulcs="szekcio.leiras">
+          <Panel title="Leírás" cimKulcs="szekcio.leiras" lenyithato nyitva={false}>
             <div className="space-y-4">
               {mod.description.map((para, i) => (
                 <Szoveg
@@ -304,7 +304,7 @@ export default function ModDetail() {
             </div>
           </Panel>
 
-          <Panel title="Funkciók" cimKulcs="szekcio.funkciok">
+          <Panel title="Funkciók" cimKulcs="szekcio.funkciok" lenyithato nyitva={false}>
             <ul className="grid gap-2.5 sm:grid-cols-2">
               {mod.features.map((f, i) => (
                 <li key={f} className="flex items-start gap-2.5 text-sm text-ash-200">
@@ -320,7 +320,7 @@ export default function ModDetail() {
             </ul>
           </Panel>
 
-          <Panel title="Telepítés" id="telepites" cimKulcs="szekcio.telepites">
+          <Panel title="Telepítés" id="telepites" cimKulcs="szekcio.telepites" lenyithato nyitva={false}>
             <ol className="space-y-3">
               {mod.installationSteps.map((step, i) => (
                 <li
@@ -356,6 +356,7 @@ export default function ModDetail() {
 
           {/* Letöltések */}
           <Panel
+            lenyithato
             title="Letölthető verziók"
             id="letoltesek"
             bodyClassName="space-y-4"
@@ -368,6 +369,8 @@ export default function ModDetail() {
 
           {/* GYIK */}
           <Panel
+            lenyithato
+            nyitva={false}
             title="Gyakori kérdések"
             id="gyik"
             bodyClassName="py-0 sm:py-0"

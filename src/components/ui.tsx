@@ -1,7 +1,13 @@
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react'
+import {
+  useState,
+  type AnchorHTMLAttributes,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+} from 'react'
 import { Link } from 'react-router-dom'
 import { cx } from '@/lib/format'
 import { Felirat } from './Szoveg'
+import { IconChevronDown } from './Icons'
 
 /* ---------- Gombok ---------- */
 
@@ -13,7 +19,8 @@ const base =
 
 const variants: Record<Variant, string> = {
   primary: 'bg-blood-600 text-white hover:bg-blood-500 active:bg-blood-700',
-  secondary: 'border border-ink-600 bg-ink-800 text-ash-100 hover:border-blood-600 hover:bg-ink-700',
+  secondary:
+    'border border-ink-600 bg-ink-800 text-ash-100 hover:border-blood-600 hover:bg-ink-700',
   ghost: 'border border-transparent text-ash-300 hover:text-ash-100 hover:bg-ink-800',
 }
 
@@ -64,11 +71,7 @@ export function ExternalButton({
   ...rest
 }: AnchorHTMLAttributes<HTMLAnchorElement> & { variant?: Variant; size?: Size }) {
   return (
-    <a
-      rel="noopener noreferrer"
-      className={btnClass(variant, size, className)}
-      {...rest}
-    >
+    <a rel="noopener noreferrer" className={btnClass(variant, size, className)} {...rest}>
       {children}
     </a>
   )
@@ -100,6 +103,11 @@ export function Badge({
 
 /* ---------- Panel / szekció ---------- */
 
+/**
+ * Szekció-doboz. Lenyitható változatban a fejléc gomb: kattintásra nyílik és
+ * csukódik, így az adatlap átláthatóbb - a hosszú részek (leírás, funkciók)
+ * csukva indulnak, a fontos (letöltés) nyitva.
+ */
 export function Panel({
   title,
   cimKulcs,
@@ -108,6 +116,8 @@ export function Panel({
   children,
   className,
   bodyClassName,
+  lenyithato = false,
+  nyitva = true,
 }: {
   title?: string
   /** Ha meg van adva, a szekciócím is formázható a szerkesztőben. */
@@ -117,19 +127,52 @@ export function Panel({
   children: ReactNode
   className?: string
   bodyClassName?: string
+  /** A fejlécre kattintva nyílik/csukódik */
+  lenyithato?: boolean
+  /** Lenyitható doboz kezdő állapota */
+  nyitva?: boolean
 }) {
+  const [nyitott, setNyitott] = useState(nyitva)
+  const latszik = !lenyithato || nyitott
+  const cim = (
+    <h2 className="zc-label flex items-center gap-2.5 text-ash-100">
+      <span aria-hidden className="block h-3 w-[3px] bg-blood-500" />
+      {cimKulcs ? <Felirat kulcs={cimKulcs} alap={title ?? ''} /> : title}
+    </h2>
+  )
   return (
     <section id={id} className={cx('border border-ink-700 bg-ink-900', className)}>
-      {title && (
-        <header className="flex items-center justify-between gap-3 border-b border-ink-700 bg-ink-850 px-4 py-3 sm:px-5">
-          <h2 className="zc-label flex items-center gap-2.5 text-ash-100">
-            <span aria-hidden className="block h-3 w-[3px] bg-blood-500" />
-            {cimKulcs ? <Felirat kulcs={cimKulcs} alap={title} /> : title}
-          </h2>
-          {action}
-        </header>
-      )}
-      <div className={cx('p-4 sm:p-5', bodyClassName)}>{children}</div>
+      {title &&
+        (lenyithato ? (
+          <button
+            type="button"
+            onClick={() => setNyitott((v) => !v)}
+            aria-expanded={nyitott}
+            className={cx(
+              'flex w-full items-center justify-between gap-3 bg-ink-850 px-4 py-3 text-left transition-colors hover:bg-ink-800 sm:px-5',
+              nyitott && 'border-b border-ink-700',
+            )}
+          >
+            {cim}
+            <span className="flex items-center gap-3">
+              {action}
+              <IconChevronDown
+                width={16}
+                height={16}
+                className={cx(
+                  'shrink-0 text-blood-500 transition-transform duration-200',
+                  nyitott && 'rotate-180',
+                )}
+              />
+            </span>
+          </button>
+        ) : (
+          <header className="flex items-center justify-between gap-3 border-b border-ink-700 bg-ink-850 px-4 py-3 sm:px-5">
+            {cim}
+            {action}
+          </header>
+        ))}
+      {latszik && <div className={cx('p-4 sm:p-5', bodyClassName)}>{children}</div>}
     </section>
   )
 }

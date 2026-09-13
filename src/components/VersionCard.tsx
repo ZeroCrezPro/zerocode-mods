@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import type { Mod, ModVersion } from '@/data/types'
 import { formatDate, formatNumber, vLabel } from '@/lib/format'
 import { downloadFileName, downloadUrl } from '@/lib/download'
 import { Badge, btnClass } from './ui'
-import { IconDownload } from './Icons'
+import { IconChevronDown, IconDownload } from './Icons'
 import { Felirat, Szoveg } from './Szoveg'
 import { csakSzoveg } from '@/lib/gazdagSzoveg'
 
@@ -31,18 +32,16 @@ export function VersionCard({
   const file = downloadFileName(version.download)
   // A verzió helye a listában - ebből lesz a szerkesztő jelölője.
   const vi = mod.versions.indexOf(version)
+  // A változáslista csukva indul, hogy a letöltés doboza rövid legyen.
+  const [valtozasok, setValtozasok] = useState(false)
 
   return (
     <article
       className={
-        latest
-          ? 'border border-blood-600/50 bg-ink-900'
-          : 'border border-ink-700 bg-ink-900/60'
+        latest ? 'border border-blood-600/50 bg-ink-900' : 'border border-ink-700 bg-ink-900/60'
       }
     >
-      {latest && (
-        <div className="zc-diag h-1 w-full bg-blood-600/20" aria-hidden />
-      )}
+      {latest && <div className="zc-diag h-1 w-full bg-blood-600/20" aria-hidden />}
       <div className="p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-2.5">
           <span className="font-mono text-xl font-black tracking-tight text-ash-100">
@@ -80,20 +79,30 @@ export function VersionCard({
 
         {version.changes && version.changes.length > 0 && (
           <div className="mt-4">
-            <Felirat
-              elem="p"
-              className="zc-label mb-2 text-ash-400"
-              kulcs="verzio.valtozasok"
-              alap="Változások"
-            />
-            <ul className="space-y-1.5">
-              {version.changes.map((c, ci) => (
-                <li key={c} className="flex gap-2.5 text-sm text-ash-300">
-                  <span aria-hidden className="mt-2 block h-1 w-1 shrink-0 bg-blood-500" />
-                  <Szoveg ertek={c} mezo={`${mod.slug}:versions:${vi}:changes:${ci}`} />
-                </li>
-              ))}
-            </ul>
+            <button
+              type="button"
+              onClick={() => setValtozasok((v) => !v)}
+              aria-expanded={valtozasok}
+              className="zc-label mb-2 flex items-center gap-2 text-ash-400 transition-colors hover:text-ash-100"
+            >
+              <IconChevronDown
+                width={14}
+                height={14}
+                className={`shrink-0 text-blood-500 transition-transform duration-200 ${valtozasok ? 'rotate-180' : ''}`}
+              />
+              <Felirat kulcs="verzio.valtozasok" alap="Változások" />
+              <span className="font-mono text-[11px] text-ash-500">{version.changes.length}</span>
+            </button>
+            {valtozasok && (
+              <ul className="space-y-1.5">
+                {version.changes.map((c, ci) => (
+                  <li key={c} className="flex gap-2.5 text-sm text-ash-300">
+                    <span aria-hidden className="mt-2 block h-1 w-1 shrink-0 bg-blood-500" />
+                    <Szoveg ertek={c} mezo={`${mod.slug}:versions:${vi}:changes:${ci}`} />
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 
@@ -120,11 +129,7 @@ export function VersionCard({
             <Szoveg
               className="text-ash-200"
               ertek={version.author ?? mod.author}
-              mezo={
-                version.author
-                  ? `${mod.slug}:versions:${vi}:author`
-                  : `${mod.slug}:author`
-              }
+              mezo={version.author ? `${mod.slug}:versions:${vi}:author` : `${mod.slug}:author`}
             />
             {file && (
               <>
