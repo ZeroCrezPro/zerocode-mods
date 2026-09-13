@@ -1,7 +1,7 @@
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Seo, pageTitle } from '@/components/Seo'
-import { Button, btnClass } from '@/components/ui'
+import { Button, Panel, SectionHead, btnClass } from '@/components/ui'
 import { cx } from '@/lib/format'
 import { fiokHivas, fiokokBekapcsolva, kepBetolt, kepHivas, useFiok, type Fiok } from '@/lib/fiok'
 import { KepSzerkeszto } from '@/components/KepSzerkeszto'
@@ -367,11 +367,10 @@ export function UjJelszo() {
 /** Egy szekció a fiók oldalán: cím, rövid magyarázat, tartalom. */
 function Szakasz({ cim, leiras, children }: { cim: string; leiras?: string; children: ReactNode }) {
   return (
-    <section className="border border-ink-700 bg-ink-850/60 p-5 sm:p-6">
-      <h2 className="zc-label text-ash-100">{cim}</h2>
-      {leiras && <p className="mt-1 text-xs text-ash-400">{leiras}</p>}
-      <div className="mt-4">{children}</div>
-    </section>
+    <Panel title={cim}>
+      {leiras && <p className="mb-4 text-xs text-ash-400">{leiras}</p>}
+      {children}
+    </Panel>
   )
 }
 
@@ -496,10 +495,11 @@ export function FiokOldal() {
   }
 
   return (
-    <Kartya cim="Fiókom" alcim="Profil, biztonság és a fiók kezelése egy helyen." szeles>
+    <div className="zc-container py-10 sm:py-14">
       <Seo title={pageTitle('Fiókom')} description="A saját fiókod." path="/fiok" noIndex />
+      <SectionHead eyebrow="Fiók" title="Fiókom" />
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-[1.15fr_1fr]">
         <div className="space-y-5">
           <Szakasz cim="Profil" leiras="Így látnak mások az oldalon.">
             <Profilkep fiok={fiok} beallit={beallit} />
@@ -563,7 +563,7 @@ export function FiokOldal() {
           }}
         />
       )}
-    </Kartya>
+    </div>
   )
 }
 
