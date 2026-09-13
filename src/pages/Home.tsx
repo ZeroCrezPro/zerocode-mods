@@ -14,20 +14,24 @@ function Stats() {
     { value: String(mods.length), label: 'Mod' },
     { value: String(totalReleases()), label: 'Kiadás' },
     { value: 'PC', label: 'Platform' },
-    downloads
-      ? { value: `${formatNumber(downloads)}+`, label: 'Letöltés' }
-      : { value: '100%', label: 'Ingyenes' },
+    // A letöltésszám csak akkor, ha van mért adat - kitalált százalék nincs.
+    ...(downloads ? [{ value: `${formatNumber(downloads)}+`, label: 'Letöltés' }] : []),
   ]
 
   return (
-    <dl className="grid grid-cols-2 divide-ink-700 border border-ink-700 bg-ink-900 md:grid-cols-4 md:divide-x">
+    <dl
+      className={
+        'grid grid-cols-2 divide-ink-700 border border-ink-700 bg-ink-900 md:divide-x ' +
+        (items.length === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3')
+      }
+    >
       {items.map((s, i) => (
         <div
           key={s.label}
           className={
             'px-5 py-6 text-center ' +
-            (i < 2 ? 'border-b border-ink-700 md:border-b-0 ' : '') +
-            (i % 2 === 0 ? 'border-r border-ink-700 md:border-r-0' : '')
+            (i < items.length - 2 || (items.length % 2 === 1 && i === items.length - 2) ? 'border-b border-ink-700 md:border-b-0 ' : '') +
+            (i % 2 === 0 && i !== items.length - 1 ? 'border-r border-ink-700 md:border-r-0' : '')
           }
         >
           <dt className="sr-only">{s.label}</dt>
