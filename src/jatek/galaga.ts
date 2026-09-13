@@ -605,7 +605,10 @@ export class Galaga {
 
   // játékállapot
   private hajoX = this.w / 2
-  private readonly hajoY = H - 56
+  /* A hajó magassága: egérnél az alján, érintésnél feljebb, hogy az ujj ne takarja. */
+  private hajoY = H - 56
+  private static readonly HAJO_Y_EGER = H - 56
+  private static readonly HAJO_Y_UJJ = H - 150
   private eletek = 3
   private pont = 0
   private rekord = rekordBetolt()
@@ -856,6 +859,7 @@ export class Galaga {
     if (e.pointerType === 'mouse' && e.button !== 0) return
     e.preventDefault()
     const erintes = e.pointerType !== 'mouse'
+    this.hajoY = erintes ? Galaga.HAJO_Y_UJJ : Galaga.HAJO_Y_EGER
     if (erintes) {
       if (this.ujjId !== null) return // egyszerre egy ujj vezérel
       this.ujjId = e.pointerId
