@@ -61,15 +61,16 @@ export async function fiokHivas<T = Record<string, unknown>>(
 
 export const PROFILKEP_MERET = 256
 
-/** Kép betöltése fájlból (a böngésző dekódol; EXIF-forgatást is kezel). */
+/**
+ * Kép betöltése fájlból (a böngésző dekódol; EXIF-forgatást is kezel).
+ * A kép ideiglenes címe (img.src) él marad, hogy a szerkesztő is meg tudja
+ * jeleníteni - ha már nem kell, URL.revokeObjectURL(img.src) szabadítja fel.
+ */
 export function kepBetolt(fajl: File): Promise<HTMLImageElement> {
   return new Promise((kesz, hiba) => {
     const url = URL.createObjectURL(fajl)
     const img = new Image()
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-      kesz(img)
-    }
+    img.onload = () => kesz(img)
     img.onerror = () => {
       URL.revokeObjectURL(url)
       hiba(new Error('Ez a fájl nem kép, vagy a böngésző nem tudja megnyitni.'))
@@ -168,7 +169,11 @@ export async function webpOptimalizal(vaszon: HTMLCanvasElement, celBajt = 40 * 
 /** Gyors út szerkesztő nélkül: középső négyzet, kicsinyítve, optimalizálva. */
 export async function kepElokeszit(fajl: File): Promise<Blob> {
   const img = await kepBetolt(fajl)
-  return webpOptimalizal(kepKivag(img, alapKivagas(img)))
+  try {
+    return await webpOptimalizal(kepKivag(img, alapKivagas(img)))
+  } finally {
+    URL.revokeObjectURL(img.src)
+  }
 }
 
 /** Profilkép feltöltése (POST a képpel) vagy törlése (DELETE). */

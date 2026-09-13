@@ -27,7 +27,8 @@ export function KepSzerkeszto({
   const huzas = useRef<{ x: number; y: number; k: Kivagas } | null>(null)
 
   const maxOldal = Math.min(img.naturalWidth, img.naturalHeight)
-  const minOldal = Math.max(32, Math.min(maxOldal, 64))
+  // legfeljebb négyszeres nagyítás - ennél közelebb már csak pixelek lennének
+  const minOldal = Math.max(32, maxOldal / 4)
   // nagyítás: 1 = a legnagyobb négyzet látszik; nagyobb szám = kisebb kivágás = közelebb
   const nagyitas = maxOldal / k.oldal
   const maxNagyitas = maxOldal / minOldal
@@ -62,6 +63,9 @@ export function KepSzerkeszto({
     const ky = r ? (e.clientY - r.top) / r.height : 0.5
     nagyit(nagyitas * (e.deltaY < 0 ? 1.12 : 1 / 1.12), kx, ky)
   }
+
+  // A kép ideiglenes címét a szerkesztő bezárásakor szabadítjuk fel.
+  useEffect(() => () => URL.revokeObjectURL(img.src), [img])
 
   useEffect(() => {
     const billentyu = (ev: KeyboardEvent) => {
