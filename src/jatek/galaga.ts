@@ -550,7 +550,6 @@ export class Galaga {
   private razas = 0
   private formacioFazis = 0
   private oszlopok = 8
-  private kovetkezoElet = 20000
   private rejtettUtolso = -1
   /*
    * Kerek pontozás: az n. hullám pontosan n × 10 000 pontot ér. Az ellenfelek
@@ -990,7 +989,6 @@ export class Galaga {
     } catch {
       /* nincs tároló */
     }
-    this.kovetkezoElet = 20000
     this.lovedekek = []
     this.reszecskek = []
     this.feliratok = []
@@ -1275,14 +1273,8 @@ export class Galaga {
     this.eletEllenoriz()
   }
 
-  /** Extra élet és rekord a pontszám alapján. */
+  /** Rekord a pontszám alapján. (Pontért nem jár élet - csak a rejtett kód ad.) */
   private eletEllenoriz() {
-    if (this.pont >= this.kovetkezoElet) {
-      this.kovetkezoElet += 30000
-      this.eletek++
-      this.felirat(this.hajoX, this.hajoY - 30, '+1 ÉLET', '#3ddc84')
-      this.hang.ujElet()
-    }
     if (this.pont > this.rekord) {
       this.rekord = this.pont
       rekordMent(this.rekord)
