@@ -424,6 +424,9 @@ változik), a visszaszámláló, és a hely, ahova a látogató beírja. A negye
 után rögtön ellenőrzi - külön gomb nincs. Helyes szám után ugyanott megjelenik a kód,
 és kattintásra másolható. (A váltás pillanatában beütött előző szám is elfogadott.)
 
+**Bejelentkezett látogatónak könnyebb:** csak **két** számjegy, és **tizenöt**
+másodperces ablak - ez az egyik előnye a fióknak.
+
 Legörgetéskor a kódmező nem vész el: amikor a gombsor kigördül a képből, a mező
 **átcsúszik a jobb oldali letöltő doboz alá**, és a ragadós oldalsávval együtt mozog -
 így a Letölthető verzióknál is kéznél van.
