@@ -826,41 +826,74 @@ export class Galaga {
 
   private leKezelo = (e: KeyboardEvent) => this.billentyu(e, true)
   private felKezelo = (e: KeyboardEvent) => this.billentyu(e, false)
-  private egerMozog = (e: MouseEvent) => {
+  /*
+   * Egér és érintés ugyanazon a pointer-eseményeken át: egérrel a hajó a
+   * kurzort követi, bal gomb lő; ujjal a lenyomva tartott ujjat követi a hajó,
+   * és amíg tartod, folyamatosan lő. Érintésnél az érzékenység nem számít
+   * (az ujj helye a hajó helye).
+   */
+  private ujjId: number | null = null
+  private vaszonX = (e: PointerEvent) => {
     const r = this.vaszon.getBoundingClientRect()
-    const x = ((e.clientX - r.left) / r.width) * this.w
+    return ((e.clientX - r.left) / r.width) * this.w
+  }
+  private vaszonY = (e: PointerEvent) => {
+    const r = this.vaszon.getBoundingClientRect()
+    return ((e.clientY - r.top) / r.height) * H
+  }
+  private egerMozog = (e: PointerEvent) => {
+    const erintes = e.pointerType !== 'mouse'
+    if (erintes && this.ujjId !== e.pointerId) return
+    const x = this.vaszonX(e)
     if (this.kepernyo === 'jatek') {
-      // érzékenység: a mozgás középpont körüli szorzása
-      this.egerX = szorit(this.w / 2 + (x - this.w / 2) * this.b.egerErzekenyseg, 0, this.w)
+      this.egerX = erintes ? szorit(x, 0, this.w) : szorit(this.w / 2 + (x - this.w / 2) * this.b.egerErzekenyseg, 0, this.w)
       this.egerHasznal = true
-    } else {
-      this.menuEgerre(x, ((e.clientY - r.top) / r.height) * H)
+    } else if (!erintes) {
+      this.menuEgerre(x, this.vaszonY(e))
     }
   }
-  private egerLe = (e: MouseEvent) => {
-    if (e.button !== 0) return
+  private egerLe = (e: PointerEvent) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return
     e.preventDefault()
+    const erintes = e.pointerType !== 'mouse'
+    if (erintes) {
+      if (this.ujjId !== null) return // egyszerre egy ujj vezérel
+      this.ujjId = e.pointerId
+      try {
+        this.vaszon.setPointerCapture(e.pointerId)
+      } catch {
+        /* nem gond */
+      }
+    }
+    const x = this.vaszonX(e)
     if (this.kepernyo === 'jatek') {
+      if (erintes) this.egerX = szorit(x, 0, this.w)
       this.egerLenyomva = true
       this.tuzKerelem = true
       this.egerHasznal = true
-    } else {
-      const r = this.vaszon.getBoundingClientRect()
-      const x = ((e.clientX - r.left) / r.width) * this.w
-      if (this.menuEgerre(x, ((e.clientY - r.top) / r.height) * H)) this.menuValaszt(x)
+    } else if (this.menuEgerre(x, this.vaszonY(e))) {
+      this.menuValaszt(x)
     }
   }
-  private egerFel = (e: MouseEvent) => {
-    if (e.button === 0) this.egerLenyomva = false
+  private egerFel = (e: PointerEvent) => {
+    if (e.pointerType === 'mouse') {
+      if (e.button === 0) this.egerLenyomva = false
+      return
+    }
+    if (e.pointerId !== this.ujjId) return
+    this.ujjId = null
+    this.egerLenyomva = false
   }
   private kontextus = (e: Event) => e.preventDefault()
 
   private bemenetBekot() {
     window.addEventListener('keydown', this.leKezelo)
     window.addEventListener('keyup', this.felKezelo)
-    this.vaszon.addEventListener('mousemove', this.egerMozog)
-    this.vaszon.addEventListener('mousedown', this.egerLe)
-    window.addEventListener('mouseup', this.egerFel)
+    this.vaszon.style.touchAction = 'none'
+    this.vaszon.addEventListener('pointermove', this.egerMozog)
+    this.vaszon.addEventListener('pointerdown', this.egerLe)
+    window.addEventListener('pointerup', this.egerFel)
+    window.addEventListener('pointercancel', this.egerFel)
     this.vaszon.addEventListener('contextmenu', this.kontextus)
   }
 
@@ -1051,10 +1084,11 @@ export class Galaga {
     cancelAnimationFrame(this.rafId)
     window.removeEventListener('keydown', this.leKezelo)
     window.removeEventListener('keyup', this.felKezelo)
-    window.removeEventListener('mouseup', this.egerFel)
+    window.removeEventListener('pointerup', this.egerFel)
+    window.removeEventListener('pointercancel', this.egerFel)
     window.removeEventListener('resize', this.meretKezelo)
-    this.vaszon.removeEventListener('mousemove', this.egerMozog)
-    this.vaszon.removeEventListener('mousedown', this.egerLe)
+    this.vaszon.removeEventListener('pointermove', this.egerMozog)
+    this.vaszon.removeEventListener('pointerdown', this.egerLe)
     this.vaszon.removeEventListener('contextmenu', this.kontextus)
     this.hang.bezar()
     this.bezarCb()
