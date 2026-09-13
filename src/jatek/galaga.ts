@@ -1837,7 +1837,7 @@ export class Galaga {
     this.szoveg(`REKORD ${this.rekord}`, this.w / 2, 16, 13, '#ffd23f')
     this.szoveg(`HULLÁM ${this.hullam}`, this.w - 58, 16, 13, '#eef0f5', 'right')
     const s = this.sprites.hajo
-    for (let i = 0; i < Math.max(0, this.eletek - 1); i++) {
+    for (let i = 0; i < Math.max(0, this.eletek); i++) {
       g.save()
       g.translate(16 + i * 22, H - 16)
       g.scale(0.5, 0.5)
