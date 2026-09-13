@@ -1,9 +1,9 @@
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Seo, pageTitle } from '@/components/Seo'
-import { Button } from '@/components/ui'
+import { Button, btnClass } from '@/components/ui'
 import { cx } from '@/lib/format'
-import { fiokHivas, fiokokBekapcsolva, useFiok, type Fiok } from '@/lib/fiok'
+import { fiokHivas, fiokokBekapcsolva, kepElokeszit, kepHivas, useFiok, type Fiok } from '@/lib/fiok'
 
 /*
  * Fiók-oldalak: belépés, regisztráció, elfelejtett jelszó, új jelszó a
@@ -305,6 +305,89 @@ export function UjJelszo() {
 
 /* ---------- Saját fiók ---------- */
 
+/** Egy szekció a fiók oldalán: cím, rövid magyarázat, tartalom. */
+function Szakasz({ cim, leiras, children }: { cim: string; leiras?: string; children: ReactNode }) {
+  return (
+    <section className="border border-ink-700 bg-ink-850/60 p-5 sm:p-6">
+      <h2 className="zc-label text-ash-100">{cim}</h2>
+      {leiras && <p className="mt-1 text-xs text-ash-400">{leiras}</p>}
+      <div className="mt-4">{children}</div>
+    </section>
+  )
+}
+
+/** Profilkép: a kép (vagy a név kezdőbetűje), feltöltés és törlés. */
+function Profilkep({ fiok, beallit }: { fiok: Fiok; beallit: (f: Fiok) => void }) {
+  const [fut, setFut] = useState(false)
+  const [hiba, setHiba] = useState('')
+  const inputId = useId()
+
+  const feltolt = async (fajl: File | undefined) => {
+    if (!fajl) return
+    setFut(true)
+    setHiba('')
+    try {
+      const kep = await kepElokeszit(fajl)
+      const v = await kepHivas(kep)
+      if (v.ok) beallit(v.adat.fiok)
+      else setHiba(v.hiba)
+    } catch (e) {
+      setHiba(e instanceof Error ? e.message : 'A képet nem sikerült feldolgozni.')
+    }
+    setFut(false)
+  }
+  const torol = async () => {
+    setFut(true)
+    setHiba('')
+    const v = await kepHivas(null)
+    if (v.ok) beallit(v.adat.fiok)
+    else setHiba(v.hiba)
+    setFut(false)
+  }
+
+  return (
+    <div className="flex items-start gap-5">
+      <div className="relative h-24 w-24 shrink-0 border border-ink-600 bg-ink-900">
+        {fiok.kepUrl ? (
+          <img src={fiok.kepUrl} alt="Profilkép" className="h-full w-full object-cover" />
+        ) : (
+          <span className="flex h-full w-full items-center justify-center font-mono text-3xl font-black text-blood-400">
+            {fiok.nev.slice(0, 1).toUpperCase()}
+          </span>
+        )}
+        <span className="absolute -right-px -bottom-px h-2 w-2 bg-blood-500" aria-hidden />
+      </div>
+      <div className="min-w-0 flex-1">
+        <input
+          id={inputId}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          disabled={fut}
+          onChange={(e) => {
+            feltolt(e.target.files?.[0])
+            e.target.value = ''
+          }}
+        />
+        <div className="flex flex-wrap gap-2">
+          <label htmlFor={inputId} className={btnClass('secondary', 'sm', fut ? 'pointer-events-none opacity-50' : 'cursor-pointer')}>
+            {fut ? 'Feltöltés…' : fiok.kepUrl ? 'Kép cseréje' : 'Kép feltöltése'}
+          </label>
+          {fiok.kepUrl && (
+            <Button type="button" variant="ghost" size="sm" onClick={torol} disabled={fut}>
+              Kép törlése
+            </Button>
+          )}
+        </div>
+        <p className="mt-2 text-xs text-ash-400">
+          JPG, PNG vagy WebP. A képet az oldal négyzetre vágja és 256×256-ra kicsinyíti - a fejlécben a neved mellett jelenik meg.
+        </p>
+        <Uzenet szoveg={hiba} tipus="hiba" />
+      </div>
+    </div>
+  )
+}
+
 export function FiokOldal() {
   const { fiok, beallit, kilep } = useFiok()
   const navigate = useNavigate()
@@ -323,7 +406,7 @@ export function FiokOldal() {
   if (!fiokokBekapcsolva) return <Kikapcsolva />
   if (!fiok) {
     return (
-      <Kartya cim="Fiók">
+      <Kartya cim="Fiókom" szeles>
         <p className="text-sm text-ash-400">Betöltés…</p>
       </Kartya>
     )
@@ -346,41 +429,52 @@ export function FiokOldal() {
   }
 
   return (
-    <Kartya cim="Fiókom">
+    <Kartya cim="Fiókom" alcim="Profil, biztonság és a fiók kezelése egy helyen." szeles>
       <Seo title={pageTitle('Fiókom')} description="A saját fiókod." path="/fiok" noIndex />
-      <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
-        <dt className="zc-label text-ash-400">Név</dt>
-        <dd className="font-semibold text-ash-100">{fiok.nev}</dd>
-        <dt className="zc-label text-ash-400">E-mail</dt>
-        <dd className="text-ash-100">{fiok.email}</dd>
-      </dl>
 
-      <h2 className="zc-label mt-8 mb-3 text-ash-100">Jelszó módosítása</h2>
-      <form onSubmit={jelszoValt} className="space-y-4">
-        <Mezo cimke="Jelenlegi jelszó" ertek={regi} beallit={setRegi} tipus="password" autoComplete="current-password" />
-        <Mezo cimke="Új jelszó" ertek={uj} beallit={setUj} tipus="password" autoComplete="new-password" segito="Legalább 8 karakter." />
-        <Mezo cimke="Új jelszó még egyszer" ertek={uj2} beallit={setUj2} tipus="password" autoComplete="new-password" />
-        <Uzenet szoveg={u.hiba} tipus="hiba" />
-        <Uzenet szoveg={u.siker} tipus="siker" />
-        <Button type="submit" variant="secondary" disabled={u.kuldes}>
-          {u.kuldes ? 'Mentés…' : 'Jelszó módosítása'}
-        </Button>
-      </form>
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div className="space-y-5">
+          <Szakasz cim="Profil" leiras="Így látnak mások az oldalon.">
+            <Profilkep fiok={fiok} beallit={beallit} />
+            <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-5 gap-y-2 border-t border-ink-700 pt-4 text-sm">
+              <dt className="zc-label text-ash-400">Név</dt>
+              <dd className="font-semibold text-ash-100">{fiok.nev}</dd>
+              <dt className="zc-label text-ash-400">E-mail</dt>
+              <dd className="break-all text-ash-100">{fiok.email}</dd>
+            </dl>
+          </Szakasz>
 
-      <div className="mt-8 flex items-center justify-between gap-3 border-t border-ink-700 pt-5">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={async () => {
-            await kilep()
-            navigate('/', { replace: true })
-          }}
-        >
-          Kilépés
-        </Button>
-        <Button type="button" onClick={() => setTorlesKerdes(true)}>
-          Fiók törlése
-        </Button>
+          <Szakasz cim="Fiók" leiras="Kilépés erről a gépről, vagy a fiók végleges törlése.">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={async () => {
+                  await kilep()
+                  navigate('/', { replace: true })
+                }}
+              >
+                Kilépés
+              </Button>
+              <Button type="button" onClick={() => setTorlesKerdes(true)}>
+                Fiók törlése
+              </Button>
+            </div>
+          </Szakasz>
+        </div>
+
+        <Szakasz cim="Biztonság" leiras="Jelszóváltás után a többi gépen újra be kell lépni.">
+          <form onSubmit={jelszoValt} className="space-y-4">
+            <Mezo cimke="Jelenlegi jelszó" ertek={regi} beallit={setRegi} tipus="password" autoComplete="current-password" />
+            <Mezo cimke="Új jelszó" ertek={uj} beallit={setUj} tipus="password" autoComplete="new-password" segito="Legalább 8 karakter." />
+            <Mezo cimke="Új jelszó megerősítése" ertek={uj2} beallit={setUj2} tipus="password" autoComplete="new-password" />
+            <Uzenet szoveg={u.hiba} tipus="hiba" />
+            <Uzenet szoveg={u.siker} tipus="siker" />
+            <Button type="submit" variant="secondary" disabled={u.kuldes}>
+              {u.kuldes ? 'Mentés…' : 'Jelszó módosítása'}
+            </Button>
+          </form>
+        </Szakasz>
       </div>
 
       {torlesKerdes && (

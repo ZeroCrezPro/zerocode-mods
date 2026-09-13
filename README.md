@@ -562,7 +562,9 @@ nem megy ki - a Frissítés ezt jelzi.
 - A levelet a függvény közvetlenül az `smtp.gmail.com`-nak adja át (Cloudflare
   socket, TLS), külön levélküldő szolgáltatás nélkül.
 - Végpontok: `/api/fiok/regisztracio`, `belepes`, `kilepes`, `en`, `elfelejtett`,
-  `uj-jelszo`, `jelszo`, `torles` (a fiók végleges törlése, IGEN/NEM megerősítés után). Egy címről tíz percenként korlátozott számú próbálkozás megy.
+  `uj-jelszo`, `jelszo`, `torles` (a fiók végleges törlése, IGEN/NEM megerősítés után),
+  `kep` (POST: profilkép feltöltése, DELETE: törlése; a kép a `/api/fiok/kep/<azonosító>` címen
+  nyilvános - a böngésző már 256×256-os WebP-re kicsinyítve küldi, a KV tárolja). Egy címről tíz percenként korlátozott számú próbálkozás megy.
 - Oldalak: `/belepes`, `/regisztracio`, `/elfelejtett-jelszo`, `/uj-jelszo`, `/fiok`.
 - Az előnézetben a fiók-végpontok nem élnek (403), csak az éles oldalon.
 
