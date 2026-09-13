@@ -585,7 +585,7 @@ A fiókokat a Cloudflare-en a **Workers & Pages → KV → FIOKOK** alatt látod
 ## Rejtett játék: Csillagraj
 
 A fejléc **Z-kockájára három gyors kattintás** megnyit egy Galaga ihlette arcade
-űrhajós játékot ( + ). Minden
+űrhajós játékot (`src/jatek/galaga.ts` + `src/components/GalagaJatek.tsx`). Minden
 grafika saját pixelsprite, minden hang WebAudio-szintézis - nincs benne idegen anyag.
 A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
 
