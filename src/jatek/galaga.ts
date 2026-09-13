@@ -452,6 +452,9 @@ const FEGYVEREK: Fegyver[] = [
 const FOELLENSEG_FEGYVER: Fegyver = { nev: 'TELJES ARZENÁL', oszlopok: 3, dupla: true, sebzes: 2, robbano: 3, lezer: 0 }
 const FOELLENSEG_HULLAM = 13
 const ROBBANAS_SUGAR = 70
+/* Egységes tempó: minden ellenfél ugyanazzal a sebességgel repül és támad - nincs hirtelen manőver. */
+const TEMPO = 0.5 // görbe-sebesség (1 = a teljes görbe egy mp alatt)
+const EROSZKEDES = 200 // egység/mp a lefelé haladó mintáknál
 
 interface Reszecske {
   x: number
@@ -559,9 +562,9 @@ export class Galaga {
     }
     this.fajtak = {
       dron: { sprite: this.sprites.dron, elet: 1, pont: 50, pontTamadva: 100, sebesseg: 1 },
-      vadasz: { sprite: this.sprites.vadasz, elet: 1, pont: 80, pontTamadva: 160, sebesseg: 1.15 },
-      vezer: { sprite: this.sprites.vezer, elet: 2, pont: 150, pontTamadva: 400, sebesseg: 0.95 },
-      villam: { sprite: this.sprites.villam, elet: 1, pont: 120, pontTamadva: 250, sebesseg: 1.6 },
+      vadasz: { sprite: this.sprites.vadasz, elet: 1, pont: 80, pontTamadva: 160, sebesseg: 1 },
+      vezer: { sprite: this.sprites.vezer, elet: 2, pont: 150, pontTamadva: 400, sebesseg: 1 },
+      villam: { sprite: this.sprites.villam, elet: 1, pont: 120, pontTamadva: 250, sebesseg: 1 },
       foellenseg: { sprite: this.sprites.foellenseg, elet: 90, pont: 5000, pontTamadva: 5000, sebesseg: 1 },
     }
     for (let i = 0; i < 260; i++) {
@@ -912,7 +915,7 @@ export class Galaga {
           allapot: 'bejon',
           gorbe: [start, k1, k2, cel],
           t: -(sorszam * 0.12) - sor * 0.3, // negatív = még vár a startra
-          tSeb: 0.55 + this.hullam * 0.03,
+          tSeb: TEMPO,
           ido: 0,
           fazis: Math.random() * Math.PI * 2,
           villan: 0,
@@ -1008,7 +1011,7 @@ export class Galaga {
           sor: -1,
           allapot: 'tamad',
           t: 0,
-          tSeb: 0.6,
+          tSeb: TEMPO,
           ido: 0,
           fazis: Math.random() * Math.PI * 2,
           villan: 0,
@@ -1032,8 +1035,8 @@ export class Galaga {
 
   /** Egy ellenfél kiválik a formációból, és támadó mintát kap. */
   private tamadasIndit(e: Ellenfel) {
-    const mintak: Minta[] = e.fajta === 'vezer' ? ['iv', 'hullam'] : e.fajta === 'vadasz' ? ['iv', 'hullam', 'zuhanas'] : ['hullam', 'zuhanas']
-    if (this.hullam >= 4) mintak.push('rajtautes')
+    // Minden fajta ugyanazokból a nyugodt mintákból választ - rajtaütés nincs.
+    const mintak: Minta[] = ['iv', 'hullam', 'zuhanas']
     e.minta = mintak[Math.floor(Math.random() * mintak.length)]
     e.allapot = 'tamad'
     e.ido = 0
@@ -1048,7 +1051,7 @@ export class Galaga {
       { x: this.hajoX, y: H + 40 },
     ]
     e.t = 0
-    e.tSeb = (e.minta === 'rajtautes' ? 1.6 : e.minta === 'zuhanas' ? 1.1 : 0.55) * this.fajtak[e.fajta].sebesseg * (0.85 + this.nehezseg() * 0.2)
+    e.tSeb = TEMPO
   }
 
   private lo(x: number, y: number, vx: number, vy: number, sajat: boolean, sebzes = 1, robbano = false) {
@@ -1268,12 +1271,12 @@ export class Galaga {
           e.ido += dt
           if (e.ido >= 0) {
             e.allapot = 'tamad'
-            e.minta = 'rajtautes'
+            e.minta = 'hullam'
             e.ido = 0
             const celX = szorit(this.hajoX + veletlen(-60, 60), 30, this.w - 30)
             e.gorbe = [{ x: e.x, y: -30 }, { x: e.x, y: H * 0.3 }, { x: celX, y: H * 0.6 }, { x: celX, y: H + 40 }]
             e.t = 0
-            e.tSeb = 0.9 * (0.9 + neh * 0.15)
+            e.tSeb = TEMPO
           }
         }
       } else if (e.allapot === 'tamad') {
@@ -1286,13 +1289,14 @@ export class Galaga {
           e.y = p.y
           if (e.t >= 1) this.visszater(e)
         } else if (e.minta === 'hullam') {
-          e.y += 150 * e.tSeb * dt * 1.6
+          e.y += EROSZKEDES * dt
           e.x = szorit(e.x + Math.cos(e.ido * 4 + e.fazis) * 150 * dt, 16, this.w - 16)
           if (e.y > H + 30) this.visszater(e)
         } else if (e.minta === 'zuhanas') {
           // a játékos felé dől, aztán egyenesen zuhan
-          if (e.ido < 0.6) e.x += (this.hajoX - e.x) * dt * 3
-          e.y += 260 * e.tSeb * dt
+          // lassan a játékos felé dől, közben egyenletesen ereszkedik
+          if (e.ido < 0.8) e.x += (this.hajoX - e.x) * dt * 1.5
+          e.y += EROSZKEDES * dt
           if (e.y > H + 30) this.visszater(e)
         }
         // támadás közben lő a játékos felé
@@ -1431,7 +1435,7 @@ export class Galaga {
     const startX = szorit(e.x, 20, this.w - 20)
     e.gorbe = [{ x: startX, y: -30 }, { x: startX, y: 20 }, { x: h.x, y: h.y - 40 }, h]
     e.t = 0
-    e.tSeb = 0.8
+    e.tSeb = TEMPO
     e.x = startX
     e.y = -30
   }
