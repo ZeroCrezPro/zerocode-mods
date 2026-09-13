@@ -20,8 +20,43 @@ const nav = [
  * logóra) megnyitja a Csillagraj arcade játékot - az első kattintás még a
  * főoldalra visz, a második-harmadik már nem navigál.
  */
+/*
+ * A kocka jele félpercenként vált: Z betű ↔ a rejtett játék űrhajója (ugyanaz a
+ * pixelrajz, mint a játékban). Apró célzás, hogy a kockában játék rejtőzik.
+ */
+const HAJO_SOROK = [
+  '......W......',
+  '......W......',
+  '.....WWW.....',
+  '.....WCW.....',
+  '....WWCWW....',
+  '..R.WWCWW.R..',
+  '..R.WWWWW.R..',
+  '.RRRWWWWWRRR.',
+  'RRRRWRRRWRRRR',
+  'RR..WW.WW..RR',
+]
+const HAJO_SZIN: Record<string, string> = { W: '#eef0f5', C: '#5cc8ff', R: '#ff5a60' }
+
+function HajoJel({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 13 10" width={26} height={20} shapeRendering="crispEdges" aria-hidden className={className}>
+      {HAJO_SOROK.flatMap((sor, y) =>
+        [...sor].map((ch, x) =>
+          ch === '.' ? null : <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={HAJO_SZIN[ch]} />,
+        ),
+      )}
+    </svg>
+  )
+}
+
 function Brand({ jatekNyit }: { jatekNyit: () => void }) {
   const kattintasok = useRef<number[]>([])
+  const [urhajo, setUrhajo] = useState(false)
+  useEffect(() => {
+    const t = setInterval(() => setUrhajo((v) => !v), 30000)
+    return () => clearInterval(t)
+  }, [])
   const kattint = (e: ReactMouseEvent) => {
     const most = Date.now()
     kattintasok.current = [...kattintasok.current.filter((t) => most - t < 700), most]
@@ -50,7 +85,13 @@ function Brand({ jatekNyit }: { jatekNyit: () => void }) {
           aria-hidden
           className="relative flex h-10 w-10 shrink-0 items-center justify-center border border-blood-600/60 bg-blood-600/10 font-mono text-base font-black text-blood-400 transition-colors group-hover:bg-blood-600 group-hover:text-white"
         >
-          Z
+          <span className={cx('transition-opacity duration-700', urhajo ? 'opacity-0' : 'opacity-100')}>Z</span>
+          <HajoJel
+            className={cx(
+              'absolute inset-0 m-auto transition-opacity duration-700',
+              urhajo ? 'opacity-100' : 'opacity-0',
+            )}
+          />
           <span className="absolute -right-px -bottom-px h-2 w-2 bg-blood-500" />
         </span>
       )}
