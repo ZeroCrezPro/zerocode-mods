@@ -106,12 +106,51 @@ function useUrlap() {
 
 /* ---------- Belépés ---------- */
 
+/*
+ * "Jegyezd meg": a látogató kérésére a név/e-mail és a jelszó a böngésző
+ * tárolójában marad, és a belépő mező legközelebb kitöltve jön. Csak a
+ * saját gépen érdemes - a leírás ezt mondja is. A pipa levétele törli.
+ */
+const MEGJEGYZES_KULCS = 'zc-belepes'
+
+function megjegyzettBelepes(): { azonosito: string; jelszo: string } | null {
+  try {
+    const t = localStorage.getItem(MEGJEGYZES_KULCS)
+    if (!t) return null
+    const a = JSON.parse(t) as { azonosito?: string; jelszo?: string }
+    return { azonosito: String(a.azonosito ?? ''), jelszo: String(a.jelszo ?? '') }
+  } catch {
+    return null
+  }
+}
+
+function megjegyzesMent(adat: { azonosito: string; jelszo: string } | null) {
+  try {
+    if (adat) localStorage.setItem(MEGJEGYZES_KULCS, JSON.stringify(adat))
+    else localStorage.removeItem(MEGJEGYZES_KULCS)
+  } catch {
+    /* privát ablakban nincs tároló - akkor nem jegyzi meg */
+  }
+}
+
 export function Belepes() {
   const { fiok, beallit } = useFiok()
   const navigate = useNavigate()
   const [azonosito, setAzonosito] = useState('')
   const [jelszo, setJelszo] = useState('')
+  const [megjegyez, setMegjegyez] = useState(false)
   const u = useUrlap()
+  const jelolo = useId()
+
+  // A kiszolgálón renderelt oldalban nincs tároló - csak betöltés után töltjük ki.
+  useEffect(() => {
+    const m = megjegyzettBelepes()
+    if (m) {
+      setAzonosito(m.azonosito)
+      setJelszo(m.jelszo)
+      setMegjegyez(true)
+    }
+  }, [])
 
   if (!fiokokBekapcsolva) return <Kikapcsolva />
   if (fiok) return <Navigate to="/fiok" replace />
@@ -121,6 +160,7 @@ export function Belepes() {
     u.futtat(async () => {
       const v = await fiokHivas<{ fiok: Fiok }>('belepes', { azonosito, jelszo })
       if (v.ok) {
+        megjegyzesMent(megjegyez ? { azonosito, jelszo } : null)
         beallit(v.adat.fiok)
         navigate('/fiok', { replace: true })
       }
@@ -134,6 +174,24 @@ export function Belepes() {
       <form onSubmit={kuld} className="space-y-4">
         <Mezo cimke="Név vagy e-mail" ertek={azonosito} beallit={setAzonosito} autoComplete="username" />
         <Mezo cimke="Jelszó" ertek={jelszo} beallit={setJelszo} tipus="password" autoComplete="current-password" />
+        <label htmlFor={jelolo} className="flex cursor-pointer items-start gap-3 text-sm text-ash-300">
+          <input
+            id={jelolo}
+            type="checkbox"
+            checked={megjegyez}
+            onChange={(e) => {
+              setMegjegyez(e.target.checked)
+              if (!e.target.checked) megjegyzesMent(null)
+            }}
+            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer appearance-none border border-ink-500 bg-ink-950 checked:border-blood-500 checked:bg-blood-600 checked:bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><path d=%22M3.5 8.5l3 3 6-6%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222%22/></svg>')] focus:outline-none focus-visible:ring-2 focus-visible:ring-blood-500/60"
+          />
+          <span>
+            Jegyezd meg a belépésem
+            <span className="block text-xs text-ash-500">
+              A név/e-mail és a jelszó ezen a gépen marad, legközelebb kitöltve jön. Csak saját gépen kapcsold be.
+            </span>
+          </span>
+        </label>
         <Uzenet szoveg={u.hiba} tipus="hiba" />
         <Button type="submit" size="lg" className="w-full" disabled={u.kuldes}>
           {u.kuldes ? 'Belépés…' : 'Belépés'}
