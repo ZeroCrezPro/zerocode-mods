@@ -551,6 +551,7 @@ export class Galaga {
   private formacioFazis = 0
   private oszlopok = 8
   private kovetkezoElet = 20000
+  private rejtettUtolso = -1
   private jatekVegeIdo = 0
 
   private bezarCb: () => void
@@ -972,6 +973,7 @@ export class Galaga {
     this.eletek = 3
     this.pont = 0
     this.hullam = 0
+    this.rejtettUtolso = -1
     try {
       const t = Number(localStorage.getItem('zc-galaga-teszt'))
       if (t > 1) this.hullam = t - 1
@@ -1267,6 +1269,18 @@ export class Galaga {
     this.robbanas(this.hajoX, this.hajoY, '#d61f27', 34, true)
     this.hang.serules()
     this.lovedekek = this.lovedekek.filter((l) => l.sajat)
+
+    /*
+     * Rejtett kód: aki pontosan kerek tízezernél (10 000 … 90 000) hal meg,
+     * öt életet kap. Ugyanannál a pontszámnál csak egyszer jár.
+     */
+    if (this.pont % 10000 === 0 && this.pont >= 10000 && this.pont <= 90000 && this.pont !== this.rejtettUtolso) {
+      this.rejtettUtolso = this.pont
+      this.eletek = 5
+      this.felirat(this.hajoX, this.hajoY - 40, 'REJTETT KÓD: 5 ÉLET!', '#3ddc84')
+      this.hang.ujElet()
+    }
+
     if (this.eletek <= 0) {
       this.jatekVegeIdo = 1.8
     }
