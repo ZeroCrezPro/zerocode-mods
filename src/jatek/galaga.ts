@@ -627,21 +627,33 @@ export class Galaga {
       if (!this.fut) return
       this.ranglista = j.ok && Array.isArray(j.lista) ? j.lista : []
       this.ranglistaAllapot = 'kesz'
+      if (this.rekord > 0) void this.pontBekuld(this.rekord)
     } catch {
       this.ranglistaAllapot = 'hiba'
     }
   }
 
   /** Játék végén a bejelentkezett játékos eredménye felmegy a ranglistára. */
-  private async pontBekuld() {
-    if (!this.jatekos || this.pont <= 0) return
+  /**
+   * A ranglista a legjobb eredményt őrzi, ezért nemcsak a játék végén küldünk:
+   * minden hullám végén, kilépéskor/újrakezdéskor is - így az sem veszik el,
+   * amit valaki a menün át hagy ott. A helyi rekord is felmegy, ha nagyobb.
+   */
+  private async pontBekuld(pont = this.pont) {
+    if (!this.jatekos || pont <= 0) return
+    const sajat = this.ranglista.find((r) => r.nev === this.jatekos!.nev)
+    if (sajat && sajat.pont >= pont) {
+      if (this.bekuldes === 'megy') this.bekuldes = 'kesz'
+      return
+    }
     this.bekuldes = 'megy'
     try {
       const v = await fetch('/api/jatek/pont', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ pont: this.pont }),
+        keepalive: true,
+        body: JSON.stringify({ pont }),
       })
       const j = (await v.json()) as { ok?: boolean; lista?: RangSor[] }
       if (!this.fut) return
@@ -952,10 +964,12 @@ export class Galaga {
   }
 
   private fomenu() {
+    void this.pontBekuld()
     this.kepernyoValt('fomenu')
   }
 
   private bezar() {
+    void this.pontBekuld()
     this.fut = false
     cancelAnimationFrame(this.rafId)
     window.removeEventListener('keydown', this.leKezelo)
@@ -977,6 +991,7 @@ export class Galaga {
   /* ---------- játékmenet ---------- */
 
   private ujJatek() {
+    void this.pontBekuld()
     this.eletek = 3
     this.pont = 0
     this.hullam = 0
@@ -1011,6 +1026,7 @@ export class Galaga {
       this.felirat(this.w / 2, H / 2 + 60, `HULLÁM BÓNUSZ +${bonusz}`, '#ffd23f')
       this.eletEllenoriz()
     }
+    if (this.hullam > 0) void this.pontBekuld()
     this.hullam++
     this.hullamKeret = this.hullam * 10000
     this.hullamPont = 0
