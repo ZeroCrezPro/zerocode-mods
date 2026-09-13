@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { Galaga, H, W } from '@/jatek/galaga'
+import { Galaga } from '@/jatek/galaga'
 
 /**
- * A rejtett arcade játék ablaka: az egész képernyőt lefedi, közepén a
- * vászon (3:4), pixelesen skálázva. A játék motorja külön modul (lazy),
+ * A rejtett arcade játék ablaka: a vászon az egész képernyőt kitölti
+ * (a játéktér szélessége a kijelző arányát követi), pixelesen skálázva. A játék motorja külön modul (lazy),
  * ezért az oldal csomagját nem terheli, amíg valaki elő nem hívja.
  *
  * Portállal a body alá kerül: a fejléc háttér-elmosása különben a fixed
@@ -48,10 +48,8 @@ export default function GalagaJatek({ bezar }: { bezar: () => void }) {
     >
       <canvas
         ref={vaszon}
-        width={W}
-        height={H}
-        className="max-h-full max-w-full cursor-crosshair"
-        style={{ aspectRatio: `${W} / ${H}`, height: '100%', imageRendering: 'pixelated' }}
+        className="h-full w-full cursor-crosshair"
+        style={{ imageRendering: 'pixelated' }}
       />
       <button
         type="button"

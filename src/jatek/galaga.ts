@@ -428,6 +428,8 @@ type Kepernyo = 'fomenu' | 'beallitasok' | 'jatek' | 'szunet' | 'vege'
 /* ================================================================== */
 
 export class Galaga {
+  /** A játéktér logikai szélessége - a kijelző arányából számolva, hogy ne legyen fekete sáv. */
+  private w = W
   private ctx: CanvasRenderingContext2D
   private b: Beallitasok
   private hang: Hangok
@@ -445,14 +447,14 @@ export class Galaga {
 
   // bemenet
   private gombok = new Set<string>()
-  private egerX = W / 2
+  private egerX = this.w / 2
   private egerLenyomva = false
   private egerHasznal = false // az utolsó mozgás egérrel volt?
   private tuzKerelem = false
   private csillagok: Csillag[] = []
 
   // játékállapot
-  private hajoX = W / 2
+  private hajoX = this.w / 2
   private readonly hajoY = H - 56
   private eletek = 3
   private pont = 0
@@ -498,18 +500,31 @@ export class Galaga {
       vezer: { sprite: this.sprites.vezer, elet: 2, pont: 150, pontTamadva: 400, sebesseg: 0.95 },
       villam: { sprite: this.sprites.villam, elet: 1, pont: 120, pontTamadva: 250, sebesseg: 1.6 },
     }
-    for (let i = 0; i < 90; i++) {
-      this.csillagok.push({ x: Math.random() * W, y: Math.random() * H, seb: veletlen(20, 140), fenyes: Math.random() })
+    for (let i = 0; i < 260; i++) {
+      this.csillagok.push({ x: Math.random() * 1800, y: Math.random() * H, seb: veletlen(20, 140), fenyes: Math.random() })
     }
-    this.felbontasAlkalmaz()
+    this.meretFrissit()
     this.bemenetBekot()
+    window.addEventListener('resize', this.meretKezelo)
+  }
+
+  private meretKezelo = () => this.meretFrissit()
+
+  /** A vászon a képernyőt tölti ki; a logikai szélesség követi az arányát. */
+  private meretFrissit() {
+    const cw = this.vaszon.clientWidth || W
+    const ch = this.vaszon.clientHeight || H
+    this.w = szorit(Math.round((H * cw) / ch), 360, 1800)
+    this.hajoX = szorit(this.hajoX, 22, this.w - 22)
+    for (const c of this.csillagok) if (c.x > this.w) c.x = Math.random() * this.w
+    this.felbontasAlkalmaz()
   }
 
   /* ---------- vászon és beállítások ---------- */
 
   private felbontasAlkalmaz() {
     const s = this.b.felbontas
-    this.vaszon.width = W * s
+    this.vaszon.width = this.w * s
     this.vaszon.height = H * s
     this.ctx.setTransform(s, 0, 0, s, 0, 0)
     this.ctx.imageSmoothingEnabled = false
@@ -521,10 +536,10 @@ export class Galaga {
   private felKezelo = (e: KeyboardEvent) => this.billentyu(e, false)
   private egerMozog = (e: MouseEvent) => {
     const r = this.vaszon.getBoundingClientRect()
-    const x = ((e.clientX - r.left) / r.width) * W
+    const x = ((e.clientX - r.left) / r.width) * this.w
     if (this.kepernyo === 'jatek') {
       // érzékenység: a mozgás középpont körüli szorzása
-      this.egerX = szorit(W / 2 + (x - W / 2) * this.b.egerErzekenyseg, 0, W)
+      this.egerX = szorit(this.w / 2 + (x - this.w / 2) * this.b.egerErzekenyseg, 0, this.w)
       this.egerHasznal = true
     } else {
       this.menuEgerre(x, ((e.clientY - r.top) / r.height) * H)
@@ -539,7 +554,7 @@ export class Galaga {
       this.egerHasznal = true
     } else {
       const r = this.vaszon.getBoundingClientRect()
-      const x = ((e.clientX - r.left) / r.width) * W
+      const x = ((e.clientX - r.left) / r.width) * this.w
       if (this.menuEgerre(x, ((e.clientY - r.top) / r.height) * H)) this.menuValaszt(x)
     }
   }
@@ -695,7 +710,7 @@ export class Galaga {
         this.kepernyoValt(this.elozoKepernyo)
       } else {
         // kattintásnál a sor bal fele csökkent, a jobb fele növel
-        this.beallitasValtoztat(i, x !== undefined && x < W / 2 ? -1 : 1)
+        this.beallitasValtoztat(i, x !== undefined && x < this.w / 2 ? -1 : 1)
       }
       return
     }
@@ -743,6 +758,7 @@ export class Galaga {
     window.removeEventListener('keydown', this.leKezelo)
     window.removeEventListener('keyup', this.felKezelo)
     window.removeEventListener('mouseup', this.egerFel)
+    window.removeEventListener('resize', this.meretKezelo)
     this.vaszon.removeEventListener('mousemove', this.egerMozog)
     this.vaszon.removeEventListener('mousedown', this.egerLe)
     this.vaszon.removeEventListener('contextmenu', this.kontextus)
@@ -765,8 +781,8 @@ export class Galaga {
     this.lovedekek = []
     this.reszecskek = []
     this.feliratok = []
-    this.hajoX = W / 2
-    this.egerX = W / 2
+    this.hajoX = this.w / 2
+    this.egerX = this.w / 2
     this.serthetetlen = 2
     this.halott = 0
     this.kepernyoValt('jatek')
@@ -795,9 +811,9 @@ export class Galaga {
         const cel = this.formacioHely(oszlop, sor, oszlopok)
         // Bejövetel: felváltva bal és jobb oldalról, hurkolt görbén, késleltetve.
         const balrol = (sor + o) % 2 === 0
-        const start = { x: balrol ? -40 : W + 40, y: veletlen(40, 140) }
-        const k1 = { x: balrol ? W * 0.35 : W * 0.65, y: H * 0.55 + sor * 20 }
-        const k2 = { x: balrol ? W * 0.85 : W * 0.15, y: H * 0.15 }
+        const start = { x: balrol ? -40 : this.w + 40, y: veletlen(40, 140) }
+        const k1 = { x: balrol ? this.w * 0.35 : this.w * 0.65, y: H * 0.55 + sor * 20 }
+        const k2 = { x: balrol ? this.w * 0.85 : this.w * 0.15, y: H * 0.15 }
         this.ellenfelek.push({
           fajta,
           x: start.x,
@@ -823,7 +839,7 @@ export class Galaga {
       for (let i = 0; i < db; i++) {
         this.ellenfelek.push({
           fajta: 'villam',
-          x: veletlen(40, W - 40),
+          x: veletlen(40, this.w - 40),
           y: -30 - i * 60,
           elet: 1,
           oszlop: -1,
@@ -841,8 +857,8 @@ export class Galaga {
   }
 
   private formacioHely(oszlop: number, sor: number, oszlopok = 8): Pont {
-    const koz = Math.min(52, (W - 60) / oszlopok)
-    const bal = (W - koz * (oszlopok - 1)) / 2
+    const koz = Math.min(52, (this.w - 60) / oszlopok)
+    const bal = (this.w - koz * (oszlopok - 1)) / 2
     return { x: bal + oszlop * koz, y: 90 + sor * 40 }
   }
 
@@ -860,7 +876,7 @@ export class Galaga {
     e.fazis = Math.random() * Math.PI * 2
     e.lovesIdo = veletlen(0.3, 0.9)
     // az ív görbéje: a játékos felé kanyarodik, majd a képernyő alja alá
-    const jobbra = e.x < W / 2
+    const jobbra = e.x < this.w / 2
     e.gorbe = [
       { x: e.x, y: e.y },
       { x: jobbra ? e.x + 160 : e.x - 160, y: e.y + 140 },
@@ -923,7 +939,7 @@ export class Galaga {
       c.y += c.seb * dt * csillagSeb
       if (c.y > H) {
         c.y = -2
-        c.x = Math.random() * W
+        c.x = Math.random() * 1800
       }
     }
     if (this.kepernyo !== 'jatek') return
@@ -944,8 +960,8 @@ export class Galaga {
       this.halott -= dt
       if (this.halott <= 0 && this.eletek > 0) {
         this.serthetetlen = 2.5
-        this.hajoX = W / 2
-        this.egerX = W / 2
+        this.hajoX = this.w / 2
+        this.egerX = this.w / 2
       }
     } else {
       const bal = this.gombok.has('ArrowLeft') || this.gombok.has('a')
@@ -957,7 +973,7 @@ export class Galaga {
         // simított követés: gyors, de nem rángat
         this.hajoX += (this.egerX - this.hajoX) * Math.min(1, dt * 22)
       }
-      this.hajoX = szorit(this.hajoX, 22, W - 22)
+      this.hajoX = szorit(this.hajoX, 22, this.w - 22)
 
       if (this.serthetetlen > 0) this.serthetetlen -= dt
       this.lovesVarakozas -= dt
@@ -1014,7 +1030,7 @@ export class Galaga {
       } else if (e.allapot === 'formacio') {
         if (e.oszlop >= 0) {
           const h = this.formacioHely(e.oszlop, e.sor, oszlopok)
-          e.x = W / 2 + (h.x - W / 2) * lelegzes + sway
+          e.x = this.w / 2 + (h.x - this.w / 2) * lelegzes + sway
           e.y = h.y + Math.sin(this.formacioFazis * 2 + e.oszlop * 0.5) * 3
           // formációból ritkán lő
           e.lovesIdo -= dt
@@ -1029,7 +1045,7 @@ export class Galaga {
             e.allapot = 'tamad'
             e.minta = 'rajtautes'
             e.ido = 0
-            const celX = szorit(this.hajoX + veletlen(-60, 60), 30, W - 30)
+            const celX = szorit(this.hajoX + veletlen(-60, 60), 30, this.w - 30)
             e.gorbe = [{ x: e.x, y: -30 }, { x: e.x, y: H * 0.3 }, { x: celX, y: H * 0.6 }, { x: celX, y: H + 40 }]
             e.t = 0
             e.tSeb = 0.9 * (0.9 + neh * 0.15)
@@ -1046,7 +1062,7 @@ export class Galaga {
           if (e.t >= 1) this.visszater(e)
         } else if (e.minta === 'hullam') {
           e.y += 150 * e.tSeb * dt * 1.6
-          e.x = szorit(e.x + Math.cos(e.ido * 4 + e.fazis) * 150 * dt, 16, W - 16)
+          e.x = szorit(e.x + Math.cos(e.ido * 4 + e.fazis) * 150 * dt, 16, this.w - 16)
           if (e.y > H + 30) this.visszater(e)
         } else if (e.minta === 'zuhanas') {
           // a játékos felé dől, aztán egyenesen zuhan
@@ -1078,7 +1094,7 @@ export class Galaga {
       l.x += l.vx * dt
       l.y += l.vy * dt
     }
-    this.lovedekek = this.lovedekek.filter((l) => l.y > -20 && l.y < H + 20 && l.x > -20 && l.x < W + 20)
+    this.lovedekek = this.lovedekek.filter((l) => l.y > -20 && l.y < H + 20 && l.x > -20 && l.x < this.w + 20)
 
     // --- ütközések ---
     for (const l of this.lovedekek) {
@@ -1158,7 +1174,7 @@ export class Galaga {
     // a képernyő tetejéről ereszkedik vissza a helyére
     e.allapot = 'visszater'
     const h = this.formacioHely(e.oszlop, e.sor, this.oszlopok)
-    const startX = szorit(e.x, 20, W - 20)
+    const startX = szorit(e.x, 20, this.w - 20)
     e.gorbe = [{ x: startX, y: -30 }, { x: startX, y: 20 }, { x: h.x, y: h.y - 40 }, h]
     e.t = 0
     e.tSeb = 0.8
@@ -1173,10 +1189,11 @@ export class Galaga {
     g.save()
     if (this.razas > 0) g.translate(veletlen(-4, 4) * this.razas, veletlen(-4, 4) * this.razas)
     g.fillStyle = '#05050a'
-    g.fillRect(-10, -10, W + 20, H + 20)
+    g.fillRect(-10, -10, this.w + 20, H + 20)
 
     // csillagok
     for (const c of this.csillagok) {
+      if (c.x > this.w) continue
       const m = c.seb > 100 ? 2 : 1
       g.fillStyle = c.seb > 100 ? '#ffffff' : c.seb > 60 ? '#9aa4c8' : '#4b5170'
       g.globalAlpha = 0.4 + c.fenyes * 0.6
@@ -1209,7 +1226,7 @@ export class Galaga {
 
   private sotetit() {
     this.ctx.fillStyle = 'rgba(5,5,10,0.72)'
-    this.ctx.fillRect(0, 0, W, H)
+    this.ctx.fillRect(0, 0, this.w, H)
   }
 
   private szoveg(t: string, x: number, y: number, meret: number, szin = '#eef0f5', igazitas: CanvasTextAlign = 'center', vastag = true) {
@@ -1222,8 +1239,8 @@ export class Galaga {
   }
 
   private cim(t: string, y: number) {
-    this.szoveg(t, W / 2 + 3, y + 3, 40, '#7a0f14')
-    this.szoveg(t, W / 2, y, 40, '#eef0f5')
+    this.szoveg(t, this.w / 2 + 3, y + 3, 40, '#7a0f14')
+    this.szoveg(t, this.w / 2, y, 40, '#eef0f5')
   }
 
   private menuRajz() {
@@ -1233,23 +1250,23 @@ export class Galaga {
       const aktiv = i === this.menuIndex
       if (aktiv) {
         this.ctx.fillStyle = '#d61f27'
-        this.ctx.fillRect(W / 2 - 150, y - 20, 300, 40)
-        this.szoveg('▶', W / 2 - 130, y, 16, '#fff')
+        this.ctx.fillRect(this.w / 2 - 150, y - 20, 300, 40)
+        this.szoveg('▶', this.w / 2 - 130, y, 16, '#fff')
       }
-      this.szoveg(t, W / 2, y, 22, aktiv ? '#fff' : '#aeb2c4')
+      this.szoveg(t, this.w / 2, y, 22, aktiv ? '#fff' : '#aeb2c4')
     })
   }
 
   private fomenuRajz() {
-    this.szoveg('ZEROCODE', W / 2, 150, 18, '#ff5a60')
+    this.szoveg('ZEROCODE', this.w / 2, 150, 18, '#ff5a60')
     this.cim('CSILLAGRAJ', 200)
-    this.szoveg('Galaga ihlette arcade', W / 2, 240, 14, '#8a8a94', 'center', false)
+    this.szoveg('Galaga ihlette arcade', this.w / 2, 240, 14, '#8a8a94', 'center', false)
     // a hajó díszként
     const s = this.sprites.hajo
-    this.ctx.drawImage(s.kep, W / 2 - s.w / 2, 275 - s.h / 2)
+    this.ctx.drawImage(s.kep, this.w / 2 - s.w / 2, 275 - s.h / 2)
     this.menuRajz()
-    this.szoveg('A/D vagy ← →  mozgás  ·  SPACE / bal egérgomb  lövés  ·  ESC  szünet', W / 2, H - 60, 11, '#6b6f80', 'center', false)
-    this.szoveg(`REKORD  ${this.rekord}`, W / 2, H - 32, 13, '#ffd23f')
+    this.szoveg('A/D vagy ← →  mozgás  ·  SPACE / bal egérgomb  lövés  ·  ESC  szünet', this.w / 2, H - 60, 11, '#6b6f80', 'center', false)
+    this.szoveg(`REKORD  ${this.rekord}`, this.w / 2, H - 32, 13, '#ffd23f')
   }
 
   private beallitasokRajz() {
@@ -1261,24 +1278,24 @@ export class Galaga {
       const aktiv = i === this.menuIndex
       if (aktiv) {
         this.ctx.fillStyle = 'rgba(214,31,39,0.85)'
-        this.ctx.fillRect(30, y - 20, W - 60, 40)
+        this.ctx.fillRect(30, y - 20, this.w - 60, 40)
       }
       if (i < 6) {
         this.szoveg(t, 44, y, 15, aktiv ? '#fff' : '#aeb2c4', 'left')
-        this.szoveg(this.beallitasErtek(i), W - 44, y, 15, aktiv ? '#fff' : '#eef0f5', 'right', false)
+        this.szoveg(this.beallitasErtek(i), this.w - 44, y, 15, aktiv ? '#fff' : '#eef0f5', 'right', false)
       } else {
-        this.szoveg(t, W / 2, y, 20, aktiv ? '#fff' : '#aeb2c4')
+        this.szoveg(t, this.w / 2, y, 20, aktiv ? '#fff' : '#aeb2c4')
       }
     })
-    this.szoveg('← →  vagy kattintás a sor bal / jobb felén: érték', W / 2, H - 40, 11, '#6b6f80', 'center', false)
+    this.szoveg('← →  vagy kattintás a sor bal / jobb felén: érték', this.w / 2, H - 40, 11, '#6b6f80', 'center', false)
   }
 
   private vegeRajz() {
     this.sotetit()
     this.cim('GAME OVER', 200)
-    this.szoveg(`PONTSZÁM  ${this.pont}`, W / 2, 280, 22, '#eef0f5')
-    this.szoveg(`REKORD  ${this.rekord}`, W / 2, 320, 18, this.pont >= this.rekord && this.pont > 0 ? '#ffd23f' : '#aeb2c4')
-    this.szoveg(`ELÉRT HULLÁM  ${this.hullam}`, W / 2, 356, 18, '#aeb2c4')
+    this.szoveg(`PONTSZÁM  ${this.pont}`, this.w / 2, 280, 22, '#eef0f5')
+    this.szoveg(`REKORD  ${this.rekord}`, this.w / 2, 320, 18, this.pont >= this.rekord && this.pont > 0 ? '#ffd23f' : '#aeb2c4')
+    this.szoveg(`ELÉRT HULLÁM  ${this.hullam}`, this.w / 2, 356, 18, '#aeb2c4')
     this.menuRajz()
   }
 
@@ -1335,8 +1352,8 @@ export class Galaga {
 
     // HUD
     this.szoveg(`PONT ${this.pont}`, 12, 16, 13, '#eef0f5', 'left')
-    this.szoveg(`REKORD ${this.rekord}`, W / 2, 16, 13, '#ffd23f')
-    this.szoveg(`HULLÁM ${this.hullam}`, W - 12, 16, 13, '#eef0f5', 'right')
+    this.szoveg(`REKORD ${this.rekord}`, this.w / 2, 16, 13, '#ffd23f')
+    this.szoveg(`HULLÁM ${this.hullam}`, this.w - 58, 16, 13, '#eef0f5', 'right')
     const s = this.sprites.hajo
     for (let i = 0; i < Math.max(0, this.eletek - 1); i++) {
       g.save()
