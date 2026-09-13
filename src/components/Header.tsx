@@ -242,13 +242,15 @@ function FiokGomb({ className, onNavigate }: { className?: string; onNavigate?: 
       to={fiok ? '/fiok' : '/belepes'}
       onClick={onNavigate}
       className={cx(
-        'flex h-10 items-center gap-2 border border-ink-700 px-3 text-[12px] font-bold tracking-[0.08em] uppercase transition-colors hover:border-blood-600 hover:text-ash-100',
+        'flex h-10 items-center gap-2 border border-ink-700 text-[12px] font-bold tracking-[0.08em] uppercase transition-colors hover:border-blood-600 hover:text-ash-100',
+        // képpel: a kép a gomb teljes magasságát kitölti, bal oldalt a keretig
+        fiok?.kepUrl ? 'pr-3 pl-0' : 'px-3',
         fiok ? 'text-ash-100' : 'text-ash-300',
         className,
       )}
     >
       {fiok?.kepUrl ? (
-        <img src={fiok.kepUrl} alt="" aria-hidden className="h-6 w-6 shrink-0 object-cover" />
+        <img src={fiok.kepUrl} alt="" aria-hidden className="h-[38px] w-[38px] shrink-0 object-cover" />
       ) : (
         <IconUser width={16} height={16} aria-hidden />
       )}
