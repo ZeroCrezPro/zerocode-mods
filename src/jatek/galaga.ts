@@ -552,6 +552,14 @@ export class Galaga {
   private oszlopok = 8
   private kovetkezoElet = 20000
   private rejtettUtolso = -1
+  /*
+   * Kerek pontozás: az n. hullám pontosan n × 10 000 pontot ér. Az ellenfelek
+   * egyenlő részt kapnak, a maradék a hullám végén jár bónuszként - így a
+   * pontszám minden hullám végén kerek tízezres.
+   */
+  private hullamKeret = 0 // ennyit ér a hullám összesen
+  private hullamPont = 0 // ebből ennyi jött össze eddig
+  private olesPont = 0 // egy ellenfél értéke ebben a hullámban
   private jatekVegeIdo = 0
 
   private bezarCb: () => void
@@ -974,6 +982,8 @@ export class Galaga {
     this.pont = 0
     this.hullam = 0
     this.rejtettUtolso = -1
+    this.hullamKeret = 0
+    this.hullamPont = 0
     try {
       const t = Number(localStorage.getItem('zc-galaga-teszt'))
       if (t > 1) this.hullam = t - 1
@@ -996,7 +1006,16 @@ export class Galaga {
   }
 
   private ujHullam() {
+    // Az előző hullám maradéka bónuszként, hogy a végösszeg kerek legyen.
+    if (this.hullam > 0 && this.hullamKeret > this.hullamPont) {
+      const bonusz = this.hullamKeret - this.hullamPont
+      this.pont += bonusz
+      this.felirat(this.w / 2, H / 2 + 60, `HULLÁM BÓNUSZ +${bonusz}`, '#ffd23f')
+      this.eletEllenoriz()
+    }
     this.hullam++
+    this.hullamKeret = this.hullam * 10000
+    this.hullamPont = 0
     this.ellenfelek = []
     this.lovedekek = this.lovedekek.filter((l) => l.sajat)
     this.hullamSzoveg = 2.2
@@ -1075,6 +1094,7 @@ export class Galaga {
         })
       }
     }
+    this.olesPont = Math.floor(this.hullamKeret / this.ellenfelek.length)
   }
 
   private foellensegHullam() {
@@ -1108,6 +1128,7 @@ export class Galaga {
       lovesIdo: 2.5,
     })
     this.tamadasVarakozas = 999 // a főellenség maga hívja a kísérőit
+    this.olesPont = 500 // a kísérők értéke; a főellenség kapja a maradékot
   }
 
   /** A főellenség viselkedése: beúszik, kígyózik, legyezőben lő, kísérőket küld. */
@@ -1219,9 +1240,11 @@ export class Galaga {
 
   /** Egy ellenfél megsemmisül: pont, robbanás, hang. */
   private ellenfelPusztul(e: Ellenfel) {
-    const adat = this.fajtak[e.fajta]
-    const pont = e.allapot === 'tamad' ? adat.pontTamadva : adat.pont
-    this.pontotAd(pont, e.x, e.y)
+    // A hullám kerete fölé sosem megyünk: a főellenség a maradékot kapja.
+    const maradek = Math.max(0, this.hullamKeret - this.hullamPont)
+    const pont = e.fajta === 'foellenseg' ? maradek : Math.min(this.olesPont, maradek)
+    this.hullamPont += pont
+    if (pont > 0) this.pontotAd(pont, e.x, e.y)
     const nagy = e.fajta === 'vezer' || e.fajta === 'foellenseg'
     const szin = PALETTA[e.fajta === 'dron' ? 'B' : e.fajta === 'vadasz' ? 'P' : e.fajta === 'vezer' || e.fajta === 'foellenseg' ? 'G' : 'O']
     this.robbanas(e.x, e.y, szin, e.fajta === 'foellenseg' ? 90 : nagy ? 26 : 16, nagy)
@@ -1249,6 +1272,11 @@ export class Galaga {
   private pontotAd(n: number, x: number, y: number) {
     this.pont += n
     this.felirat(x, y, `+${n}`)
+    this.eletEllenoriz()
+  }
+
+  /** Extra élet és rekord a pontszám alapján. */
+  private eletEllenoriz() {
     if (this.pont >= this.kovetkezoElet) {
       this.kovetkezoElet += 30000
       this.eletek++
