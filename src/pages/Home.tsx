@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
-import { legujabbModok, mods, site, totalDownloads, totalReleases } from '@/data'
-import { formatNumber } from '@/lib/format'
+import { legujabbModok, mods, site } from '@/data'
 import { Felirat, Szoveg } from '@/components/Szoveg'
 import { Seo, pageTitle } from '@/components/Seo'
 import { ModCard } from '@/components/ModCard'
@@ -9,13 +8,13 @@ import { IconArrowRight, IconDownload, IconGamepad, IconPackage } from '@/compon
 import { Empty } from '@/components/Empty'
 
 function Stats() {
-  const downloads = totalDownloads()
+  // A modok fajtája: magyarítás (a szerkesztőben a zászlós kapcsoló) vagy játékmod.
+  const magyaritasok = mods.filter((m) => m.magyaritas).length
   const items: { value: string; label: string }[] = [
     { value: String(mods.length), label: 'Mod' },
-    { value: String(totalReleases()), label: 'Kiadás' },
+    { value: String(mods.length - magyaritasok), label: 'Játékmod' },
+    { value: String(magyaritasok), label: 'Magyarítás' },
     { value: 'PC', label: 'Platform' },
-    // A letöltésszám csak akkor, ha van mért adat - kitalált százalék nincs.
-    ...(downloads ? [{ value: `${formatNumber(downloads)}+`, label: 'Letöltés' }] : []),
   ]
 
   return (
