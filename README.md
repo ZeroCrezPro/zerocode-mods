@@ -575,6 +575,16 @@ nem megy ki - a Frissítés ezt jelzi.
 - Oldalak: `/belepes`, `/regisztracio`, `/elfelejtett-jelszo`, `/uj-jelszo`, `/fiok`.
 - Az előnézetben a fiók-végpontok nem élnek (403), csak az éles oldalon.
 
+### Hozzászólások
+
+Minden mod adatlapján, a jobb oldali sávban (Legfrissebb kiadás → Melyik játékhoz →
+**Hozzászólások**) modonként külön beszélgetés van. Olvasni bárki tud, írni csak
+bejelentkezve; egy üzenet legfeljebb 500 karakter, üreset nem lehet küldeni. A szöveg
+sima szövegként tárolódik és jelenik meg (beírt HTML/JavaScript nem fut le). A lista
+saját görgethető területen van, legújabb felül, félpercenként frissül. Tárolás: KV
+`hozzaszolas:<slug>` (a legutóbbi 300 üzenet); végpont `/api/hozzaszolas/<slug>`
+(GET nyilvános, POST bejelentkezve). Az előnézetben nem él.
+
 ### Fiókok kezelése
 
 A fiókokat a Cloudflare-en a **Workers & Pages → KV → FIOKOK** alatt látod

@@ -11,6 +11,7 @@ import { SmartImage } from '@/components/SmartImage'
 import { Diavetites } from '@/components/Diavetites'
 import { KodDoboz } from '@/components/KodDoboz'
 import { FizetosLetoltes } from '@/components/FizetosLetoltes'
+import { Hozzaszolasok } from '@/components/Hozzaszolasok'
 import { AccordionItem } from '@/components/Accordion'
 import { VersionCard } from '@/components/VersionCard'
 import { Felirat, Szoveg } from '@/components/Szoveg'
@@ -481,6 +482,9 @@ export default function ModDetail() {
               />
             </div>
           )}
+
+          {/* Hozzászólások: a Melyik játékhoz alatt; a fiókrendszer nélkül nincs. */}
+          {site.fiok?.bekapcsolva && <Hozzaszolasok slug={mod.slug} />}
 
           {mod.externalLinks && mod.externalLinks.length > 0 && (
             <div className="border border-ink-700 bg-ink-900 p-4">
