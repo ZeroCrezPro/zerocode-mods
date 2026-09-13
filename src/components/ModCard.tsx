@@ -50,8 +50,14 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
   return (
     <article
       ref={kartya}
-      className="group flex h-full flex-col border border-ink-700 bg-ink-900 transition-colors duration-200 hover:border-blood-600/70"
+      className="group relative flex h-full cursor-pointer flex-col border border-ink-700 bg-ink-900 transition-colors duration-200 hover:border-blood-600/70"
     >
+      {/*
+        Az egész kártya kattintható: ez a láthatatlan link az egészet lefedi.
+        A név linkje marad a billentyűzetnek és a felolvasónak; a többi
+        tartalom alá kerül, ezért a szövegkijelölés a leírásban nem zavar.
+      */}
+      <Link to={`/modok/${mod.slug}`} tabIndex={-1} aria-hidden className="absolute inset-0 z-10" />
       <Link
         to={`/modok/${mod.slug}`}
         tabIndex={-1}
@@ -79,6 +85,7 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
       </Link>
 
       <div className="relative isolate flex flex-1 flex-col p-4">
+        {/* A név linkje a lefedő réteg fölött marad, hogy fókuszálható legyen. */}
         {/*
           Magyarosításnál az egér alatt halványan előtűnik a fordítás-jel a
           szövegek mögött. Negatív rétegen ül, az isolate tartja a kártyán
@@ -97,7 +104,7 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
           }`}
         />
         <h3 className="text-lg leading-tight font-extrabold tracking-tight text-ash-100">
-          <Link to={`/modok/${mod.slug}`} className="transition-colors group-hover:text-blood-400">
+          <Link to={`/modok/${mod.slug}`} className="relative z-20 transition-colors group-hover:text-blood-400">
             <Szoveg ertek={mod.name} mezo={`${mod.slug}:name`} />
           </Link>
         </h3>
@@ -137,7 +144,7 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
         {/*
           A kártyán nincs Letöltés gomb: a letöltés az adatlapon van, ahol a
           telepítési kódot is fel kell fedni hozzá - innen letölteni
-          megkerülné. A kártya a nevére vagy a képére kattintva nyílik.
+          megkerülné. A kártya bárhol rákattintva nyílik.
         */}
       </div>
     </article>
