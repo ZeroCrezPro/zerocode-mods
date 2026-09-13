@@ -1,7 +1,8 @@
 /**
  * Tartalomvédelem az élő oldalon: nincs szövegkijelölés, másolás, kép-húzás,
- * jobb klikk és mentés-gyorsbillentyű. Az űrlapmezők kivételek, hogy a
- * belépés és a regisztráció működjön.
+ * jobb klikk (mezőkben sem), és gyorsbillentyű sem - csak az F11 (teljes
+ * képernyő) és az ESC él. A sima gépelés, Tab, Enter, nyilak működnek, hogy
+ * a belépés és a regisztráció kitölthető maradjon.
  *
  * A szerkesztő előnézetében (helyi cím) nem kapcsol be, mert ott a
  * formázáshoz szöveget kell kijelölni.
@@ -18,16 +19,24 @@ export function vedelemBekapcsol() {
     return Boolean(e?.closest?.('input, textarea, select, [contenteditable="true"]'))
   }
 
-  for (const nev of ['contextmenu', 'copy', 'cut', 'dragstart', 'selectstart'] as const) {
+  // Jobb klikk sehol - mezőben sem.
+  document.addEventListener('contextmenu', (ev) => ev.preventDefault())
+
+  for (const nev of ['copy', 'cut', 'dragstart', 'selectstart'] as const) {
     document.addEventListener(nev, (ev) => {
       if (!mezoben(ev.target)) ev.preventDefault()
     })
   }
 
   document.addEventListener('keydown', (ev) => {
-    if (!(ev.ctrlKey || ev.metaKey)) return
-    const k = ev.key.toLowerCase()
-    // mentés, forrás, nyomtatás, mindent kijelöl, másolás - mezőn kívül
-    if (['s', 'u', 'p'].includes(k) || (['a', 'c', 'x'].includes(k) && !mezoben(ev.target))) ev.preventDefault()
+    if (ev.key === 'F11' || ev.key === 'Escape') return
+    // Az AltGr (Ctrl+Alt együtt) magyar billentyűzeten írásjelet ad (@, {, [ …) - az kell.
+    const altGr = ev.ctrlKey && ev.altKey && ev.key.length === 1
+    if (altGr) return
+    // Minden más módosítós kombináció (Ctrl+…, Alt+…, Win+…) és a funkcióbillentyűk tiltva.
+    if (ev.ctrlKey || ev.altKey || ev.metaKey || /^F\d{1,2}$/.test(ev.key) || ev.key === 'ContextMenu') {
+      ev.preventDefault()
+      ev.stopPropagation()
+    }
   })
 }
