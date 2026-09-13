@@ -43,7 +43,10 @@ export function render(url: string): { html: string; head: string } {
 /** sitemap.xml tartalma. */
 export function renderSitemap(): string {
   const base = site.url.replace(/\/$/, '')
+  // A fiók-oldalak (belépés, regisztráció stb.) noindex-esek: a keresőnek nem kellenek.
+  const FIOK_OLDALAK = new Set(['/belepes', '/regisztracio', '/elfelejtett-jelszo', '/uj-jelszo', '/fiok'])
   const entries = allRoutes()
+    .filter((r) => !FIOK_OLDALAK.has(r))
     .map((r) => {
       const priority = r === '/' ? '1.0' : r.startsWith('/modok/') ? '0.9' : '0.7'
       return `  <url>\n    <loc>${base}${r === '/' ? '/' : r}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${priority}</priority>\n  </url>`

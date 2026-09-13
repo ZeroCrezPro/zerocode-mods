@@ -175,6 +175,8 @@ export interface SiteConfig {
   ogImage: string
   /** A főoldal fejlécének háttérképe. Üresen a sima rácsos háttér látszik. */
   heroImage?: string
+  /** Google Search Console tulajdon-igazoló kód (a meta tag content értéke) */
+  googleVerification?: string
   /** Fizetés: a Lemon Squeezy közös alapterméke (nem titkos adat) */
   lemon?: LemonBeallitas
   /** Felhasználói fiókok: ha be van kapcsolva, a fejlécben ott a Belépés gomb */

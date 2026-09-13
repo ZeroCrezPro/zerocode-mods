@@ -762,6 +762,14 @@ const BEALLITAS_SZAKASZOK = [
         sugo: 'Ez jelenik meg a Google találati listájában a főoldalnál.',
       },
       { k: 'email', cim: 'Kapcsolati e-mail', tipus: 'szoveg' },
+      {
+        k: 'googleVerification',
+        cim: 'Google Search Console igazoló kód',
+        tipus: 'szoveg',
+        mono: true,
+        teljes: true,
+        sugo: 'search.google.com/search-console → Tulajdon hozzáadása (URL-előtag) → HTML-címke: csak a content="…" értékét idézőjel nélkül. Frissítés után a Google-nál kattints az Ellenőrzésre.',
+      },
     ],
   },
   {

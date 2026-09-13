@@ -56,6 +56,8 @@ export function renderHeadTags(data: SeoData): string {
     `<meta name="twitter:title" content="${esc(title)}" />`,
     `<meta name="twitter:description" content="${esc(data.description)}" />`,
     `<meta name="twitter:image" content="${esc(image)}" />`,
+    // Search Console tulajdon-igazolás - minden oldal fejlécében, ha be van állítva
+    ...(site.googleVerification ? [`<meta name="google-site-verification" content="${esc(site.googleVerification)}" />`] : []),
   ]
 
   for (const ld of data.jsonLd ?? []) {

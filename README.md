@@ -822,6 +822,11 @@ npx wrangler pages deploy dist --project-name zerocode-mods
 
 ## SEO és előrenderelés
 
+**Hogy a Google megtalálja:** a szerkesztőben *Beállítások → Az oldal → Google Search Console
+igazoló kód* mezőbe a Search Console HTML-címkéjének `content` értéke kerül; Frissítés
+után a Search Console-ban *Ellenőrzés*, majd *Webhelytérképek* → `sitemap.xml` beküldése.
+A sitemap csak a kereshető oldalakat tartalmazza (a fiók-oldalak noindex-esek).
+
 Az oldal SPA, de a build **minden útvonalhoz legyárt egy kész HTML fájlt**
 (`scripts/prerender.mjs`). Ez azt jelenti, hogy:
 
