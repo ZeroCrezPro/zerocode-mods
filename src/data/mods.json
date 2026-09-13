@@ -402,7 +402,20 @@
         "answer": "A mod indításkor ellenőrzi, hogy a játék kódjában megtalálja-e, amire szüksége van. Ha egy frissítés után valamelyik funkció nem találja a helyét, azon a soron „Nem elérhető” felirat jelenik meg, a többi funkció ettől még működik. Ilyenkor a modhoz frissítés jön."
       }
     ],
-    "slideshow": [],
+    "slideshow": [
+      "/images/screenshots/stronghold-crusader-de-mod-panel/1.webp",
+      "/images/screenshots/stronghold-crusader-de-mod-panel/2.webp",
+      "/images/screenshots/stronghold-crusader-de-mod-panel/3.webp",
+      "/images/screenshots/stronghold-crusader-de-mod-panel/4.webp",
+      "/images/screenshots/stronghold-crusader-de-mod-panel/5.webp",
+      "/images/screenshots/stronghold-crusader-de-mod-panel/6.webp",
+      "/images/screenshots/stronghold-crusader-de-mod-panel/7.webp",
+      "/images/screenshots/stronghold-crusader-de-mod-panel/8.webp",
+      "/images/screenshots/stronghold-crusader-de-mod-panel/9.webp",
+      "/images/screenshots/stronghold-crusader-de-mod-panel/10.webp",
+      "/images/screenshots/stronghold-crusader-de-mod-panel/11.webp",
+      "/images/screenshots/stronghold-crusader-de-mod-panel/12.webp"
+    ],
     "externalLinks": [],
     "fizetos": {}
   }
