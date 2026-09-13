@@ -13,7 +13,7 @@ import { fiokHivas, fiokokBekapcsolva, useFiok, type Fiok } from '@/lib/fiok'
 
 /* ---------- közös elemek ---------- */
 
-function Kartya({ cim, alcim, children }: { cim: string; alcim?: string; children: ReactNode }) {
+function Kartya({ cim, alcim, children, szeles }: { cim: string; alcim?: string; children: ReactNode; szeles?: boolean }) {
   return (
     <div className="relative overflow-hidden">
       <div className="zc-grid-bg absolute inset-0" aria-hidden />
@@ -22,7 +22,7 @@ function Kartya({ cim, alcim, children }: { cim: string; alcim?: string; childre
         aria-hidden
       />
       <div className="zc-container relative flex min-h-[62vh] items-start justify-center py-14 sm:py-20">
-        <div className="w-full max-w-md border border-ink-600 bg-ink-900/95 p-6 shadow-2xl shadow-black/50 sm:p-8">
+        <div className={cx('w-full border border-ink-600 bg-ink-900/95 p-6 shadow-2xl shadow-black/50 sm:p-8', szeles ? 'max-w-3xl' : 'max-w-md')}>
           <h1 className="text-2xl font-black tracking-tight uppercase">{cim}</h1>
           {alcim && <p className="mt-2 text-sm text-ash-400">{alcim}</p>}
           <div className="mt-6">{children}</div>

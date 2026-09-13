@@ -147,7 +147,41 @@ export async function fiokLetrehoz(kv, { nev, email, jelszo }) {
 /* ---------- munkamenet (süti) ---------- */
 
 /** Ami a fiókból a böngészőnek kimehet. */
-export const nyilvanosFiok = (fiok) => ({ nev: fiok.nev, email: fiok.email })
+export const nyilvanosFiok = (fiok) => ({
+  nev: fiok.nev,
+  email: fiok.email,
+  kepUrl: fiok.kep ? `/api/fiok/kep/${fiok.kep}?v=${fiok.kepValtozat ?? 0}` : '',
+})
+
+/* ---------- profilkép ---------- */
+
+/*
+ * A kép a KV-ban van (kep:<azonosító>), az azonosító az e-mail hash-ének
+ * eleje - így a kép címéből nem derül ki az e-mail. A böngésző már
+ * kicsinyítve (256x256, WebP) küldi, ezért kicsi marad.
+ */
+export const KEP_MERET_HATAR = 400 * 1024
+export const KEP_TIPUSOK = new Set(['image/webp', 'image/jpeg', 'image/png'])
+
+export async function kepAzonosito(email) {
+  const h = await crypto.subtle.digest('SHA-256', szovegKod('kep:' + emailKulcs(email)))
+  return [...new Uint8Array(h).slice(0, 12)].map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+export async function kepMent(kv, fiok, bajtok, tipus) {
+  const id = await kepAzonosito(fiok.email)
+  await kv.put(`kep:${id}`, bajtok, { metadata: { tipus } })
+  fiok.kep = id
+  fiok.kepValtozat = Date.now()
+  await fiokMent(kv, fiok)
+}
+
+export async function kepTorol(kv, fiok) {
+  if (fiok.kep) await kv.delete(`kep:${fiok.kep}`)
+  delete fiok.kep
+  delete fiok.kepValtozat
+  await fiokMent(kv, fiok)
+}
 
 /** A jegy a hash végét hordozza: jelszóváltáskor minden régi jegy elavul. */
 const hashJel = (fiok) => String(fiok.hash).slice(-16)

@@ -187,7 +187,11 @@ function FiokGomb({ className, onNavigate }: { className?: string; onNavigate?: 
         className,
       )}
     >
-      <IconUser width={16} height={16} aria-hidden />
+      {fiok?.kepUrl ? (
+        <img src={fiok.kepUrl} alt="" aria-hidden className="h-6 w-6 shrink-0 object-cover" />
+      ) : (
+        <IconUser width={16} height={16} aria-hidden />
+      )}
       <span className="max-w-[9rem] truncate">{fiok ? fiok.nev : 'Belépés'}</span>
     </Link>
   )
