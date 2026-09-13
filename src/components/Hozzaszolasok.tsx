@@ -17,6 +17,8 @@ interface Uzenet {
   kepUrl: string
   szoveg: string
   ido: number
+  /** a bejelentkezett látogató saját üzenete - törölheti */
+  sajat?: boolean
 }
 
 const MAX = 500
@@ -30,7 +32,26 @@ export function Hozzaszolasok({ slug }: { slug: string }) {
   const [szoveg, setSzoveg] = useState('')
   const [kuldes, setKuldes] = useState(false)
   const [hiba, setHiba] = useState('')
+  const [torlesKerdes, setTorlesKerdes] = useState<string | null>(null)
   const lap = useRef<HTMLDivElement>(null)
+
+  const torol = async (id: string) => {
+    setHiba('')
+    try {
+      const v = await fetch(`/api/hozzaszolas/${encodeURIComponent(slug)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ id }),
+      })
+      const j = (await v.json().catch(() => ({}))) as { ok?: boolean; hiba?: string; lista?: Uzenet[] }
+      if (!v.ok || !j.ok) setHiba(j.hiba || 'Nem sikerült törölni.')
+      else setLista(j.lista ?? [])
+    } catch {
+      setHiba('Nem érem el a kiszolgálót - nézd meg a kapcsolatot.')
+    }
+    setTorlesKerdes(null)
+  }
 
   const betolt = async () => {
     try {
@@ -49,7 +70,7 @@ export function Hozzaszolasok({ slug }: { slug: string }) {
     const t = setInterval(betolt, 30000)
     return () => clearInterval(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug])
+  }, [slug, fiok?.nev])
 
   const kuld = async (e: FormEvent) => {
     e.preventDefault()
@@ -108,6 +129,36 @@ export function Hozzaszolasok({ slug }: { slug: string }) {
                 <time dateTime={new Date(u.ido).toISOString()} className="ml-auto shrink-0 text-[11px] text-ash-500">
                   {idoFormat(u.ido)}
                 </time>
+                {u.sajat &&
+                  (torlesKerdes === u.id ? (
+                    <span className="flex shrink-0 items-center gap-1 text-[11px]">
+                      <span className="text-ash-400">Törlöd?</span>
+                      <button
+                        type="button"
+                        onClick={() => torol(u.id)}
+                        className="bg-blood-600 px-1.5 py-0.5 font-bold text-white hover:bg-blood-500"
+                      >
+                        Igen
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTorlesKerdes(null)}
+                        className="border border-ink-600 px-1.5 py-0.5 text-ash-300 hover:text-ash-100"
+                      >
+                        Nem
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setTorlesKerdes(u.id)}
+                      aria-label="Saját üzenet törlése"
+                      title="Törlés"
+                      className="flex h-5 w-5 shrink-0 items-center justify-center border border-ink-600 font-mono text-xs text-ash-400 hover:border-blood-600 hover:text-white"
+                    >
+                      ×
+                    </button>
+                  ))}
               </header>
               <p className="mt-2 text-sm leading-relaxed break-words whitespace-pre-wrap text-ash-300">{u.szoveg}</p>
             </article>

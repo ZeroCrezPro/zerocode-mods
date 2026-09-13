@@ -1,13 +1,14 @@
 /**
  * Hozzászólások egy modhoz.
- *   GET  /api/hozzaszolas/<slug>            - a legutóbbi üzenetek (nyilvános), legújabb elöl
- *   POST /api/hozzaszolas/<slug> { szoveg } - új üzenet, csak bejelentkezve
+ *   GET    /api/hozzaszolas/<slug>            - a legutóbbi üzenetek (nyilvános), legújabb elöl
+ *   POST   /api/hozzaszolas/<slug> { szoveg } - új üzenet, csak bejelentkezve
+ *   DELETE /api/hozzaszolas/<slug> { id }     - a saját üzenet törlése
  *
  * A KV-ban modonként egy lista (hozzaszolas:<slug>), a legutóbbi 300 üzenet.
  * A szöveg sima szövegként tárolódik és jelenik meg - HTML soha nem fut le.
  */
 import mods from '../../../src/data/mods.json' with { type: 'json' }
-import { bejelentkezettFiok, jsonValasz, keresTest, nyilvanosFiok, tulSokProba } from '../../_lib/fiok.js'
+import { bejelentkezettFiok, emailKulcs, jsonValasz, keresTest, nyilvanosFiok, tulSokProba } from '../../_lib/fiok.js'
 
 const HOSSZ = 300
 const MAX_KARAKTER = 500
@@ -20,11 +21,33 @@ async function lista(kv, slug) {
   return Array.isArray(l) ? l : []
 }
 
-export async function onRequestGet({ params, env }) {
+/** Kifelé a tulajdonos e-mailje nem megy; helyette egy jelző, hogy a kérőé-e. */
+const nyilvanos = (l, sajatEmail) =>
+  l.map(({ tulaj, ...u }) => ({ ...u, sajat: Boolean(sajatEmail) && tulaj === sajatEmail }))
+
+export async function onRequestGet({ request, params, env }) {
   const slug = String(params.slug ?? '')
   if (!ervenyesSlug(slug)) return jsonValasz({ ok: false, hiba: 'Nincs ilyen mod.' }, 404)
   if (!env.FIOKOK) return jsonValasz({ ok: true, lista: [] })
-  return jsonValasz({ ok: true, lista: await lista(env.FIOKOK, slug) })
+  const fiok = await bejelentkezettFiok(request, env)
+  return jsonValasz({ ok: true, lista: nyilvanos(await lista(env.FIOKOK, slug), fiok ? emailKulcs(fiok.email) : '') })
+}
+
+export async function onRequestDelete({ request, params, env }) {
+  const slug = String(params.slug ?? '')
+  if (!ervenyesSlug(slug)) return jsonValasz({ ok: false, hiba: 'Nincs ilyen mod.' }, 404)
+  const fiok = await bejelentkezettFiok(request, env)
+  if (!fiok) return jsonValasz({ ok: false, hiba: 'Nem vagy bejelentkezve.' }, 401)
+  const test = await keresTest(request)
+  const id = String(test?.id ?? '')
+  const l = await lista(env.FIOKOK, slug)
+  const en = emailKulcs(fiok.email)
+  const u = l.find((x) => x.id === id)
+  if (!u) return jsonValasz({ ok: false, hiba: 'Ez az üzenet már nincs meg.' }, 404)
+  if (u.tulaj !== en) return jsonValasz({ ok: false, hiba: 'Csak a saját üzenetedet törölheted.' }, 403)
+  const uj = l.filter((x) => x.id !== id)
+  await env.FIOKOK.put(kulcs(slug), JSON.stringify(uj))
+  return jsonValasz({ ok: true, lista: nyilvanos(uj, en) })
 }
 
 export async function onRequestPost({ request, params, env }) {
@@ -46,10 +69,12 @@ export async function onRequestPost({ request, params, env }) {
   if (!szoveg) return jsonValasz({ ok: false, hiba: 'Üres üzenetet nem lehet küldeni.' }, 400)
   if ([...szoveg].length > MAX_KARAKTER) return jsonValasz({ ok: false, hiba: `Legfeljebb ${MAX_KARAKTER} karakter.` }, 400)
 
-  const nyilvanos = nyilvanosFiok(fiok)
-  const uzenet = { id: crypto.randomUUID(), nev: nyilvanos.nev, kepUrl: nyilvanos.kepUrl, szoveg, ido: Date.now() }
+  const adat = nyilvanosFiok(fiok)
+  const uzenet = { id: crypto.randomUUID(), nev: adat.nev, kepUrl: adat.kepUrl, szoveg, ido: Date.now(), tulaj: emailKulcs(fiok.email) }
   const l = await lista(env.FIOKOK, slug)
   l.unshift(uzenet)
   await env.FIOKOK.put(kulcs(slug), JSON.stringify(l.slice(0, HOSSZ)))
-  return jsonValasz({ ok: true, uzenet })
+  const { tulaj, ...ki } = uzenet
+  void tulaj
+  return jsonValasz({ ok: true, uzenet: { ...ki, sajat: true } })
 }
