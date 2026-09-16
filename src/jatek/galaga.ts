@@ -641,6 +641,9 @@ export class Galaga {
   private formacioFazis = 0
   private oszlopok = 8
   private rejtettUtolso = -1
+  /** A rejtett öt élet megvan-e (utána más a jutalom-élet szabálya), és hány pluszt adott már. */
+  private rejtettAktiv = false
+  private rejtettBonusz = 0
   /*
    * Kerek pontozás: az n. hullám pontosan n × 10 000 pontot ér. Az ellenfelek
    * egyenlő részt kapnak, a maradék a hullám végén jár bónuszként - így a
@@ -1133,6 +1136,8 @@ export class Galaga {
     this.pont = 0
     this.hullam = 0
     this.rejtettUtolso = -1
+    this.rejtettAktiv = false
+    this.rejtettBonusz = 0
     this.hullamKeret = 0
     this.hullamPont = 0
     try {
@@ -1491,7 +1496,13 @@ export class Galaga {
    * után egy, de legfeljebb háromig. (A rejtett kód öt élete ettől független.)
    */
   private jutalomElet(miert: string) {
-    if (this.eletek >= 3) return
+    if (this.rejtettAktiv) {
+      // Rejtett mód: csak amíg mind az öt rejtett élet megvan, és legfeljebb még öt.
+      if (this.eletek < 5 || this.rejtettBonusz >= 5) return
+      this.rejtettBonusz++
+    } else if (this.eletek >= 3) {
+      return
+    }
     this.eletek++
     this.felirat(this.hajoX, this.hajoY - 30, `+1 ÉLET - ${miert}`, '#3ddc84')
     this.hang.ujElet()
@@ -1521,6 +1532,8 @@ export class Galaga {
     if (this.pont % 10000 === 0 && this.pont >= 10000 && this.pont <= 90000 && this.pont !== this.rejtettUtolso) {
       this.rejtettUtolso = this.pont
       this.eletek = 5
+      this.rejtettAktiv = true
+      this.rejtettBonusz = 0
       this.felirat(this.hajoX, this.hajoY - 40, 'REJTETT KÓD: 5 ÉLET!', '#3ddc84')
       this.hang.ujElet()
     }
