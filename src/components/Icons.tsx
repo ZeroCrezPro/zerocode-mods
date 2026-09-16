@@ -126,3 +126,10 @@ export const IconUser = (s: SVGProps<SVGSVGElement>) => (
     <circle cx="12" cy="7" r="4" />
   </svg>
 )
+
+export const IconEye = (s: SVGProps<SVGSVGElement>) => (
+  <svg {...p(s)}>
+    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+)

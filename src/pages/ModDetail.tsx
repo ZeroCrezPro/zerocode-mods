@@ -12,6 +12,7 @@ import { Diavetites } from '@/components/Diavetites'
 import { KodDoboz } from '@/components/KodDoboz'
 import { FizetosLetoltes } from '@/components/FizetosLetoltes'
 import { Hozzaszolasok } from '@/components/Hozzaszolasok'
+import { megtekintesJelez } from '@/lib/megtekintes'
 import { AccordionItem } from '@/components/Accordion'
 import { VersionCard } from '@/components/VersionCard'
 import { Felirat, Szoveg } from '@/components/Szoveg'
@@ -38,6 +39,11 @@ export default function ModDetail() {
     figyelo.observe(cel)
     return () => figyelo.disconnect()
   }, [])
+
+  // Az adatlap megnyitása egy megtekintés.
+  useEffect(() => {
+    if (slug) void megtekintesJelez(slug)
+  }, [slug])
 
   if (!mod) return <NotFound />
 

@@ -1372,6 +1372,9 @@ const elonezetSzerver = http.createServer(async (req, res) => {
   if (ut.startsWith('/premium/')) {
     return json(res, 403, { ok: false, hiba: 'Zárt útvonal - csak érvényes kulccsal, az éles oldalon.' })
   }
+  if (ut.startsWith('/api/megtekintes')) {
+    return json(res, req.method === 'GET' ? 200 : 403, { ok: req.method === 'GET', szamok: {}, hiba: 'Az előnézetben nincs megtekintés-számláló.' })
+  }
   if (ut.startsWith('/api/hozzaszolas/')) {
     return json(res, req.method === 'GET' ? 200 : 403, {
       ok: req.method === 'GET',

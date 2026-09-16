@@ -585,6 +585,13 @@ saját görgethető területen van, legújabb felül, félpercenként frissül. 
 `hozzaszolas:<slug>` (a legutóbbi 300 üzenet); végpont `/api/hozzaszolas/<slug>`
 (GET nyilvános, POST bejelentkezve). Az előnézetben nem él.
 
+### Megtekintés-számláló
+
+A modkártyák jobb alsó sarkában szem ikon + szám: ennyiszer nyitották meg az adatlapot.
+Az adatlap betöltése `POST /api/megtekintes/<slug>` (ugyanarról a címről fél percen belül
+csak egyszer számít), a kártyák a `GET /api/megtekintes` listából olvasnak; tárolás KV
+`megtekintes:<slug>`. Az előnézetben nem számol.
+
 ### Fiókok kezelése
 
 A fiókokat a Cloudflare-en a **Workers & Pages → KV → FIOKOK** alatt látod

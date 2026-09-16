@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { useMegtekintesek } from '@/lib/megtekintes'
+import { IconEye } from './Icons'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { Mod } from '@/data/types'
@@ -43,6 +45,8 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
   }, [])
 
   const nev = csakSzoveg(mod.name)
+  const megtekintesek = useMegtekintesek()
+  const nezettseg = megtekintesek[mod.slug]
 
   // Ha a mod ugyanazt a nevet kapta, mint a játék, ne írjuk ki kétszer.
   const jatekNeve = mod.game && csakSzoveg(mod.game) !== nev ? mod.game : null
@@ -140,6 +144,18 @@ export function ModCard({ mod, eager = false }: { mod: Mod; eager?: boolean }) {
             {v?.size ?? '-'}
           </Adat>
         </dl>
+
+        {/* Megtekintések: jobb alul, szem + szám (ahányszor megnyitották az adatlapot). */}
+        <div className="mt-3 flex justify-end">
+          <span
+            className="flex items-center gap-1.5 font-mono text-xs text-ash-400"
+            title="Ennyiszer nyitották meg"
+            aria-label={String(nezettseg ?? 0) + ' megtekintés'}
+          >
+            <IconEye width={14} height={14} />
+            {nezettseg === undefined ? '–' : nezettseg.toLocaleString('hu-HU')}
+          </span>
+        </div>
 
         {/*
           A kártyán nincs Letöltés gomb: a letöltés az adatlapon van, ahol a
