@@ -452,6 +452,8 @@ interface Lovedek {
   ido: number
   alapX: number
   talalt: Set<Ellenfel>
+  /** sorozat-golyó: találatnál növeli, hibázásnál nullázza a sorozatot */
+  sorozat?: boolean
 }
 
 /*
@@ -522,6 +524,8 @@ interface Fegyver {
   /** a 13. hullám utáni fegyvercsalád sorszáma és változata (1 = egyes, 2 = iker, 3 = hármas) */
   csalad?: number
   valtozat?: 1 | 2 | 3
+  /** főellenség-golyók: sorozat-sebzéssel */
+  golyo?: boolean
 }
 
 const FEGYVEREK: Fegyver[] = [
@@ -539,7 +543,12 @@ const FEGYVEREK: Fegyver[] = [
   { nev: 'IKERLÉZER', oszlopok: 0, dupla: false, sebzes: 2, robbano: 0, lezer: 2 },
   { nev: 'HÁRMAS LÉZER', oszlopok: 0, dupla: false, sebzes: 2, robbano: 0, lezer: 3 },
 ]
-const FOELLENSEG_FEGYVER: Fegyver = { nev: 'TELJES ARZENÁL', oszlopok: 3, dupla: true, sebzes: 2, robbano: 3, lezer: 0 }
+/*
+ * Főellenség-hullámon csak golyók: három egymás mellett. Sorozat-sebzés: amíg
+ * minden kilőtt golyó talál, a találatok sebzése 1, 2, 3, … - az első
+ * elhibázott golyó nullázza a sorozatot.
+ */
+const FOELLENSEG_FEGYVER: Fegyver = { nev: 'SOROZAT-GOLYÓK', oszlopok: 0, dupla: false, sebzes: 1, robbano: 0, lezer: 0, golyo: true }
 const FOELLENSEG_HULLAM = 13
 const ROBBANAS_SUGAR = 70
 /* Egységes tempó: minden ellenfél ugyanazzal a sebességgel repül és támad - nincs hirtelen manőver. */
@@ -623,6 +632,7 @@ export class Galaga {
   private tamadasVarakozas = 0
   private hullamSzoveg = 0
   private fegyverSzoveg = 0
+  private sorozat = 0 // egymás utáni találatok száma (főellenség-golyók)
   private fegyverNev = ''
   private lezerAktiv = false
   private lezerHang = 0
@@ -1157,6 +1167,7 @@ export class Galaga {
     this.hullam++
     this.hullamKeret = this.hullam * 10000
     this.hullamPont = 0
+    this.sorozat = 0
     this.ellenfelek = []
     this.lovedekek = this.lovedekek.filter((l) => l.sajat)
     this.hullamSzoveg = 2.2
@@ -1244,7 +1255,7 @@ export class Galaga {
 
   /** Az aktuális fegyver: a hullámok számából; főellenségnél a teljes arzenál (lézer nélkül). */
   private fegyver(): Fegyver {
-    if (this.hullam === FOELLENSEG_HULLAM) return FOELLENSEG_FEGYVER
+    if (this.foellensegHullam()) return FOELLENSEG_FEGYVER
     if (this.hullam < FOELLENSEG_HULLAM) return FEGYVEREK[this.hullam - 1]
     // A 13. után a lézer elmarad: családok jönnek, minden harmadik hullámnál
     // egyes → iker → hármas. Főellenség-hullámon az előző fegyver marad.
@@ -1399,6 +1410,12 @@ export class Galaga {
   private tuzel(f: Fegyver) {
     const y = this.hajoY - 18
     const oszlopHely = (db: number, koz: number) => (db === 1 ? [0] : db === 2 ? [-koz, koz] : [-koz * 1.7, 0, koz * 1.7])
+    if (f.golyo) {
+      for (const dx of oszlopHely(3, 11)) {
+        this.lo(this.hajoX + dx, y, 0, -520, true, 1, false, { alak: 'gomb', szin: '#ffd23f', meret: 7, sorozat: true })
+      }
+      return
+    }
     if (f.csalad !== undefined) {
       const cs = csaladAdat(f.csalad)
       for (const dx of oszlopHely(f.valtozat ?? 1, cs.meret + 4)) this.csaladLoves(cs, this.hajoX + dx, y, f.sebzes)
@@ -1713,6 +1730,13 @@ export class Galaga {
         l.x = l.alapX
       }
     }
+    // Sorozat-golyó, ami találat nélkül hagyja el a képet: a sorozat nullázódik.
+    for (const l of this.lovedekek) {
+      if (l.sajat && l.sorozat && l.talalt.size === 0 && (l.y < -20 || l.y > H + 20 || l.x < -20 || l.x > this.w + 20)) {
+        if (this.sorozat > 0) this.felirat(this.hajoX, this.hajoY - 40, 'SOROZAT VÉGE', '#ff5a60')
+        this.sorozat = 0
+      }
+    }
     this.lovedekek = this.lovedekek.filter((l) => l.y > -20 && l.y < H + 20 && l.x > -20 && l.x < this.w + 20)
 
     // --- ütközések ---
@@ -1728,6 +1752,10 @@ export class Galaga {
           l.talalt.add(e)
           if (l.atut > 0) l.atut--
           else l.y = -999 // eldobjuk
+          if (l.sorozat) {
+            this.sorozat++
+            l.sebzes = this.sorozat
+          }
           e.elet -= l.sebzes
           e.villan = 0.09
           this.hang.talalat()
@@ -2079,6 +2107,7 @@ export class Galaga {
       g.fillStyle = '#d61f27'
       g.fillRect(this.w / 2 - sz / 2, 34, sz * szorit(fo.elet / this.foellensegElet, 0, 1), 8)
       this.szoveg('FŐELLENSÉG', this.w / 2, 52, 11, '#ff5a60')
+      this.szoveg(`SOROZAT ×${this.sorozat}`, this.w / 2, 68, 12, this.sorozat > 0 ? '#ffd23f' : '#8a8a94')
     }
 
     if (this.hullamSzoveg > 0) {
