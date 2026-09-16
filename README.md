@@ -580,7 +580,10 @@ nem megy ki - a Frissítés ezt jelzi.
 Minden mod adatlapján, a jobb oldali sávban (Legfrissebb kiadás → Melyik játékhoz →
 **Hozzászólások**) modonként külön beszélgetés van. Olvasni bárki tud, írni csak
 bejelentkezve; egy üzenet legfeljebb 500 karakter, üreset nem lehet küldeni. A szöveg
-sima szövegként tárolódik és jelenik meg (beírt HTML/JavaScript nem fut le). A lista
+sima szövegként tárolódik és jelenik meg (beírt HTML/JavaScript nem fut le). Minden üzenet
+tetején pipa (✓) és X (✗) számlálóval: belépve szavazható (ugyanarra kattintva visszavonja,
+a másikra váltva átteszi; PUT `/api/hozzaszolas/<slug>` {id, szavazat}); a saját üzenet
+törölhető (×, Törlöd? Igen/Nem). A lista
 saját görgethető területen van, legújabb felül, félpercenként frissül. Tárolás: KV
 `hozzaszolas:<slug>` (a legutóbbi 300 üzenet); végpont `/api/hozzaszolas/<slug>`
 (GET nyilvános, POST bejelentkezve). Az előnézetben nem él.

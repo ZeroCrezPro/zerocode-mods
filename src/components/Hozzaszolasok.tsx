@@ -19,6 +19,10 @@ interface Uzenet {
   ido: number
   /** a bejelentkezett látogató saját üzenete - törölheti */
   sajat?: boolean
+  /** pipák és X-ek száma, és a látogató saját szavazata */
+  jo?: number
+  rossz?: number
+  sajatSzavazat?: 'jo' | 'rossz' | null
 }
 
 const MAX = 500
@@ -66,6 +70,25 @@ export function Hozzaszolasok({ slug }: { slug: string }) {
     window.addEventListener('resize', merj)
     return () => window.removeEventListener('resize', merj)
   }, [fiok, lista === null])
+
+  /** Pipa / X: ugyanarra kattintva visszavonja, a másikra váltva átteszi. */
+  const szavaz = async (u: Uzenet, mire: 'jo' | 'rossz') => {
+    if (!fiok) return
+    const uj = u.sajatSzavazat === mire ? null : mire
+    try {
+      const v = await fetch(`/api/hozzaszolas/${encodeURIComponent(slug)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ id: u.id, szavazat: uj }),
+      })
+      const j = (await v.json().catch(() => ({}))) as { ok?: boolean; hiba?: string; lista?: Uzenet[] }
+      if (!v.ok || !j.ok) setHiba(j.hiba || 'Nem sikerült szavazni.')
+      else setLista(j.lista ?? [])
+    } catch {
+      setHiba('Nem érem el a kiszolgálót - nézd meg a kapcsolatot.')
+    }
+  }
 
   const torol = async (id: string) => {
     setHiba('')
@@ -164,6 +187,37 @@ export function Hozzaszolasok({ slug }: { slug: string }) {
                   </span>
                 )}
                 <span className="min-w-0 truncate text-sm font-bold text-ash-100">{u.nev}</span>
+                {/* Összegzés: pipa és X - belépve szavazható */}
+                <span className="flex shrink-0 items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => szavaz(u, 'jo')}
+                    disabled={!fiok}
+                    title={fiok ? 'Jó' : 'Szavazáshoz jelentkezz be'}
+                    aria-label={`Jó: ${u.jo ?? 0}`}
+                    className={`flex h-6 items-center gap-1 border px-1.5 font-mono text-[11px] transition-colors disabled:cursor-default ${
+                      u.sajatSzavazat === 'jo'
+                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300'
+                        : 'border-ink-600 text-ash-400 enabled:hover:border-emerald-500 enabled:hover:text-emerald-300'
+                    }`}
+                  >
+                    ✓ {u.jo ?? 0}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => szavaz(u, 'rossz')}
+                    disabled={!fiok}
+                    title={fiok ? 'Rossz' : 'Szavazáshoz jelentkezz be'}
+                    aria-label={`Rossz: ${u.rossz ?? 0}`}
+                    className={`flex h-6 items-center gap-1 border px-1.5 font-mono text-[11px] transition-colors disabled:cursor-default ${
+                      u.sajatSzavazat === 'rossz'
+                        ? 'border-blood-500 bg-blood-600/20 text-blood-300'
+                        : 'border-ink-600 text-ash-400 enabled:hover:border-blood-500 enabled:hover:text-blood-300'
+                    }`}
+                  >
+                    ✗ {u.rossz ?? 0}
+                  </button>
+                </span>
                 <time
                   dateTime={new Date(u.ido).toISOString()}
                   className="ml-auto shrink-0 text-[11px] text-ash-500"
