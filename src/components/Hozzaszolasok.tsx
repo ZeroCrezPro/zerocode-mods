@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from './ui'
+import { IconCheck, IconClose } from './Icons'
+import { cx } from '@/lib/format'
 import { useFiok } from '@/lib/fiok'
 
 /**
@@ -26,6 +28,45 @@ interface Uzenet {
 }
 
 const MAX = 500
+
+/** Keret nélküli szavazó: ikon + szám; az aktív zöld (jó) vagy piros (rossz). */
+function SzavazoGomb({
+  fajta,
+  aktiv,
+  szam,
+  enged,
+  onClick,
+}: {
+  fajta: 'jo' | 'rossz'
+  aktiv: boolean
+  szam: number
+  enged: boolean
+  onClick: () => void
+}) {
+  const jo = fajta === 'jo'
+  const Ikon = jo ? IconCheck : IconClose
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={!enged}
+      title={enged ? (jo ? 'Jó' : 'Rossz') : 'Szavazáshoz jelentkezz be'}
+      aria-label={`${jo ? 'Jó' : 'Rossz'}: ${szam}`}
+      aria-pressed={aktiv}
+      className={cx(
+        'flex items-center gap-1.5 text-sm font-bold transition-colors disabled:cursor-default',
+        aktiv
+          ? jo
+            ? 'text-emerald-400'
+            : 'text-blood-400'
+          : cx('text-ash-300', enged && (jo ? 'hover:text-emerald-400' : 'hover:text-blood-400')),
+      )}
+    >
+      <Ikon width={18} height={18} strokeWidth={aktiv ? 3 : 2.25} />
+      <span className="font-mono">{szam}</span>
+    </button>
+  )
+}
 
 const idoFormat = (t: number) =>
   new Date(t).toLocaleString('hu-HU', {
@@ -224,36 +265,22 @@ export function Hozzaszolasok({ slug }: { slug: string }) {
                     </button>
                   ))}
               </header>
-              {/* Összegzés az üzenet tetején: pipa és X - belépve szavazható */}
-              <div className="mt-2 flex items-center gap-1">
-                <button
-                  type="button"
+              {/* Összegzés az üzenet tetején: pipa és X - keret nélkül, belépve szavazható */}
+              <div className="mt-2 flex items-center gap-4">
+                <SzavazoGomb
+                  aktiv={u.sajatSzavazat === 'jo'}
+                  szam={u.jo ?? 0}
+                  fajta="jo"
+                  enged={Boolean(fiok)}
                   onClick={() => szavaz(u, 'jo')}
-                  disabled={!fiok}
-                  title={fiok ? 'Jó' : 'Szavazáshoz jelentkezz be'}
-                  aria-label={`Jó: ${u.jo ?? 0}`}
-                  className={`flex h-6 items-center gap-1 border px-1.5 font-mono text-[11px] transition-colors disabled:cursor-default ${
-                    u.sajatSzavazat === 'jo'
-                      ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300'
-                      : 'border-ink-600 text-ash-400 enabled:hover:border-emerald-500 enabled:hover:text-emerald-300'
-                  }`}
-                >
-                  ✓ {u.jo ?? 0}
-                </button>
-                <button
-                  type="button"
+                />
+                <SzavazoGomb
+                  aktiv={u.sajatSzavazat === 'rossz'}
+                  szam={u.rossz ?? 0}
+                  fajta="rossz"
+                  enged={Boolean(fiok)}
                   onClick={() => szavaz(u, 'rossz')}
-                  disabled={!fiok}
-                  title={fiok ? 'Rossz' : 'Szavazáshoz jelentkezz be'}
-                  aria-label={`Rossz: ${u.rossz ?? 0}`}
-                  className={`flex h-6 items-center gap-1 border px-1.5 font-mono text-[11px] transition-colors disabled:cursor-default ${
-                    u.sajatSzavazat === 'rossz'
-                      ? 'border-blood-500 bg-blood-600/20 text-blood-300'
-                      : 'border-ink-600 text-ash-400 enabled:hover:border-blood-500 enabled:hover:text-blood-300'
-                  }`}
-                >
-                  ✗ {u.rossz ?? 0}
-                </button>
+                />
               </div>
               <p className="mt-2 text-sm leading-relaxed break-words whitespace-pre-wrap text-ash-300">
                 {u.szoveg}
