@@ -1289,14 +1289,9 @@ export class Galaga {
     e.lovesIdo -= dt
     if (e.lovesIdo <= 0 && e.y >= 100) {
       e.lovesIdo = Math.max(0.55, 1.3 - this.hullam * 0.02)
-      // 5 lövedék legyezőben, a hajó felé
-      const dx = this.hajoX - e.x
-      const dy = this.hajoY - e.y
-      const alap = Math.atan2(dy, dx)
+      // 5 lövedék egymás mellett, egyenesen lefelé
       for (let i = -2; i <= 2; i++) {
-        const a = alap + i * 0.22
-        const seb = 240 + this.hullam * 6
-        this.lo(e.x + i * 6, e.y + 20, Math.cos(a) * seb, Math.sin(a) * seb, false)
+        this.lo(e.x + i * 16, e.y + 20, 0, 240 + this.hullam * 6, false)
       }
       this.hang.loves()
     }
@@ -1665,11 +1660,8 @@ export class Galaga {
         e.lovesIdo -= dt
         if (e.lovesIdo <= 0 && e.y < this.hajoY - 60) {
           e.lovesIdo = veletlen(0.8, 1.8) / neh
-          const dx = this.hajoX - e.x
-          const dy = this.hajoY - e.y
-          const l = Math.hypot(dx, dy) || 1
-          const seb = 230 + this.hullam * 12
-          this.lo(e.x, e.y + 10, (dx / l) * seb * 0.6, (dy / l) * seb, false)
+          // Az ellenfelek csak egyenesen lefelé lőnek, nem céloznak oldalra.
+          this.lo(e.x, e.y + 10, 0, 230 + this.hullam * 12, false)
         }
       } else if (e.allapot === 'visszater') {
         e.t += dt * e.tSeb
