@@ -1164,6 +1164,7 @@ export class Galaga {
       this.eletEllenoriz()
     }
     if (this.hullam > 0) void this.pontBekuld()
+    if (this.hullam > 0 && this.hullam % 3 === 0) this.jutalomElet(`${this.hullam}. hullám`)
     this.hullam++
     this.hullamKeret = this.hullam * 10000
     this.hullamPont = 0
@@ -1460,6 +1461,7 @@ export class Galaga {
     if (e.fajta === 'foellenseg') {
       this.razas = 1
       this.felirat(e.x, e.y - 30, 'FŐELLENSÉG LEGYŐZVE!', '#3ddc84')
+      this.jutalomElet('főellenség')
     }
     this.hang.robbanas(nagy)
     this.hang.pont()
@@ -1482,6 +1484,17 @@ export class Galaga {
     this.pont += n
     this.felirat(x, y, `+${n}`)
     this.eletEllenoriz()
+  }
+
+  /**
+   * Jutalom-élet: minden főellenség legyőzéséért és minden harmadik hullám
+   * után egy, de legfeljebb háromig. (A rejtett kód öt élete ettől független.)
+   */
+  private jutalomElet(miert: string) {
+    if (this.eletek >= 3) return
+    this.eletek++
+    this.felirat(this.hajoX, this.hajoY - 30, `+1 ÉLET - ${miert}`, '#3ddc84')
+    this.hang.ujElet()
   }
 
   /** Rekord a pontszám alapján. (Pontért nem jár élet - csak a rejtett kód ad.) */

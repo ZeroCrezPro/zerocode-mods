@@ -626,7 +626,8 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
   szilánk, gyűrű, csillag, villám, csepp, mag, penge, örvény - mind más viselkedéssel),
   családonként három hullám: egyes → iker → hármas. A főellenség 13 hullámonként visszatér,
   egyre több élettel.
-  3 élet, pontért nem jár extra; kerek pontozás: az n. hullám n×10 000 pontot ér.
+  3 élet, pontért nem jár extra; jutalom-élet minden főellenségért és minden 3. hullám
+  után, legfeljebb háromig. Kerek pontozás: az n. hullám n×10 000 pontot ér.
 - Ranglista a főmenü bal oldalán (helyezés · profilkép · név · pont): a bejelentkezett
   játékos eredménye a játék végén magától felkerül (`/api/jatek/pont`), a lista nyilvános
   (`/api/jatek/ranglista`, KV `ranglista` dokumentum, legjobb 50, fiókonként a legjobb).
