@@ -1745,7 +1745,7 @@ export class Galaga {
       if (!l.sajat) continue
       for (const e of this.ellenfelek) {
         if (e.allapot === 'bejon' && e.t < 0) continue
-        if (e.oszlop < 0 && e.allapot === 'formacio') continue // várakozó villám a képen kívül
+        if (e.fajta === 'villam' && e.oszlop < 0 && e.allapot === 'formacio') continue // várakozó villám a képen kívül
         const s = this.fajtak[e.fajta].sprite
         if (e.elet <= 0) continue
         if (l.talalt.has(e)) continue
