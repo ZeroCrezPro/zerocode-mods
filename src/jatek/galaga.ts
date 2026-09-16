@@ -1272,7 +1272,8 @@ export class Galaga {
   /** Főellenség-hullám: egyetlen nagy ellenfél, ami lő, kitér és kísérőket hív. */
   private foellensegHullamIndit() {
     const kor = Math.floor(this.hullam / FOELLENSEG_HULLAM) // hányadik főellenség
-    const elet = 200 + (kor - 1) * 120
+    // 1 000 000 élet (minden következő főellenségnél még egymillió)
+    const elet = 1_000_000 * kor
     this.foellensegElet = elet
     this.ellenfelek.push({
       fajta: 'foellenseg',
@@ -1753,8 +1754,9 @@ export class Galaga {
           if (l.atut > 0) l.atut--
           else l.y = -999 // eldobjuk
           if (l.sorozat) {
+            // sorozat-sebzés: 1000, aztán minden további találatnál duplázódik
             this.sorozat++
-            l.sebzes = this.sorozat
+            l.sebzes = 1000 * 2 ** (this.sorozat - 1)
           }
           e.elet -= l.sebzes
           e.villan = 0.09
@@ -2103,11 +2105,26 @@ export class Galaga {
     if (fo && this.foellensegElet > 0) {
       const sz = Math.min(300, this.w - 40)
       g.fillStyle = '#2a2a30'
-      g.fillRect(this.w / 2 - sz / 2, 34, sz, 8)
+      g.fillRect(this.w / 2 - sz / 2, 31, sz, 14)
       g.fillStyle = '#d61f27'
-      g.fillRect(this.w / 2 - sz / 2, 34, sz * szorit(fo.elet / this.foellensegElet, 0, 1), 8)
+      g.fillRect(this.w / 2 - sz / 2, 31, sz * szorit(fo.elet / this.foellensegElet, 0, 1), 14)
+      // az élet száma a csíkban
+      this.szoveg(
+        `${Math.max(0, Math.ceil(fo.elet)).toLocaleString('hu-HU')} / ${this.foellensegElet.toLocaleString('hu-HU')}`,
+        this.w / 2,
+        38,
+        9,
+        '#ffffff',
+      )
       this.szoveg('FŐELLENSÉG', this.w / 2, 52, 11, '#ff5a60')
-      this.szoveg(`SOROZAT ×${this.sorozat}`, this.w / 2, 68, 12, this.sorozat > 0 ? '#ffd23f' : '#8a8a94')
+      const kovetkezo = 1000 * 2 ** this.sorozat
+      this.szoveg(
+        `SOROZAT ×${this.sorozat}  ·  következő találat: ${kovetkezo.toLocaleString('hu-HU')}`,
+        this.w / 2,
+        68,
+        12,
+        this.sorozat > 0 ? '#ffd23f' : '#8a8a94',
+      )
     }
 
     if (this.hullamSzoveg > 0) {
