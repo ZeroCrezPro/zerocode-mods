@@ -2116,12 +2116,12 @@ export class Galaga {
         9,
         '#ffffff',
       )
-      this.szoveg('FŐELLENSÉG', this.w / 2, 52, 11, '#ff5a60')
+      this.szoveg('FŐELLENSÉG', this.w / 2, 57, 11, '#ff5a60')
       const kovetkezo = 1000 * 2 ** this.sorozat
       this.szoveg(
         `SOROZAT ×${this.sorozat}  ·  következő találat: ${kovetkezo.toLocaleString('hu-HU')}`,
         this.w / 2,
-        68,
+        74,
         12,
         this.sorozat > 0 ? '#ffd23f' : '#8a8a94',
       )
