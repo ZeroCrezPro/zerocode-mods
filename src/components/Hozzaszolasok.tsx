@@ -187,37 +187,6 @@ export function Hozzaszolasok({ slug }: { slug: string }) {
                   </span>
                 )}
                 <span className="min-w-0 truncate text-sm font-bold text-ash-100">{u.nev}</span>
-                {/* Összegzés: pipa és X - belépve szavazható */}
-                <span className="flex shrink-0 items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => szavaz(u, 'jo')}
-                    disabled={!fiok}
-                    title={fiok ? 'Jó' : 'Szavazáshoz jelentkezz be'}
-                    aria-label={`Jó: ${u.jo ?? 0}`}
-                    className={`flex h-6 items-center gap-1 border px-1.5 font-mono text-[11px] transition-colors disabled:cursor-default ${
-                      u.sajatSzavazat === 'jo'
-                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300'
-                        : 'border-ink-600 text-ash-400 enabled:hover:border-emerald-500 enabled:hover:text-emerald-300'
-                    }`}
-                  >
-                    ✓ {u.jo ?? 0}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => szavaz(u, 'rossz')}
-                    disabled={!fiok}
-                    title={fiok ? 'Rossz' : 'Szavazáshoz jelentkezz be'}
-                    aria-label={`Rossz: ${u.rossz ?? 0}`}
-                    className={`flex h-6 items-center gap-1 border px-1.5 font-mono text-[11px] transition-colors disabled:cursor-default ${
-                      u.sajatSzavazat === 'rossz'
-                        ? 'border-blood-500 bg-blood-600/20 text-blood-300'
-                        : 'border-ink-600 text-ash-400 enabled:hover:border-blood-500 enabled:hover:text-blood-300'
-                    }`}
-                  >
-                    ✗ {u.rossz ?? 0}
-                  </button>
-                </span>
                 <time
                   dateTime={new Date(u.ido).toISOString()}
                   className="ml-auto shrink-0 text-[11px] text-ash-500"
@@ -255,6 +224,37 @@ export function Hozzaszolasok({ slug }: { slug: string }) {
                     </button>
                   ))}
               </header>
+              {/* Összegzés az üzenet tetején: pipa és X - belépve szavazható */}
+              <div className="mt-2 flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => szavaz(u, 'jo')}
+                  disabled={!fiok}
+                  title={fiok ? 'Jó' : 'Szavazáshoz jelentkezz be'}
+                  aria-label={`Jó: ${u.jo ?? 0}`}
+                  className={`flex h-6 items-center gap-1 border px-1.5 font-mono text-[11px] transition-colors disabled:cursor-default ${
+                    u.sajatSzavazat === 'jo'
+                      ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300'
+                      : 'border-ink-600 text-ash-400 enabled:hover:border-emerald-500 enabled:hover:text-emerald-300'
+                  }`}
+                >
+                  ✓ {u.jo ?? 0}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => szavaz(u, 'rossz')}
+                  disabled={!fiok}
+                  title={fiok ? 'Rossz' : 'Szavazáshoz jelentkezz be'}
+                  aria-label={`Rossz: ${u.rossz ?? 0}`}
+                  className={`flex h-6 items-center gap-1 border px-1.5 font-mono text-[11px] transition-colors disabled:cursor-default ${
+                    u.sajatSzavazat === 'rossz'
+                      ? 'border-blood-500 bg-blood-600/20 text-blood-300'
+                      : 'border-ink-600 text-ash-400 enabled:hover:border-blood-500 enabled:hover:text-blood-300'
+                  }`}
+                >
+                  ✗ {u.rossz ?? 0}
+                </button>
+              </div>
               <p className="mt-2 text-sm leading-relaxed break-words whitespace-pre-wrap text-ash-300">
                 {u.szoveg}
               </p>
