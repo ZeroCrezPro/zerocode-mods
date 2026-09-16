@@ -191,7 +191,7 @@ interface Sprite {
   h: number
 }
 
-function spriteKeszit(sorok: string[]): Sprite {
+function spriteKeszit(sorok: string[], paletta: Record<string, string> = PALETTA): Sprite {
   const w = sorok[0].length * PX
   const h = sorok.length * PX
   const rajz = (feher: boolean) => {
@@ -203,7 +203,7 @@ function spriteKeszit(sorok: string[]): Sprite {
       for (let x = 0; x < sor.length; x++) {
         const ch = sor[x]
         if (ch === '.') continue
-        g.fillStyle = feher ? '#ffffff' : (PALETTA[ch] ?? '#fff')
+        g.fillStyle = feher ? '#ffffff' : (paletta[ch] ?? '#fff')
         g.fillRect(x * PX, y * PX, PX, PX)
       }
     })
@@ -593,6 +593,9 @@ export class Galaga {
   private b: Beallitasok
   private hang: Hangok
   private sprites: Record<EllenfelFajta | 'hajo', Sprite>
+  /** Az életjelző színváltozatai: a rejtett mód plusz életei aranyak, a 11. extra zöld. */
+  private hajoArany: Sprite
+  private hajoZold: Sprite
   private fajtak: Record<EllenfelFajta, FajtaAdat>
 
   private kepernyo: Kepernyo = 'fomenu'
@@ -684,6 +687,8 @@ export class Galaga {
       villam: spriteKeszit(VILLAM),
       foellenseg: spriteKeszit(FOELLENSEG),
     }
+    this.hajoArany = spriteKeszit(HAJO, { ...PALETTA, W: '#fff1b8', C: '#ffd23f', R: '#e0a800' })
+    this.hajoZold = spriteKeszit(HAJO, { ...PALETTA, W: '#d9ffe9', C: '#3ddc84', R: '#1fa85e' })
     this.fajtak = {
       dron: { sprite: this.sprites.dron, elet: 1, pont: 50, pontTamadva: 100, sebesseg: 1 },
       vadasz: { sprite: this.sprites.vadasz, elet: 1, pont: 80, pontTamadva: 160, sebesseg: 1 },
@@ -1500,9 +1505,17 @@ export class Galaga {
       // Rejtett mód: csak amíg mind az öt rejtett élet megvan, és legfeljebb még öt.
       if (this.eletek < 5 || this.rejtettBonusz >= 5) return
       this.rejtettBonusz++
-    } else if (this.eletek >= 3) {
+      this.eletek++
+      this.felirat(this.hajoX, this.hajoY - 30, `+1 ÉLET - ${miert}`, '#ffd23f')
+      this.hang.ujElet()
+      // ha kigyűlt a tíz, jár egy tizenegyedik, extra élet is
+      if (this.rejtettBonusz === 5 && this.eletek === 10) {
+        this.eletek = 11
+        this.felirat(this.hajoX, this.hajoY - 50, 'EXTRA ÉLET!', '#3ddc84')
+      }
       return
     }
+    if (this.eletek >= 3) return
     this.eletek++
     this.felirat(this.hajoX, this.hajoY - 30, `+1 ÉLET - ${miert}`, '#3ddc84')
     this.hang.ujElet()
@@ -2117,10 +2130,13 @@ export class Galaga {
     this.szoveg(`HULLÁM ${this.hullam}`, this.w - 58, 16, 13, '#eef0f5', 'right')
     const s = this.sprites.hajo
     for (let i = 0; i < Math.max(0, this.eletek); i++) {
+      // 1-5: alap (fehér-piros); 6-10: a rejtett mód plusz életei (arany); 11.: extra (zöld, külön)
+      const extra = i >= 10
+      const sprite = extra ? this.hajoZold : i >= 5 ? this.hajoArany : s
       g.save()
-      g.translate(16 + i * 22, H - 16)
+      g.translate(16 + i * 22 + (extra ? 14 : 0), H - 16)
       g.scale(0.5, 0.5)
-      g.drawImage(s.kep, -s.w / 2, -s.h / 2)
+      g.drawImage(sprite.kep, -sprite.w / 2, -sprite.h / 2)
       g.restore()
     }
 
