@@ -620,9 +620,9 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
 - Fegyverfejlődés hullámonként: egyes → iker → hármas → erős hármas → dupla (1/2/3
   oszlop) → robbanó (1/2/3, területi sebzés) → lézer (1/2/3 sugár). A 13. hullám
   főellenség: életcsíkkal, legyező-lövéssel, kísérőkkel - itt a teljes normál + robbanó
-  hullámon csak **sorozat-golyók** járnak (3 golyó egymás mellett): amíg minden golyó talál,
-  a találatok 1, 2, 3… sebzéssel erősödnek, az első hibázás nullázza a sorozatot (HUD:
-  SOROZAT ×n); mellette a formáció is támad, és a főellenség kísérőket hív.
+  hullámon csak **golyók** járnak (3 golyó egymás mellett), mindegyik találat fixen
+  10 000-et sebez; a főellenségnek 100 000 000 élete van (minden visszatérésnél
+  százmillióval több); mellette a formáció is támad, és a főellenség kísérőket hív.
   A 13. után a lézer elmarad: 120 lövedékcsalád jön (12 anyag × 10 forma: gömb, nyíl,
   szilánk, gyűrű, csillag, villám, csepp, mag, penge, örvény - mind más viselkedéssel),
   családonként három hullám: egyes → iker → hármas. A főellenség 13 hullámonként visszatér,

@@ -460,7 +460,7 @@ interface Lovedek {
   ido: number
   alapX: number
   talalt: Set<Ellenfel>
-  /** sorozat-golyó: találatnál növeli, hibázásnál nullázza a sorozatot */
+  /** főellenség-golyó: fix 10 000 sebzés */
   sorozat?: boolean
 }
 
@@ -532,7 +532,7 @@ interface Fegyver {
   /** a 13. hullám utáni fegyvercsalád sorszáma és változata (1 = egyes, 2 = iker, 3 = hármas) */
   csalad?: number
   valtozat?: 1 | 2 | 3
-  /** főellenség-golyók: sorozat-sebzéssel */
+  /** főellenség-golyók: minden golyó 10 000-et sebez */
   golyo?: boolean
 }
 
@@ -552,11 +552,11 @@ const FEGYVEREK: Fegyver[] = [
   { nev: 'HÁRMAS LÉZER', oszlopok: 0, dupla: false, sebzes: 2, robbano: 0, lezer: 3 },
 ]
 /*
- * Főellenség-hullámon csak golyók: három egymás mellett. Sorozat-sebzés: amíg
- * minden kilőtt golyó talál, a találatok sebzése 1, 2, 3, … - az első
- * elhibázott golyó nullázza a sorozatot.
+ * Főellenség-hullámon csak golyók: három egymás mellett, mindegyik találat
+ * fixen 10 000-et sebez - nincs sorozat, nincs duplázás.
  */
-const FOELLENSEG_FEGYVER: Fegyver = { nev: 'SOROZAT-GOLYÓK', oszlopok: 0, dupla: false, sebzes: 1, robbano: 0, lezer: 0, golyo: true }
+const FOELLENSEG_FEGYVER: Fegyver = { nev: 'GOLYÓK', oszlopok: 0, dupla: false, sebzes: 1, robbano: 0, lezer: 0, golyo: true }
+const GOLYO_SEBZES = 10_000
 const FOELLENSEG_HULLAM = 13
 const ROBBANAS_SUGAR = 70
 /* Egységes tempó: minden ellenfél ugyanazzal a sebességgel repül és támad - nincs hirtelen manőver. */
@@ -645,7 +645,6 @@ export class Galaga {
   private tamadasVarakozas = 0
   private hullamSzoveg = 0
   private fegyverSzoveg = 0
-  private sorozat = 0 // egymás utáni találatok száma (főellenség-golyók)
   private fegyverNev = ''
   private lezerAktiv = false
   private lezerHang = 0
@@ -1188,7 +1187,6 @@ export class Galaga {
     this.hullam++
     this.hullamKeret = this.hullam * 10000
     this.hullamPont = 0
-    this.sorozat = 0
     this.ellenfelek = []
     this.lovedekek = this.lovedekek.filter((l) => l.sajat)
     this.hullamSzoveg = 2.2
@@ -1293,8 +1291,8 @@ export class Galaga {
   /** Főellenség-hullám: egyetlen nagy ellenfél, ami lő, kitér és kísérőket hív. */
   private foellensegHullamIndit() {
     const kor = Math.floor(this.hullam / FOELLENSEG_HULLAM) // hányadik főellenség
-    // 1 000 000 élet (minden következő főellenségnél még egymillió)
-    const elet = 1_000_000 * kor
+    // 100 000 000 élet (minden következő főellenségnél még százmillió)
+    const elet = 100_000_000 * kor
     this.foellensegElet = elet
     this.ellenfelek.push({
       fajta: 'foellenseg',
@@ -1844,13 +1842,6 @@ export class Galaga {
         l.x = l.alapX
       }
     }
-    // Sorozat-golyó, ami találat nélkül hagyja el a képet: a sorozat nullázódik.
-    for (const l of this.lovedekek) {
-      if (l.sajat && l.sorozat && l.talalt.size === 0 && (l.y < -20 || l.y > H + 20 || l.x < -20 || l.x > this.w + 20)) {
-        if (this.sorozat > 0) this.felirat(this.hajoX, this.hajoY - 40, 'SOROZAT VÉGE', '#ff5a60')
-        this.sorozat = 0
-      }
-    }
     this.lovedekek = this.lovedekek.filter((l) => l.y > -20 && l.y < H + 20 && l.x > -20 && l.x < this.w + 20)
 
     // --- ütközések ---
@@ -1866,11 +1857,7 @@ export class Galaga {
           l.talalt.add(e)
           if (l.atut > 0) l.atut--
           else l.y = -999 // eldobjuk
-          if (l.sorozat) {
-            // sorozat-sebzés: 1000, aztán minden további találatnál duplázódik
-            this.sorozat++
-            l.sebzes = 1000 * 2 ** (this.sorozat - 1)
-          }
+          if (l.sorozat) l.sebzes = GOLYO_SEBZES // főellenség-golyó: fix sebzés
           e.elet -= l.sebzes
           e.villan = 0.09
           this.hang.talalat()
@@ -2232,14 +2219,6 @@ export class Galaga {
         '#ffffff',
       )
       this.szoveg('FŐELLENSÉG', this.w / 2, 57, 11, '#ff5a60')
-      const kovetkezo = 1000 * 2 ** this.sorozat
-      this.szoveg(
-        `SOROZAT ×${this.sorozat}  ·  következő találat: ${kovetkezo.toLocaleString('hu-HU')}`,
-        this.w / 2,
-        74,
-        12,
-        this.sorozat > 0 ? '#ffd23f' : '#8a8a94',
-      )
     }
 
     if (this.hullamSzoveg > 0) {
