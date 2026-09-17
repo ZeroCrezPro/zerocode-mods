@@ -47,6 +47,9 @@ pnpm-debug.log*
 eszkoz/szerkeszto/program/bin/
 eszkoz/szerkeszto/program/obj/
 eszkoz/szerkeszto/program/kiadas/
+eszkoz/hajo-szerkeszto/bin/
+eszkoz/hajo-szerkeszto/obj/
+eszkoz/hajo-szerkeszto/kiadas/
 eszkoz/szerkeszto/program/ikon.ico
 .szerkeszto-mentes/
 .szerkeszto-uzenet.txt

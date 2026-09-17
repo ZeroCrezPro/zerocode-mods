@@ -36,11 +36,24 @@ const HAJO_SOROK = [
   'RRRRWRRRWRRRR',
   'RR..WW.WW..RR',
 ]
-const HAJO_SZIN: Record<string, string> = { W: '#eef0f5', C: '#5cc8ff', R: '#ff5a60' }
+// A játék palettája (a piros itt kicsit világosabb, hogy a sötét kockán is látsszon).
+const HAJO_SZIN: Record<string, string> = {
+  W: '#eef0f5',
+  C: '#5cc8ff',
+  R: '#ff5a60',
+  F: '#ffb347',
+  Y: '#ffd23f',
+  B: '#3b7bff',
+  M: '#c2185b',
+  P: '#ff6b9d',
+  G: '#3ddc84',
+  O: '#ff8c1a',
+  K: '#1a1a22',
+}
 
 function HajoJel({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 13 10" width={26} height={20} shapeRendering="crispEdges" aria-hidden className={className}>
+    <svg viewBox={`0 0 ${HAJO_SOROK[0].length} ${HAJO_SOROK.length}`} width={26} height={20} shapeRendering="crispEdges" aria-hidden className={className}>
       {HAJO_SOROK.flatMap((sor, y) =>
         [...sor].map((ch, x) =>
           ch === '.' ? null : <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={HAJO_SZIN[ch]} />,

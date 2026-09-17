@@ -188,6 +188,7 @@ zerocode-mods/
 ├── scripts/
 │   ├── prerender.mjs           # statikus HTML gyártás minden útvonalra
 │   └── make-placeholders.mjs   # helyőrző SVG-k generálása
+├── eszkoz/hajo-szerkeszto/      # a játék űrhajó-rajzolójának forrása (EXE)
 ├── eszkoz/szerkeszto/           # a szerkesztő program forrása
 │   ├── szerver.mjs             # helyi kiszolgáló (adatok, képek, publikálás)
 │   ├── ui/                     # a szerkesztő felülete
@@ -633,6 +634,23 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
   (`/api/jatek/ranglista`, KV `ranglista` dokumentum, legjobb 50, fiókonként a legjobb).
 - A rekord és a beállítások a böngésző tárolójában maradnak. (Fejlesztői segéd: a
   `zc-galaga-teszt` localStorage-kulcs egy hullámszámmal onnan indítja a játékot.)
+
+### Az űrhajók kinézete: ZeroCode Hajó Szerkesztő
+
+A játék minden rajza (űrhajó, drón, vadász, vezér, villám, főellenség) egy kis
+pixelrács a `src/jatek/galaga.ts` elején (`HAJO`, `DRON`, … tömbök; a betűk a
+`PALETTA` színei, a pont az üres pixel). Kézzel is átírhatod, de erre van egy külön
+kis program: **`ZeroCode Hajo Szerkeszto.exe`** a projekt gyökerében.
+
+- Bal oldalt a rajzok listája - kattintásra középre kerül a rács.
+- Középen a rács: bal gombbal festesz, jobb gombbal törölsz, Ctrl+Z visszavon.
+- Jobb oldalt a játék palettája (az ✕ a törlő), és a három ecset: 1, 4 (2×2) és
+  16 pixel (4×4).
+- A **FRISSÍTÉS** gomb visszaírja a rajzokat a forrásba (a fejléc kockájában villanó
+  űrhajót is, `Header.tsx` → `HAJO_SOROK`), majd ugyanazt csinálja, mint a
+  szerkesztő Frissítés gombja: build → mentés → GitHub → Cloudflare. A napló alul fut.
+- Az EXE újrafordítása: `npm run hajo:exe` (forrás: `eszkoz/hajo-szerkeszto/`,
+  .NET SDK kell hozzá, WebView2 nem).
 
 ---
 

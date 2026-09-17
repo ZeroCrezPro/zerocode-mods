@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>ZeroCode Hajo Szerkeszto</AssemblyName>
+    <RootNamespace>ZeroCode.HajoSzerkeszto</RootNamespace>
+    <ApplicationIcon>ikon.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <Product>ZeroCode Hajó Szerkesztő</Product>
+    <Company>ZeroCode</Company>
+    <Copyright>ZeroCode</Copyright>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <DebugType>none</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+</Project>
