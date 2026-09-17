@@ -396,8 +396,9 @@ export default function ModDetail() {
 
         {/* ---------- Oldalsáv ---------- */}
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+          {/* Telefonon a verziókártya már tartalmazza a letöltést, ott ez a doboz nem kell. */}
           {latest && (
-            <div className="border border-blood-600/50 bg-ink-900 p-4">
+            <div className="hidden border border-blood-600/50 bg-ink-900 p-4 lg:block">
               <Felirat
                 elem="p"
                 className="zc-label text-ash-400"
