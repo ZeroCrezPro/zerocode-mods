@@ -564,6 +564,7 @@ interface Reszecske {
   szin: string
   meret: number
   alfa?: number // halvány részecske (füst)
+  lassul?: number // sebességcsökkenés képkockánként (alap 0.96; 1 = nem lassul)
 }
 
 interface Felirat {
@@ -1509,6 +1510,36 @@ export class Galaga {
     }
   }
 
+  /** A játékos hajtóműve: két fúvókából lefelé áramló tűz, azután füst - a képernyő alján is túl. */
+  private hajoCsik() {
+    const alj = this.hajoY + this.sprites.hajo.h / 2
+    for (const dx of [-6, 6]) {
+      this.reszecskek.push({
+        x: this.hajoX + dx + veletlen(-1, 1),
+        y: alj,
+        vx: veletlen(-6, 6),
+        vy: veletlen(180, 260),
+        elet: veletlen(0.15, 0.28),
+        szin: Math.random() < 0.3 ? '#fff1b8' : Math.random() < 0.5 ? '#ffd23f' : '#ff8c1a',
+        meret: veletlen(3, 5),
+        lassul: 1,
+      })
+      if (Math.random() < 0.4) {
+        this.reszecskek.push({
+          x: this.hajoX + dx + veletlen(-2, 2),
+          y: alj + 30,
+          vx: veletlen(-12, 12),
+          vy: veletlen(120, 180),
+          elet: veletlen(0.5, 0.9),
+          szin: Math.random() < 0.5 ? '#6b6f80' : '#9a9eb0',
+          meret: veletlen(4, 8),
+          alfa: 0.35,
+          lassul: 1,
+        })
+      }
+    }
+  }
+
   private robbanas(x: number, y: number, szin: string, db = 14, nagy = false) {
     for (let i = 0; i < db; i++) {
       const a = Math.random() * Math.PI * 2
@@ -1878,13 +1909,15 @@ export class Galaga {
       this.ellenfelek = this.ellenfelek.filter((e) => e.elet > -50)
       this.lovedekek = this.lovedekek.filter((l) => l.y > -900)
     }
+    if (this.halott <= 0) this.hajoCsik()
 
     // --- effektek ---
     for (const r of this.reszecskek) {
       r.x += r.vx * dt
       r.y += r.vy * dt
-      r.vx *= 0.96
-      r.vy *= 0.96
+      const l = r.lassul ?? 0.96
+      r.vx *= l
+      r.vy *= l
       r.elet -= dt
     }
     this.reszecskek = this.reszecskek.filter((r) => r.elet > 0)
@@ -2138,10 +2171,7 @@ export class Galaga {
     if (this.halott <= 0 && (this.serthetetlen <= 0 || Math.floor(this.ido * 12) % 2 === 0)) {
       const s = this.sprites.hajo
       g.drawImage(s.kep, this.hajoX - s.w / 2, this.hajoY - s.h / 2)
-      // hajtómű lángja
-      g.fillStyle = Math.floor(this.ido * 20) % 2 ? '#ffb347' : '#ff6b1a'
-      g.fillRect(this.hajoX - 8, this.hajoY + s.h / 2, 4, 5)
-      g.fillRect(this.hajoX + 4, this.hajoY + s.h / 2, 4, 5)
+      // (a hajtómű tüze részecske: hajoCsik)
     }
 
     // részecskék
