@@ -49,6 +49,9 @@ const HAJO_SZIN: Record<string, string> = {
   G: '#3ddc84',
   O: '#ff8c1a',
   K: '#1a1a22',
+  D: '#1f4bb8',
+  E: '#1c9a58',
+  N: '#7d0f3c',
 }
 
 function HajoJel({ className }: { className?: string }) {
