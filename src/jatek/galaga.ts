@@ -111,11 +111,11 @@ const HAJO = [
   '.....WWW.....',
   '.....WOW.....',
   '....WWOWW....',
-  '..R.RWOWR.R..',
-  '..R.RWWWR.R..',
-  '.RRRRWWWRRRR.',
-  'RRRRORRRORRRR',
-  'RR..OR.RO..RR',
+  '..O.RWOWR.O..',
+  '..O.RWWWR.O..',
+  '.RRRWWWWWRRR.',
+  'RRRWWRRRWWRRR',
+  'RR.WWR.RWW.RR',
 ]
 const DRON = [
   '..Y.....Y..',
