@@ -400,7 +400,7 @@ function bezier(p0: Pont, p1: Pont, p2: Pont, p3: Pont, t: number): Pont {
   }
 }
 
-type Minta = 'hullam' | 'iv' | 'zuhanas' | 'rajtautes'
+type Minta = 'hullam' | 'iv' | 'zuhanas' | 'rajtautes' | 'raketa'
 
 interface Ellenfel {
   fajta: EllenfelFajta
@@ -563,6 +563,7 @@ interface Reszecske {
   elet: number
   szin: string
   meret: number
+  alfa?: number // halvány részecske (füst)
 }
 
 interface Felirat {
@@ -1478,6 +1479,34 @@ export class Galaga {
     e.elet = -99
   }
 
+  /** A rakéta-villám csíkja: a farnál sárga-narancs tűz, feljebb halvány, szétoszló füst. */
+  private raketaCsik(e: Ellenfel) {
+    const far = e.y - this.sprites.villam.h / 2
+    // tűz: rövid életű, fényes, a far mögött marad (a villám elhalad alatta)
+    this.reszecskek.push({
+      x: e.x + veletlen(-2, 2),
+      y: far,
+      vx: veletlen(-8, 8),
+      vy: -veletlen(20, 60),
+      elet: veletlen(0.12, 0.22),
+      szin: Math.random() < 0.5 ? '#ffd23f' : '#ff8c1a',
+      meret: veletlen(3, 5),
+    })
+    // füst: ritkábban, tovább él, szélesedik és halvány
+    if (Math.random() < 0.5) {
+      this.reszecskek.push({
+        x: e.x + veletlen(-3, 3),
+        y: far - 10,
+        vx: veletlen(-14, 14),
+        vy: -veletlen(10, 30),
+        elet: veletlen(0.5, 0.9),
+        szin: Math.random() < 0.5 ? '#6b6f80' : '#9a9eb0',
+        meret: veletlen(4, 8),
+        alfa: 0.35,
+      })
+    }
+  }
+
   private robbanas(x: number, y: number, szin: string, db = 14, nagy = false) {
     for (let i = 0; i < db; i++) {
       const a = Math.random() * Math.PI * 2
@@ -1684,11 +1713,10 @@ export class Galaga {
           // villám: várakozik a képernyő fölött, aztán rajtaüt
           e.ido += dt
           if (e.ido >= 0) {
+            // rakétaként, egyenesen lefelé indul - nem kanyarodik
             e.allapot = 'tamad'
-            e.minta = 'hullam'
+            e.minta = 'raketa'
             e.ido = 0
-            const celX = szorit(this.hajoX + veletlen(-60, 60), 30, this.w - 30)
-            e.gorbe = [{ x: e.x, y: -30 }, { x: e.x, y: H * 0.3 }, { x: celX, y: H * 0.6 }, { x: celX, y: H + 40 }]
             e.t = 0
             e.tSeb = TEMPO
           }
@@ -1705,6 +1733,11 @@ export class Galaga {
         } else if (e.minta === 'hullam') {
           e.y += EROSZKEDES * dt
           e.x = szorit(e.x + Math.cos(e.ido * 4 + e.fazis) * 150 * dt, 16, this.w - 16)
+          if (e.y > H + 30) this.visszater(e)
+        } else if (e.minta === 'raketa') {
+          // egyenesen lefelé, mögötte tűz, azután füst - mint egy rakéta
+          e.y += EROSZKEDES * dt
+          this.raketaCsik(e)
           if (e.y > H + 30) this.visszater(e)
         } else if (e.minta === 'zuhanas') {
           // a játékos felé dől, aztán egyenesen zuhan
@@ -2090,8 +2123,8 @@ export class Galaga {
       const csap = 1 + Math.sin(this.ido * 10 + e.fazis) * 0.06
       g.save()
       g.translate(e.x, e.y)
-      if (e.allapot === 'tamad' || e.allapot === 'visszater') {
-        // támadáskor a mozgás irányába fordul kicsit
+      if ((e.allapot === 'tamad' && e.minta !== 'raketa') || e.allapot === 'visszater') {
+        // támadáskor a mozgás irányába fordul kicsit (a rakéta-villám nem billeg)
         g.rotate(Math.sin(this.ido * 6 + e.fazis) * 0.15)
       }
       g.scale(1, csap)
@@ -2111,7 +2144,7 @@ export class Galaga {
 
     // részecskék
     for (const r of this.reszecskek) {
-      g.globalAlpha = Math.min(1, r.elet * 2)
+      g.globalAlpha = Math.min(1, r.elet * 2) * (r.alfa ?? 1)
       g.fillStyle = r.szin
       g.fillRect(r.x - r.meret / 2, r.y - r.meret / 2, r.meret, r.meret)
     }
