@@ -1483,15 +1483,17 @@ export class Galaga {
   private raketaCsik(e: Ellenfel) {
     const far = e.y - this.sprites.villam.h / 2
     // tűz: rövid életű, fényes, a far mögött marad (a villám elhalad alatta)
-    this.reszecskek.push({
-      x: e.x + veletlen(-2, 2),
-      y: far,
-      vx: veletlen(-8, 8),
-      vy: -veletlen(20, 60),
-      elet: veletlen(0.12, 0.22),
-      szin: Math.random() < 0.5 ? '#ffd23f' : '#ff8c1a',
-      meret: veletlen(3, 5),
-    })
+    for (let i = 0; i < 2; i++) {
+      this.reszecskek.push({
+        x: e.x + veletlen(-2, 2),
+        y: far - i * 4,
+        vx: veletlen(-6, 6),
+        vy: -veletlen(30, 80),
+        elet: veletlen(0.18, 0.32),
+        szin: i === 0 ? '#fff1b8' : Math.random() < 0.5 ? '#ffd23f' : '#ff8c1a',
+        meret: veletlen(3, 6),
+      })
+    }
     // füst: ritkábban, tovább él, szélesedik és halvány
     if (Math.random() < 0.5) {
       this.reszecskek.push({
