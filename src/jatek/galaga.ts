@@ -109,13 +109,13 @@ const HAJO = [
   '......W......',
   '......W......',
   '.....WWW.....',
-  '.....WCW.....',
-  '....WWCWW....',
-  '..R.WWCWW.R..',
-  '..R.WWWWW.R..',
-  '.RRRWWWWWRRR.',
-  'RRRRWRRRWRRRR',
-  'RR..WW.WW..RR',
+  '.....WOW.....',
+  '....WWOWW....',
+  '..R.RWOWR.R..',
+  '..R.RWWWR.R..',
+  '.RRRRWWWRRRR.',
+  'RRRRORRRORRRR',
+  'RR..OR.RO..RR',
 ]
 const DRON = [
   '..Y.....Y..',
@@ -153,15 +153,15 @@ const VEZER = [
   '..G.........G..',
 ]
 const VILLAM = [
-  '....O....',
-  '...OOO...',
-  '..OOWOO..',
-  '.OOOOOOO.',
-  'OOO.O.OOO',
-  '.O..O..O.',
-  '....O....',
   '...O.O...',
-  '..O...O..',
+  '...OOO...',
+  '.O..O..O.',
+  '.O..O..O.',
+  'OFO.O.OFO',
+  '.OFOWOFO.',
+  '..OFWFO..',
+  '...OOO...',
+  '....O....',
 ]
 
 const FOELLENSEG = [

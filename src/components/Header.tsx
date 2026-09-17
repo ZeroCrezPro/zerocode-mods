@@ -28,13 +28,13 @@ const HAJO_SOROK = [
   '......W......',
   '......W......',
   '.....WWW.....',
-  '.....WCW.....',
-  '....WWCWW....',
-  '..R.WWCWW.R..',
-  '..R.WWWWW.R..',
-  '.RRRWWWWWRRR.',
-  'RRRRWRRRWRRRR',
-  'RR..WW.WW..RR',
+  '.....WOW.....',
+  '....WWOWW....',
+  '..R.RWOWR.R..',
+  '..R.RWWWR.R..',
+  '.RRRRWWWRRRR.',
+  'RRRRORRRORRRR',
+  'RR..OR.RO..RR',
 ]
 // A játék palettája (a piros itt kicsit világosabb, hogy a sötét kockán is látsszon).
 const HAJO_SZIN: Record<string, string> = {
