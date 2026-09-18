@@ -629,6 +629,10 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
   egyre több élettel.
   3 élet, pontért nem jár extra; jutalom-élet minden főellenségért és minden 3. hullám
   után, legfeljebb háromig. Kerek pontozás: az n. hullám n×10 000 pontot ér.
+- **Élet feláldozása**: gépen jobb egérgomb, telefonon dupla koppintás - egy égő hullám
+  fut végig alulról felfelé, minden útjába eső ellenséget elpusztít, az ellenséges
+  lövedékeket elégeti, a főellenség életének 25%-át leviszi. Minden használat egy életbe
+  kerül; az utolsó élet nem áldozható fel (azon repül a hajó).
 - Ranglista a főmenü bal oldalán (helyezés · profilkép · név · pont): a bejelentkezett
   játékos eredménye a játék végén magától felkerül (`/api/jatek/pont`), a lista nyilvános
   (`/api/jatek/ranglista`, KV `ranglista` dokumentum, legjobb 50, fiókonként a legjobb).

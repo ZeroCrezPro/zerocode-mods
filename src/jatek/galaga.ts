@@ -621,6 +621,9 @@ export class Galaga {
   private gombok = new Set<string>()
   private egerX = this.w / 2
   private egerLenyomva = false
+  /** Feláldozott életért indított tűzhullámok (alulról felfelé futnak); fo = a főellenséget már megsebezte */
+  private tuzHullamok: { y: number; fo: boolean }[] = []
+  private utolsoKoppintas = 0 // érintés: dupla koppintás = élet feláldozása
   private egerHasznal = false // az utolsó mozgás egérrel volt?
   private tuzKerelem = false
   private csillagok: Csillag[] = []
@@ -883,9 +886,23 @@ export class Galaga {
     }
   }
   private egerLe = (e: PointerEvent) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return
+    if (e.pointerType === 'mouse' && e.button !== 0) {
+      // jobb gomb: élet feláldozása (tűzhullám)
+      if (e.button === 2) this.eletFelaldoz()
+      return
+    }
     e.preventDefault()
     const erintes = e.pointerType !== 'mouse'
+    if (erintes && this.kepernyo === 'jatek') {
+      // dupla koppintás: élet feláldozása (tűzhullám)
+      const most = performance.now()
+      if (most - this.utolsoKoppintas < 320) {
+        this.utolsoKoppintas = 0
+        this.eletFelaldoz()
+      } else {
+        this.utolsoKoppintas = most
+      }
+    }
     this.hajoY = erintes ? Galaga.HAJO_Y_UJJ : Galaga.HAJO_Y_EGER
     if (erintes) {
       if (this.ujjId !== null) return // egyszerre egy ujj vezérel
@@ -1157,11 +1174,13 @@ export class Galaga {
     try {
       const t = Number(localStorage.getItem('zc-galaga-teszt'))
       if (t > 1) this.hullam = t - 1
+      if (t > 0) (window as unknown as { __zcGalaga?: Galaga }).__zcGalaga = this // fejlesztői segéd
     } catch {
       /* nincs tároló */
     }
     this.lovedekek = []
     this.reszecskek = []
+    this.tuzHullamok = []
     this.feliratok = []
     this.hajoX = this.w / 2
     this.egerX = this.w / 2
@@ -1597,6 +1616,79 @@ export class Galaga {
     }
   }
 
+  /**
+   * Élet feláldozása: egy égő hullám indul a képernyő aljáról felfelé, ami
+   * minden útjába kerülő ellenséget elpusztít, a főellenség életének
+   * negyedét leviszi, és az ellenséges lövedékeket is elégeti. Az utolsó
+   * élet nem áldozható fel - azon repül a hajó.
+   */
+  private eletFelaldoz() {
+    if (this.kepernyo !== 'jatek' || this.halott > 0 || this.jatekVegeIdo > 0) return
+    if (this.eletek <= 1) {
+      this.felirat(this.hajoX, this.hajoY - 40, 'NINCS FELÁLDOZHATÓ ÉLET', '#ff5a60')
+      return
+    }
+    this.eletek--
+    this.tuzHullamok.push({ y: H + 60, fo: false })
+    this.felirat(this.hajoX, this.hajoY - 40, 'ÉLET FELÁLDOZVA', '#ff8c1a')
+    this.hang.robbanas(true)
+    this.razas = 0.6
+  }
+
+  private tuzHullamokLep(dt: number) {
+    if (this.tuzHullamok.length === 0) return
+    for (const t of this.tuzHullamok) {
+      t.y -= 900 * dt
+      for (const e of this.ellenfelek) {
+        if (e.elet <= 0 || (e.allapot === 'bejon' && e.t < 0)) continue
+        if (e.y < 0 || e.y < t.y - 10 || e.y > H + 40) continue // még nem érte el, vagy a képen kívül
+        if (e.fajta === 'villam' && e.oszlop < 0 && e.allapot === 'formacio') continue // várakozó villám
+        if (e.fajta === 'foellenseg') {
+          if (!t.fo) {
+            t.fo = true
+            e.elet -= this.foellensegElet * 0.25
+            e.villan = 0.3
+            this.robbanas(e.x, e.y, '#ff8c1a', 30, true)
+            this.felirat(e.x, e.y - 40, '-25%', '#ff8c1a')
+            if (e.elet <= 0) this.ellenfelPusztul(e)
+          }
+          continue
+        }
+        this.ellenfelPusztul(e)
+      }
+      for (const l of this.lovedekek) if (!l.sajat && l.y >= t.y) l.y = -999
+      // lángnyelvek a front mentén, fölöttük füst
+      for (let i = 0; i < 6; i++) {
+        this.reszecskek.push({
+          x: veletlen(0, this.w),
+          y: t.y + veletlen(-6, 30),
+          vx: veletlen(-15, 15),
+          vy: -veletlen(120, 320),
+          elet: veletlen(0.15, 0.4),
+          szin: Math.random() < 0.3 ? '#fff1b8' : Math.random() < 0.5 ? '#ffd23f' : '#ff8c1a',
+          meret: veletlen(3, 8),
+          lassul: 1,
+        })
+      }
+      if (Math.random() < 0.6) {
+        this.reszecskek.push({
+          x: veletlen(0, this.w),
+          y: t.y - 20,
+          vx: veletlen(-20, 20),
+          vy: -veletlen(40, 90),
+          elet: veletlen(0.5, 1),
+          szin: Math.random() < 0.5 ? '#6b6f80' : '#9a9eb0',
+          meret: veletlen(5, 10),
+          alfa: 0.3,
+          lassul: 1,
+        })
+      }
+    }
+    this.tuzHullamok = this.tuzHullamok.filter((t) => t.y > -200)
+    this.ellenfelek = this.ellenfelek.filter((e) => e.elet > -50)
+    this.lovedekek = this.lovedekek.filter((l) => l.y > -900)
+  }
+
   private hajoSerul() {
     if (this.serthetetlen > 0 || this.halott > 0) return
     this.eletek--
@@ -1905,6 +1997,7 @@ export class Galaga {
       this.lovedekek = this.lovedekek.filter((l) => l.y > -900)
     }
     if (this.halott <= 0) this.hajoCsik()
+    this.tuzHullamokLep(dt)
 
     // --- effektek ---
     for (const r of this.reszecskek) {
@@ -2167,6 +2260,28 @@ export class Galaga {
       const s = this.sprites.hajo
       g.drawImage(s.kep, this.hajoX - s.w / 2, this.hajoY - s.h / 2)
       // (a hajtómű tüze részecske: hajoCsik)
+    }
+
+    // tűzhullámok: alul sötétvörös, a front felé sárgás-fehér, izzó
+    for (const t of this.tuzHullamok) {
+      const mag = 140
+      const grad = g.createLinearGradient(0, t.y - 10, 0, t.y + mag)
+      grad.addColorStop(0, 'rgba(255,241,184,0)')
+      grad.addColorStop(0.12, 'rgba(255,241,184,0.95)')
+      grad.addColorStop(0.3, 'rgba(255,210,63,0.85)')
+      grad.addColorStop(0.6, 'rgba(255,107,26,0.6)')
+      grad.addColorStop(1, 'rgba(214,31,39,0)')
+      g.save()
+      g.globalCompositeOperation = 'lighter'
+      g.fillStyle = grad
+      g.fillRect(0, t.y - 10, this.w, mag + 10)
+      // lobogó felső él
+      g.fillStyle = 'rgba(255,241,184,0.9)'
+      for (let x = 0; x < this.w; x += 14) {
+        const h = 6 + Math.abs(Math.sin(x * 0.37 + this.ido * 21)) * 22
+        g.fillRect(x, t.y - h, 8, h)
+      }
+      g.restore()
     }
 
     // részecskék
