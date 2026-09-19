@@ -170,6 +170,58 @@ const VILLAM = [
   '....O....',
 ]
 
+/* Pajzsos: lassú, vastag páncélú tank - elöl fehér pajzslemez. */
+const PAJZSOS = [
+  '..DDDDDDDDD..',
+  '.DDBBBBBBBDD.',
+  'DDBBCCCCCBBDD',
+  'DBBCWWWWWCBBD',
+  'DBCWWWWWWWCBD',
+  'DBBCWWWWWCBBD',
+  'DDBBCCCCCBBDD',
+  '.DDBBBBBBBDD.',
+  '..DD.DDD.DD..',
+  '...D.....D...',
+]
+/* Tüzér: két csöves, sorozatlövő ágyúhajó. */
+const TUZER = [
+  '..O.......O..',
+  '.OOO.....OOO.',
+  'OOFOO...OOFOO',
+  'OOFOOOOOOOFOO',
+  '.OOFFFYFFFOO.',
+  '..OOFFYFFOO..',
+  '...OOFYFOO...',
+  '....OOYOO....',
+  '.....OYO.....',
+  '.....O.O.....',
+]
+/* Aknázó: keresztben átsuhan, és aknákat ejt maga után. */
+const AKNAZO = [
+  '...MMMMMMM...',
+  '..MMPPPPPMM..',
+  '.MMPPWPWPPMM.',
+  'MMPPPPPPPPPMM',
+  'MMPPMMMMMPPMM',
+  '.MMPMPPPMPMM.',
+  '..MM.MPM.MM..',
+  '...M..M..M...',
+  '......M......',
+]
+/* Szellem: halványul és kifakulva sérthetetlen. */
+const SZELLEM = [
+  '....WWW....',
+  '..WWCCCWW..',
+  '.WCCCCCCCW.',
+  'WCCWCCCWCCW',
+  'WCCWCCCWCCW',
+  'WCCCCCCCCCW',
+  'WCCCCCCCCCW',
+  '.WCCCCCCCW.',
+  '.W.WC.CW.W.',
+  '.W..W.W..W.',
+]
+
 const FOELLENSEG = [
   '......GG.........GG......',
   '.....GEG.........GEG.....',
@@ -384,7 +436,23 @@ class Hangok {
 /* Játékelemek                                                         */
 /* ================================================================== */
 
-type EllenfelFajta = 'dron' | 'vadasz' | 'vezer' | 'villam' | 'foellenseg'
+type EllenfelFajta =
+  | 'dron'
+  | 'vadasz'
+  | 'vezer'
+  | 'villam'
+  | 'pajzsos'
+  | 'tuzer'
+  | 'aknazo'
+  | 'szellem'
+  | 'foellenseg'
+
+/**
+ * Lövésmódok - mind egyenesen lefelé lő, csak másképp:
+ * egy = egy lövedék, iker = kettő egymás mellett, sorozat = három gyors
+ * egymás után, nehez = lassú, nagy gránát, akna = lassan süllyedő akna.
+ */
+type LovesMod = 'egy' | 'iker' | 'sorozat' | 'nehez' | 'akna'
 
 interface FajtaAdat {
   sprite: Sprite
@@ -392,6 +460,10 @@ interface FajtaAdat {
   pont: number
   pontTamadva: number
   sebesseg: number
+  /** hogyan lő ez a fajta */
+  loves: LovesMod
+  /** a tálca színe a robbanáshoz */
+  szin: string
 }
 
 interface Pont {
@@ -408,7 +480,7 @@ function bezier(p0: Pont, p1: Pont, p2: Pont, p3: Pont, t: number): Pont {
   }
 }
 
-type Minta = 'hullam' | 'iv' | 'zuhanas' | 'rajtautes' | 'raketa'
+type Minta = 'hullam' | 'iv' | 'zuhanas' | 'rajtautes' | 'raketa' | 'erod' | 'atszel'
 
 interface Ellenfel {
   fajta: EllenfelFajta
@@ -428,6 +500,9 @@ interface Ellenfel {
   fazis: number
   villan: number
   lovesIdo: number
+  /** sorozatlövésnél a hátralévő lövések száma és a következő időpontja */
+  lovesHatra?: number
+  lovesKoz?: number
 }
 
 type Alak = 'rud' | 'gomb' | 'nyil' | 'gyemant' | 'gyuru' | 'csillag' | 'villam' | 'csepp' | 'mag' | 'penge' | 'orveny'
@@ -698,16 +773,24 @@ export class Galaga {
       vadasz: spriteKeszit(VADASZ),
       vezer: spriteKeszit(VEZER),
       villam: spriteKeszit(VILLAM),
+      pajzsos: spriteKeszit(PAJZSOS),
+      tuzer: spriteKeszit(TUZER),
+      aknazo: spriteKeszit(AKNAZO),
+      szellem: spriteKeszit(SZELLEM),
       foellenseg: spriteKeszit(FOELLENSEG),
     }
     this.hajoArany = spriteKeszit(HAJO, { ...PALETTA, W: '#fff1b8', C: '#ffd23f', R: '#e0a800' })
     this.hajoZold = spriteKeszit(HAJO, { ...PALETTA, W: '#d9ffe9', C: '#3ddc84', R: '#1fa85e' })
     this.fajtak = {
-      dron: { sprite: this.sprites.dron, elet: 1, pont: 50, pontTamadva: 100, sebesseg: 1 },
-      vadasz: { sprite: this.sprites.vadasz, elet: 1, pont: 80, pontTamadva: 160, sebesseg: 1 },
-      vezer: { sprite: this.sprites.vezer, elet: 2, pont: 150, pontTamadva: 400, sebesseg: 1 },
-      villam: { sprite: this.sprites.villam, elet: 1, pont: 120, pontTamadva: 250, sebesseg: 1 },
-      foellenseg: { sprite: this.sprites.foellenseg, elet: 90, pont: 5000, pontTamadva: 5000, sebesseg: 1 },
+      dron: { sprite: this.sprites.dron, elet: 1, pont: 50, pontTamadva: 100, sebesseg: 1, loves: 'egy', szin: PALETTA.B },
+      vadasz: { sprite: this.sprites.vadasz, elet: 1, pont: 80, pontTamadva: 160, sebesseg: 1, loves: 'iker', szin: PALETTA.P },
+      vezer: { sprite: this.sprites.vezer, elet: 2, pont: 150, pontTamadva: 400, sebesseg: 1, loves: 'iker', szin: PALETTA.G },
+      villam: { sprite: this.sprites.villam, elet: 1, pont: 120, pontTamadva: 250, sebesseg: 1, loves: 'egy', szin: PALETTA.O },
+      pajzsos: { sprite: this.sprites.pajzsos, elet: 4, pont: 300, pontTamadva: 600, sebesseg: 1, loves: 'nehez', szin: PALETTA.C },
+      tuzer: { sprite: this.sprites.tuzer, elet: 2, pont: 250, pontTamadva: 500, sebesseg: 1, loves: 'sorozat', szin: PALETTA.O },
+      aknazo: { sprite: this.sprites.aknazo, elet: 2, pont: 280, pontTamadva: 560, sebesseg: 1, loves: 'akna', szin: PALETTA.M },
+      szellem: { sprite: this.sprites.szellem, elet: 2, pont: 350, pontTamadva: 700, sebesseg: 1, loves: 'egy', szin: PALETTA.C },
+      foellenseg: { sprite: this.sprites.foellenseg, elet: 90, pont: 5000, pontTamadva: 5000, sebesseg: 1, loves: 'nehez', szin: PALETTA.G },
     }
     for (let i = 0; i < 260; i++) {
       this.csillagok.push({ x: Math.random() * 1800, y: Math.random() * H, seb: veletlen(20, 140), fenyes: Math.random() })
@@ -1212,6 +1295,12 @@ export class Galaga {
     this.tamadasVarakozas = 3.5
     this.hang.hullam()
 
+    // Minden tizedik hullám után egy fokozattal nehezebb lesz minden.
+    if (this.hullam > 1 && (this.hullam - 1) % 10 === 0) {
+      this.felirat(this.w / 2, H / 2 + 90, `NEHÉZSÉG: ${this.szint() + 1}. FOKOZAT`, '#ff5a60')
+      this.hang.ujElet()
+    }
+
     // Fegyverfejlődés: a hullám végén új fokozat jön (a 2. hullámtól).
     const f = this.fegyver()
     if (f.nev !== this.fegyverNev) {
@@ -1229,14 +1318,25 @@ export class Galaga {
     // Formáció: a hullámmal nő a sorok száma és az oszlopok száma.
     const oszlopok = Math.min(10, 6 + Math.floor((this.hullam - 1) / 2))
     this.oszlopok = oszlopok
+    /*
+     * A sorok összetétele hullámról hullámra bővül: előbb a régi fajták,
+     * majd a pajzsos (5.), a tüzér (8.), az aknázó (12.) és a szellem (16.).
+     */
     const sorok: EllenfelFajta[] = foellenseg ? ['vadasz', 'dron'] : ['vezer', 'vadasz', 'dron', 'dron']
     if (!foellenseg && this.hullam >= 3) sorok.splice(1, 0, 'vadasz')
+    if (!foellenseg && this.hullam >= 5) sorok.splice(1, 0, 'pajzsos')
+    if (!foellenseg && this.hullam >= 8) sorok.splice(2, 0, 'tuzer')
+    if (!foellenseg && this.hullam >= 12) sorok.splice(3, 0, 'aknazo')
+    if (!foellenseg && this.hullam >= 16) sorok.splice(1, 0, 'szellem')
     if (!foellenseg && this.hullam >= 6) sorok.push('dron')
+    if (foellenseg && this.hullam >= 26) sorok.unshift('tuzer')
     let sorszam = 0
     sorok.forEach((fajta, sor) => {
-      const db = fajta === 'vezer' ? Math.max(2, oszlopok - 4) : oszlopok
+      // a nagyobb, erősebb fajtákból kevesebb áll a sorban
+      const ritka = fajta === 'vezer' || fajta === 'pajzsos' || fajta === 'tuzer' || fajta === 'aknazo' || fajta === 'szellem'
+      const db = ritka ? Math.max(2, oszlopok - 4) : oszlopok
       for (let o = 0; o < db; o++) {
-        const oszlop = fajta === 'vezer' ? o + Math.floor((oszlopok - db) / 2) : o
+        const oszlop = ritka ? o + Math.floor((oszlopok - db) / 2) : o
         const cel = this.formacioHely(oszlop, sor, oszlopok)
         // Bejövetel: felváltva bal és jobb oldalról, hurkolt görbén, késleltetve.
         const balrol = (sor + o) % 2 === 0
@@ -1247,7 +1347,7 @@ export class Galaga {
           fajta,
           x: start.x,
           y: start.y,
-          elet: this.fajtak[fajta].elet,
+          elet: this.fajtak[fajta].elet + this.extraElet(fajta),
           oszlop,
           sor,
           allapot: 'bejon',
@@ -1380,15 +1480,44 @@ export class Galaga {
     return 1 + (this.hullam - 1) * 0.12
   }
 
+  /** Nehézségi fokozat: minden tizedik hullám után eggyel feljebb (0, 1, 2, …). */
+  private szint() {
+    return Math.floor((this.hullam - 1) / 10)
+  }
+
+  /** A fokozat szorzója: tempó, lövedéksebesség, lőgyakoriság. */
+  private szintSzorzo() {
+    return 1 + this.szint() * 0.1
+  }
+
+  /** A szívósabb fajták fokozatonként egy kicsit többet bírnak. */
+  private extraElet(fajta: EllenfelFajta) {
+    const sz = this.szint()
+    if (fajta === 'pajzsos') return sz
+    if (fajta === 'vezer' || fajta === 'tuzer' || fajta === 'aknazo' || fajta === 'szellem') return Math.floor(sz / 2)
+    return 0
+  }
+
   /** Egy ellenfél kiválik a formációból, és támadó mintát kap. */
   private tamadasIndit(e: Ellenfel) {
-    // Minden fajta ugyanazokból a nyugodt mintákból választ - rajtaütés nincs.
+    /*
+     * Fajtánkénti taktika: a pajzsos lassan, egyenesen ereszkedik (erőd), az
+     * aknázó keresztben átsuhan és aknákat szór, a tüzér fentebb marad és
+     * sorozatokat lő (hullám), a szellem zuhanva tör a játékosra. A többiek a
+     * régi, nyugodt minták közül választanak - rajtaütés továbbra sincs.
+     */
     const mintak: Minta[] = ['iv', 'hullam', 'zuhanas']
-    e.minta = mintak[Math.floor(Math.random() * mintak.length)]
+    if (e.fajta === 'pajzsos') e.minta = 'erod'
+    else if (e.fajta === 'aknazo') e.minta = 'atszel'
+    else if (e.fajta === 'tuzer') e.minta = 'hullam'
+    else if (e.fajta === 'szellem') e.minta = Math.random() < 0.6 ? 'zuhanas' : 'iv'
+    else e.minta = mintak[Math.floor(Math.random() * mintak.length)]
     e.allapot = 'tamad'
     e.ido = 0
     e.fazis = Math.random() * Math.PI * 2
     e.lovesIdo = veletlen(0.3, 0.9)
+    // az aknázó vízszintesen suhan át: a képernyő közepe felől a túloldalra
+    if (e.minta === 'atszel') e.tSeb = (e.x < this.w / 2 ? 1 : -1) * 170 * this.szintSzorzo()
     // az ív görbéje: a játékos felé kanyarodik, majd a képernyő alja alá
     const jobbra = e.x < this.w / 2
     e.gorbe = [
@@ -1399,6 +1528,32 @@ export class Galaga {
     ]
     e.t = 0
     e.tSeb = TEMPO
+  }
+
+  /**
+   * Ellenséges lövés a fajta lövésmódja szerint - mindegyik egyenesen lefelé.
+   * A fokozat gyorsítja a lövedékeket, a sorozat a következő képkockákon folytatódik.
+   */
+  private ellenfelLo(e: Ellenfel, tamadas: boolean) {
+    const mod = this.fajtak[e.fajta].loves
+    const alap = (tamadas ? 230 : 200) + this.hullam * (tamadas ? 12 : 10)
+    const seb = alap * this.szintSzorzo()
+    const y = e.y + (tamadas ? 10 : 12)
+    if (mod === 'iker') {
+      this.lo(e.x - 7, y, 0, seb, false)
+      this.lo(e.x + 7, y, 0, seb, false)
+    } else if (mod === 'sorozat') {
+      this.lo(e.x, y, 0, seb * 1.15, false)
+      e.lovesHatra = 2
+      e.lovesKoz = 0.12
+    } else if (mod === 'nehez') {
+      this.lo(e.x, y, 0, seb * 0.6, false, 1, false, { alak: 'gomb', szin: '#ff8c1a', meret: 8 })
+    } else if (mod === 'akna') {
+      this.lo(e.x, y, 0, seb * 0.35, false, 1, false, { alak: 'gyuru', szin: '#ff6b9d', meret: 7 })
+    } else {
+      this.lo(e.x, y, 0, seb, false)
+    }
+    this.hang.loves()
   }
 
   private lo(x: number, y: number, vx: number, vy: number, sajat: boolean, sebzes = 1, robbano = false, extra: Partial<Lovedek> = {}) {
@@ -1486,6 +1641,11 @@ export class Galaga {
   }
 
   /** Egy ellenfél megsemmisül: pont, robbanás, hang. */
+  /** A szellem hullámzó áttetszősége (0,25 - 1); halványan nem sebezhető. */
+  private szellemAlfa(e: Ellenfel) {
+    return 0.62 + Math.sin(this.ido * 1.8 + e.fazis) * 0.38
+  }
+
   private ellenfelPusztul(e: Ellenfel) {
     // A hullám kerete fölé sosem megyünk: a főellenség a maradékot kapja.
     const maradek = Math.max(0, this.hullamKeret - this.hullamPont)
@@ -1493,7 +1653,7 @@ export class Galaga {
     this.hullamPont += pont
     if (pont > 0) this.pontotAd(pont, e.x, e.y)
     const nagy = e.fajta === 'vezer' || e.fajta === 'foellenseg'
-    const szin = PALETTA[e.fajta === 'dron' ? 'B' : e.fajta === 'vadasz' ? 'P' : e.fajta === 'vezer' || e.fajta === 'foellenseg' ? 'G' : 'O']
+    const szin = this.fajtak[e.fajta].szin
     this.robbanas(e.x, e.y, szin, e.fajta === 'foellenseg' ? 90 : nagy ? 26 : 16, nagy)
     if (e.fajta === 'foellenseg') {
       this.razas = 1
@@ -1792,7 +1952,7 @@ export class Galaga {
     if (this.tamadasVarakozas <= 0 && this.halott <= 0) {
       const jeloltek = this.ellenfelek.filter((e) => e.allapot === 'formacio' && e.oszlop >= 0)
       if (jeloltek.length) {
-        const db = Math.min(jeloltek.length, 1 + Math.floor(this.hullam / 3))
+        const db = Math.min(jeloltek.length, 1 + Math.floor(this.hullam / 3) + this.szint())
         for (let i = 0; i < db; i++) {
           // az alsó sorokat és a széleket előbb
           jeloltek.sort((a, b2) => b2.sor - a.sor + (Math.random() - 0.5) * 2)
@@ -1834,8 +1994,8 @@ export class Galaga {
           // formációból ritkán lő
           e.lovesIdo -= dt
           if (e.lovesIdo <= 0) {
-            e.lovesIdo = veletlen(3, 9) / neh
-            if (Math.random() < 0.5) this.lo(e.x, e.y + 12, 0, 200 + this.hullam * 10, false)
+            e.lovesIdo = veletlen(3, 9) / (neh * this.szintSzorzo())
+            if (Math.random() < 0.5) this.ellenfelLo(e, false)
           }
         } else {
           // villám: várakozik a képernyő fölött, aztán rajtaüt
@@ -1858,30 +2018,51 @@ export class Galaga {
           e.x = p.x
           e.y = p.y
           if (e.t >= 1) this.visszater(e)
+        } else if (e.minta === 'erod') {
+          // pajzsos: lassan, egyenesen ereszkedik, közben nehéz gránátokat ejt
+          e.y += EROSZKEDES * 0.55 * this.szintSzorzo() * dt
+          if (e.y > H + 30) this.visszater(e)
+        } else if (e.minta === 'atszel') {
+          // aknázó: vízszintesen átsuhan a képen, aknákat szórva
+          e.x += (e.tSeb || 170) * dt
+          e.y += 12 * dt
+          if (e.x < -40 || e.x > this.w + 40) this.visszater(e)
         } else if (e.minta === 'hullam') {
-          e.y += EROSZKEDES * dt
+          e.y += EROSZKEDES * this.szintSzorzo() * dt
           e.x = szorit(e.x + Math.cos(e.ido * 4 + e.fazis) * 150 * dt, 16, this.w - 16)
           if (e.y > H + 30) this.visszater(e)
         } else if (e.minta === 'raketa') {
           // egyenesen lefelé, mögötte tűz, azután füst - mint egy rakéta
-          e.y += EROSZKEDES * dt
+          e.y += EROSZKEDES * this.szintSzorzo() * dt
           this.raketaCsik(e)
           if (e.y > H + 30) this.visszater(e)
         } else if (e.minta === 'zuhanas') {
           // a játékos felé dől, aztán egyenesen zuhan
           // lassan a játékos felé dől, közben egyenletesen ereszkedik
           if (e.ido < 0.8) e.x += (this.hajoX - e.x) * dt * 1.5
-          e.y += EROSZKEDES * dt
+          e.y += EROSZKEDES * this.szintSzorzo() * dt
           if (e.y > H + 30) this.visszater(e)
         }
         // támadás közben lő a játékos felé
         e.lovesIdo -= dt
         if (e.lovesIdo <= 0 && e.y < this.hajoY - 60) {
-          e.lovesIdo = veletlen(0.8, 1.8) / neh
+          e.lovesIdo = veletlen(0.8, 1.8) / (neh * this.szintSzorzo())
           // Az ellenfelek csak egyenesen lefelé lőnek, nem céloznak oldalra.
-          this.lo(e.x, e.y + 10, 0, 230 + this.hullam * 12, false)
+          this.ellenfelLo(e, true)
         }
-      } else if (e.allapot === 'visszater') {
+      }
+
+      // sorozatlövés hátralévő lövései
+      if (e.lovesHatra && e.lovesHatra > 0) {
+        e.lovesKoz = (e.lovesKoz ?? 0.12) - dt
+        if (e.lovesKoz <= 0) {
+          e.lovesHatra--
+          e.lovesKoz = 0.12
+          this.lo(e.x, e.y + 12, 0, (230 + this.hullam * 12) * 1.15 * this.szintSzorzo(), false)
+        }
+      }
+
+      if (e.allapot === 'visszater') {
         e.t += dt * e.tSeb
         const p = bezier(e.gorbe![0], e.gorbe![1], e.gorbe![2], e.gorbe![3], szorit(e.t, 0, 1))
         e.x = p.x
@@ -1939,6 +2120,7 @@ export class Galaga {
       for (const e of this.ellenfelek) {
         if (e.allapot === 'bejon' && e.t < 0) continue
         if (e.fajta === 'villam' && e.oszlop < 0 && e.allapot === 'formacio') continue // várakozó villám a képen kívül
+        if (e.fajta === 'szellem' && this.szellemAlfa(e) < 0.4) continue // kifakult szellem: most nem sebezhető
         const s = this.fajtak[e.fajta].sprite
         if (e.elet <= 0) continue
         if (l.talalt.has(e)) continue
@@ -2248,6 +2430,7 @@ export class Galaga {
         g.rotate(Math.sin(this.ido * 6 + e.fazis) * 0.15)
       }
       g.scale(1, csap)
+      if (e.fajta === 'szellem') g.globalAlpha = this.szellemAlfa(e)
       g.drawImage(e.villan > 0 ? s.feher : s.kep, -s.w / 2, -s.h / 2)
       g.restore()
     }

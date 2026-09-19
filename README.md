@@ -614,7 +614,11 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
   kurzort, bal gomb lő (nyomva tartva folyamatosan). A két mód egyszerre él.
 - Főmenü (Játék / Beállítások / Kilépés), Beállítások (zene, hang, teljes képernyő,
   egér-érzékenység, automatikus lövés, felbontás), szünet menü, Game Over képernyő.
-- Ellenfelek: drón, vadász, vezér (2 élet), villám (3. hullámtól); bejövetel görbén,
+- Ellenfelek: drón, vadász, vezér (2 élet), villám (3. hullámtól), **pajzsos** (5., lassan,
+  egyenesen ereszkedik, nehéz gránátokat ejt), **tüzér** (8., sorozatlövés), **aknázó**
+  (12., keresztben átsuhan és aknákat szór), **szellem** (16., halványuláskor nem sebezhető);
+  minden fajtának saját lövésmódja van (egy, iker, sorozat, nehéz gránát, akna) - mind
+  egyenesen lefelé. Bejövetel görbén,
   formáció, kiválás és támadás (hullám, ív, zuhanás, rajtaütés); hullámról hullámra
   nehezedik. 3 élet, sérthetetlenségi idő, 20 000 pontnál extra élet.
 - Fegyverfejlődés hullámonként: egyes → iker → hármas → erős hármas → dupla (1/2/3
@@ -628,7 +632,9 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
   családonként három hullám: egyes → iker → hármas. A főellenség 13 hullámonként visszatér,
   egyre több élettel.
   3 élet, pontért nem jár extra; jutalom-élet minden főellenségért és minden 2. hullám
-  után. Az életkorlát normál módban 3, a rejtett kód feloldása után 11 (a végleges halálig);
+  után. Minden tizedik hullám után egy nehézségi fokozat lép életbe (gyorsabb ereszkedés és
+  lövedékek, sűrűbb tűz, több egyszerre támadó, a szívósabb fajtáknak több élet) - a hullám
+  elején kiírja. Az életkorlát normál módban 3, a rejtett kód feloldása után 11 (a végleges halálig);
   az új élet mindig a megmaradt életekhez adódik. Kerek pontozás: az n. hullám n×10 000 pontot ér.
 - **Élet feláldozása**: gépen jobb egérgomb, telefonon dupla koppintás - egy égő hullám
   fut végig alulról felfelé, minden útjába eső ellenséget elpusztít, az ellenséges
