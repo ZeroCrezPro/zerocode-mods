@@ -658,7 +658,6 @@ export class Galaga {
   private rejtettUtolso = -1
   /** A rejtett öt élet megvan-e (utána más a jutalom-élet szabálya), és hány pluszt adott már. */
   private rejtettAktiv = false
-  private rejtettBonusz = 0
   /*
    * Kerek pontozás: az n. hullám pontosan n × 10 000 pontot ér. Az ellenfelek
    * egyenlő részt kapnak, a maradék a hullám végén jár bónuszként - így a
@@ -1168,7 +1167,6 @@ export class Galaga {
     this.hullam = 0
     this.rejtettUtolso = -1
     this.rejtettAktiv = false
-    this.rejtettBonusz = 0
     this.hullamKeret = 0
     this.hullamPont = 0
     try {
@@ -1202,7 +1200,7 @@ export class Galaga {
       this.eletEllenoriz()
     }
     if (this.hullam > 0) void this.pontBekuld()
-    if (this.hullam > 0 && this.hullam % 3 === 0) this.jutalomElet(`${this.hullam}. hullám`)
+    if (this.hullam > 0 && this.hullam % 2 === 0) this.jutalomElet(`${this.hullam}. hullám`)
     this.hullam++
     this.hullamKeret = this.hullam * 10000
     this.hullamPont = 0
@@ -1584,28 +1582,26 @@ export class Galaga {
   }
 
   /**
-   * Jutalom-élet: minden főellenség legyőzéséért és minden harmadik hullám
-   * után egy, de legfeljebb háromig. (A rejtett kód öt élete ettől független.)
+   * Az életek felső korlátja: alaphelyzetben három, a rejtett kód feloldása
+   * után tizenegy - és az a végleges halálig (új játékig) érvényben marad.
+   */
+  private eletKorlat() {
+    return this.rejtettAktiv ? 11 : 3
+  }
+
+  /**
+   * Jutalom-élet: minden főellenség legyőzéséért és minden második hullám
+   * után egy, a korlátig. Mindig a megmaradt életekhez adódik hozzá, tehát
+   * halál után is onnan folytatódik a számlálás.
    */
   private jutalomElet(miert: string) {
-    if (this.rejtettAktiv) {
-      // Rejtett mód: csak amíg mind az öt rejtett élet megvan, és legfeljebb még öt.
-      if (this.eletek < 5 || this.rejtettBonusz >= 5) return
-      this.rejtettBonusz++
-      this.eletek++
-      this.felirat(this.hajoX, this.hajoY - 30, `+1 ÉLET - ${miert}`, '#ffd23f')
-      this.hang.ujElet()
-      // ha kigyűlt a tíz, jár egy tizenegyedik, extra élet is
-      if (this.rejtettBonusz === 5 && this.eletek === 10) {
-        this.eletek = 11
-        this.felirat(this.hajoX, this.hajoY - 50, 'EXTRA ÉLET!', '#3ddc84')
-      }
-      return
-    }
-    if (this.eletek >= 3) return
+    const korlat = this.eletKorlat()
+    if (this.eletek >= korlat) return
     this.eletek++
-    this.felirat(this.hajoX, this.hajoY - 30, `+1 ÉLET - ${miert}`, '#3ddc84')
+    const arany = this.eletek > 3
+    this.felirat(this.hajoX, this.hajoY - 30, `+1 ÉLET - ${miert}`, arany ? '#ffd23f' : '#3ddc84')
     this.hang.ujElet()
+    if (this.eletek === 11) this.felirat(this.hajoX, this.hajoY - 50, 'EXTRA ÉLET!', '#3ddc84')
   }
 
   /** Rekord a pontszám alapján. (Pontért nem jár élet - csak a rejtett kód ad.) */
@@ -1706,7 +1702,6 @@ export class Galaga {
       this.rejtettUtolso = this.pont
       this.eletek = 5
       this.rejtettAktiv = true
-      this.rejtettBonusz = 0
       this.felirat(this.hajoX, this.hajoY - 40, 'REJTETT KÓD: 5 ÉLET!', '#3ddc84')
       this.hang.ujElet()
     }
@@ -2305,9 +2300,9 @@ export class Galaga {
     this.szoveg(`HULLÁM ${this.hullam}`, this.w - 58, 16, 13, '#eef0f5', 'right')
     const s = this.sprites.hajo
     for (let i = 0; i < Math.max(0, this.eletek); i++) {
-      // 1-5: alap (fehér-piros); 6-10: a rejtett mód plusz életei (arany); 11.: extra (zöld, külön)
+      // 1-3: alap (fehér-piros); 4-10: a rejtett mód plusz életei (arany); 11.: extra (zöld, külön)
       const extra = i >= 10
-      const sprite = extra ? this.hajoZold : i >= 5 ? this.hajoArany : s
+      const sprite = extra ? this.hajoZold : i >= 3 ? this.hajoArany : s
       g.save()
       g.translate(16 + i * 22 + (extra ? 14 : 0), H - 16)
       g.scale(0.5, 0.5)
