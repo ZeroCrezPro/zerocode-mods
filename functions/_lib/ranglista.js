@@ -7,7 +7,8 @@ import { emailKulcs, nyilvanosFiok } from './fiok.js'
 
 const KULCS = 'ranglista'
 const HOSSZ = 50
-export const PONT_HATAR = 10_000_000
+/** A játékban elérhető legnagyobb pontszám (efölött hibás a beküldés). */
+export const PONT_HATAR = 999_999_999_999_999
 
 export async function ranglistaBetolt(kv) {
   const l = await kv.get(KULCS, 'json')

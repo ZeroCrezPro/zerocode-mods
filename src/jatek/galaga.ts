@@ -558,6 +558,8 @@ const FEGYVEREK: Fegyver[] = [
 const FOELLENSEG_FEGYVER: Fegyver = { nev: 'GOLYÓK', oszlopok: 0, dupla: false, sebzes: 1, robbano: 0, lezer: 0, golyo: true }
 const GOLYO_SEBZES = 10_000
 const FOELLENSEG_HULLAM = 13
+/** A legnagyobb elérhető pontszám (a ranglista is eddig fogad be). */
+const PONT_HATAR = 999_999_999_999_999
 const ROBBANAS_SUGAR = 70
 /* Egységes tempó: minden ellenfél ugyanazzal a sebességgel repül és támad - nincs hirtelen manőver. */
 const TEMPO = 0.5 // görbe-sebesség (1 = a teljes görbe egy mp alatt)
@@ -1195,7 +1197,7 @@ export class Galaga {
     // Az előző hullám maradéka bónuszként, hogy a végösszeg kerek legyen.
     if (this.hullam > 0 && this.hullamKeret > this.hullamPont) {
       const bonusz = this.hullamKeret - this.hullamPont
-      this.pont += bonusz
+      this.pont = Math.min(PONT_HATAR, this.pont + bonusz)
       this.felirat(this.w / 2, H / 2 + 60, `HULLÁM BÓNUSZ +${bonusz}`, '#ffd23f')
       this.eletEllenoriz()
     }
@@ -1576,7 +1578,7 @@ export class Galaga {
   }
 
   private pontotAd(n: number, x: number, y: number) {
-    this.pont += n
+    this.pont = Math.min(PONT_HATAR, this.pont + n)
     this.felirat(x, y, `+${n}`)
     this.eletEllenoriz()
   }
