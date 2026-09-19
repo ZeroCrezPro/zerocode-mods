@@ -252,6 +252,13 @@ interface Sprite {
   h: number
 }
 
+/** Egy #rrggbb szín világosítása/sötétítése (1 = eredeti). */
+function arnyalat(szin: string, feny: number): string {
+  const n = parseInt(szin.slice(1), 16)
+  const c = (e: number) => Math.max(0, Math.min(255, Math.round(((n >> e) & 255) * feny)))
+  return `rgb(${c(16)},${c(8)},${c(0)})`
+}
+
 function spriteKeszit(sorok: string[], paletta: Record<string, string> = PALETTA): Sprite {
   const w = sorok[0].length * PX
   const h = sorok.length * PX
@@ -506,7 +513,7 @@ interface Ellenfel {
   lovesKoz?: number
 }
 
-type Alak = 'rud' | 'gomb' | 'nyil' | 'gyemant' | 'gyuru' | 'csillag' | 'villam' | 'csepp' | 'mag' | 'penge' | 'orveny'
+type Alak = 'rud' | 'gomb' | 'nyil' | 'gyemant' | 'gyuru' | 'csillag' | 'villam' | 'csepp' | 'mag' | 'penge' | 'orveny' | 'raketa'
 
 interface Lovedek {
   x: number
@@ -1121,7 +1128,7 @@ export class Galaga {
 
   private menuSorY(i: number): number {
     const suru = this.kepernyo === 'beallitasok' || this.kepernyo === 'bolt'
-    const kezd = this.kepernyo === 'beallitasok' ? 200 : this.kepernyo === 'bolt' ? 260 : this.kepernyo === 'vege' ? 430 : this.kepernyo === 'ranglista' ? H - 50 : 330
+    const kezd = this.kepernyo === 'beallitasok' ? 200 : this.kepernyo === 'bolt' ? 330 : this.kepernyo === 'vege' ? 430 : this.kepernyo === 'ranglista' ? H - 50 : 330
     return kezd + i * (suru ? 46 : 52)
   }
 
@@ -1604,8 +1611,8 @@ export class Galaga {
   private tuzel() {
     const sugar = this.robbanSugarErtek()
     this.lo(this.hajoX, this.hajoY - 18, 0, -560, true, this.sebzesErtek(), sugar > 0, {
-      alak: sugar > 0 ? 'mag' : 'gomb',
-      szin: sugar > 0 ? '#ff8c1a' : '#ffd23f',
+      alak: 'raketa',
+      szin: sugar > 0 ? '#ff8c1a' : '#eef0f5',
       meret: 6 + Math.min(6, this.fejl.robbanas),
       robbanSugar: sugar,
       koveto: this.kovetoAktiv() ? 4 : 0,
@@ -1651,6 +1658,34 @@ export class Galaga {
     this.hang.robbanas(nagy)
     this.hang.pont()
     e.elet = -99
+  }
+
+  /** A hajó rakétalövedékének csóvája: rövid tűz, mögötte halvány füst. */
+  private loszerCsik(l: Lovedek) {
+    const far = l.y + l.meret * 1.1
+    this.reszecskek.push({
+      x: l.x + veletlen(-1, 1),
+      y: far,
+      vx: veletlen(-8, 8),
+      vy: veletlen(40, 110),
+      elet: veletlen(0.08, 0.16),
+      szin: Math.random() < 0.4 ? '#fff1b8' : Math.random() < 0.5 ? '#ffd23f' : '#ff8c1a',
+      meret: veletlen(2, 4),
+      lassul: 1,
+    })
+    if (Math.random() < 0.35) {
+      this.reszecskek.push({
+        x: l.x + veletlen(-2, 2),
+        y: far + 6,
+        vx: veletlen(-10, 10),
+        vy: veletlen(20, 60),
+        elet: veletlen(0.3, 0.55),
+        szin: Math.random() < 0.5 ? '#6b6f80' : '#9a9eb0',
+        meret: veletlen(3, 5),
+        alfa: 0.3,
+        lassul: 1,
+      })
+    }
   }
 
   /** A rakéta-villám csíkja: a farnál sárga-narancs tűz, feljebb halvány, szétoszló füst. */
@@ -2081,6 +2116,7 @@ export class Galaga {
         l.vx = Math.cos(a) * seb
         l.vy = Math.sin(a) * seb
       }
+      if (l.sajat && l.alak === 'raketa') this.loszerCsik(l)
       l.alapX += l.vx * dt
       l.y += l.vy * dt
       l.x = l.hullamAmp ? l.alapX + Math.sin(l.ido * 12) * l.hullamAmp : l.alapX
@@ -2325,11 +2361,71 @@ export class Galaga {
     this.szoveg('← →  vagy kattintás a sor bal / jobb felén: érték', this.w / 2, H - 40, 11, '#6b6f80', 'center', false)
   }
 
+  /**
+   * A lőszer térbeli (voxeles) képe: kis kockákból épített rakéta, ami lassan
+   * forog a saját tengelye körül. A kockákat hátulról előre rajzoljuk, a
+   * távolabbiak sötétebbek - ettől lesz térhatású a pixeles kép.
+   */
+  private raketaVoxelRajz(kx: number, ky: number, meret: number) {
+    const g = this.ctx
+    const szog = this.ido * 0.6 // lassú forgás
+    const dolt = 0.42 // enyhe felülnézet
+    const kockak: { x: number; y: number; z: number; szin: string }[] = []
+    const test = (y: number, sugar: number, szin: string) => {
+      for (let x = -3; x <= 3; x++)
+        for (let z = -3; z <= 3; z++) if (x * x + z * z <= sugar * sugar) kockak.push({ x, y, z, szin })
+    }
+    // orr (piros kúp), test (világos, piros gyűrűvel), szárnyak, hajtómű
+    test(7, 0.9, '#d61f27')
+    test(6, 1.5, '#d61f27')
+    test(5, 2.1, '#d61f27')
+    for (let y = 4; y >= -3; y--) test(y, 2.5, y === 1 ? '#d61f27' : y === 0 ? '#5cc8ff' : '#eef0f5')
+    test(-4, 2.2, '#8b8fa3')
+    for (const [dx, dz] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ]) {
+      for (let y = -4; y <= -1; y++) {
+        const hossz = 3 + (y + 4) * 0.4
+        for (let t = 2; t <= hossz; t++) kockak.push({ x: dx * t, y, z: dz * t, szin: '#d61f27' })
+      }
+    }
+    // hajtómű lángja: képkockánként újrarajzolva, hogy lobogjon
+    for (let i = 0; i < 26; i++) {
+      const y = -5 - Math.floor(Math.random() * 3)
+      kockak.push({
+        x: Math.round(veletlen(-1.6, 1.6)),
+        y,
+        z: Math.round(veletlen(-1.6, 1.6)),
+        szin: y < -6 ? '#ff8c1a' : Math.random() < 0.5 ? '#ffd23f' : '#fff1b8',
+      })
+    }
+
+    const sin = Math.sin(szog)
+    const cos = Math.cos(szog)
+    const k = meret / 9 // egy kocka oldala képpontban
+    const pontok = kockak.map((v) => {
+      const x = v.x * cos - v.z * sin
+      const z = v.x * sin + v.z * cos
+      return { sx: kx + x * k, sy: ky - v.y * k + z * k * dolt, z, szin: v.szin }
+    })
+    pontok.sort((a, b) => a.z - b.z) // hátulról előre
+    for (const pt of pontok) {
+      const feny = 0.55 + 0.45 * ((pt.z + 4) / 8)
+      g.globalAlpha = 1
+      g.fillStyle = arnyalat(pt.szin, feny)
+      g.fillRect(Math.round(pt.sx - k / 2), Math.round(pt.sy - k / 2), Math.ceil(k) + 1, Math.ceil(k) + 1)
+    }
+  }
+
   private boltRajz() {
     this.sotetit()
-    this.cim('FEJLESZTÉS', 120)
-    this.szoveg(`KREDIT:  ${this.fejl.penz.toLocaleString('hu-HU')} ${PENZNEM}`, this.w / 2, 190, 18, '#ffd23f')
-    this.szoveg('minden megölt ellenfél 10 kreditet ad', this.w / 2, 216, 11, '#6b6f80', 'center', false)
+    this.cim('FEJLESZTÉS', 92)
+    this.raketaVoxelRajz(this.w / 2, 172, 72)
+    this.szoveg(`KREDIT:  ${this.fejl.penz.toLocaleString('hu-HU')} ${PENZNEM}`, this.w / 2, 262, 18, '#ffd23f')
+    this.szoveg('minden megölt ellenfél 10 kreditet ad', this.w / 2, 286, 11, '#6b6f80', 'center', false)
     const tetelek = this.menuTetelek()
     tetelek.forEach((t, i) => {
       const y = this.menuSorY(i)
@@ -2511,6 +2607,31 @@ export class Galaga {
     g.translate(l.x, l.y)
     g.fillStyle = l.szin
     switch (l.alak) {
+      case 'raketa': {
+        // pixeles kis rakéta: hegyes orr, világos test, két szárny, alul lángcsóva
+        const h = m * 2.2 // hossz
+        const sz = Math.max(3, m * 0.8) // szélesség
+        g.fillStyle = '#d61f27'
+        g.beginPath()
+        g.moveTo(0, -h / 2 - sz * 0.5)
+        g.lineTo(sz / 2, -h / 2 + sz * 0.4)
+        g.lineTo(-sz / 2, -h / 2 + sz * 0.4)
+        g.closePath()
+        g.fill()
+        g.fillStyle = l.szin
+        g.fillRect(-sz / 2, -h / 2 + sz * 0.3, sz, h * 0.75)
+        g.fillStyle = 'rgba(0,0,0,0.25)'
+        g.fillRect(sz / 6, -h / 2 + sz * 0.3, sz / 3, h * 0.75)
+        g.fillStyle = '#d61f27'
+        g.fillRect(-sz, h / 2 - sz * 0.9, sz / 2, sz * 0.9)
+        g.fillRect(sz / 2, h / 2 - sz * 0.9, sz / 2, sz * 0.9)
+        // hajtómű lángja (villódzva)
+        g.fillStyle = villog ? '#ffd23f' : '#ff8c1a'
+        g.fillRect(-sz / 3, h / 2 - sz * 0.1, (sz * 2) / 3, sz * 0.9)
+        g.fillStyle = '#fff1b8'
+        g.fillRect(-sz / 6, h / 2 - sz * 0.1, sz / 3, sz * 0.5)
+        break
+      }
       case 'gomb':
       case 'mag':
         g.beginPath()

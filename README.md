@@ -626,7 +626,8 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
   sebzi, a sugár szintenként nő) és KÖVETŐ MÓD (megvásárolható, **alapból kikapcsolva**, a
   boltban bármikor ki-be kapcsolható). Pénz: **minden megölt ellenfél 10 kreditet ad** (a pénznem az űrbéli kredit, KR); a pénz és
   a fejlesztések a böngésző tárolójában maradnak (`zc-galaga-fejlesztes`), tehát a következő
-  játszmára is megmaradnak. A főellenség 13 hullámonként visszatér, egyre több élettel.
+  játszmára is megmaradnak. A hajó lövedéke rakéta (tűz- és füstcsóvával), a fejlesztés
+  képernyő tetején pedig egy lassan forgó, kockákból épített (voxeles) rakéta látható. A főellenség 13 hullámonként visszatér, egyre több élettel.
 - **Élet feláldozása**: gépen jobb egérgomb, telefonon dupla koppintás - egy égő hullám
   fut végig alulról felfelé, minden útjába eső ellenséget elpusztít, az ellenséges
   lövedékeket elégeti, a főellenség életének 25%-át leviszi. Minden használat egy életbe
