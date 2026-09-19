@@ -622,9 +622,11 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
   formáció, kiválás és támadás (hullám, ív, zuhanás, rajtaütés); hullámról hullámra
   nehezedik. 3 élet, sérthetetlenségi idő, 20 000 pontnál extra élet.
 - **Egyetlen lőszertípus, pénzből fejleszthető** (FEJLESZTÉS a főmenüben és a szünet menüben):
-  SEBZÉS (alap 10 000, szintenként +10 000, 10 szintig), ROBBANÁS (a becsapódás környékét is
-  sebzi, a sugár szintenként nő) és KÖVETŐ MÓD (megvásárolható, **alapból kikapcsolva**, a
-  boltban bármikor ki-be kapcsolható). Pénz: **minden megölt ellenfél 10 kreditet ad** (a pénznem az űrbéli kredit, KR); a pénz és
+  SEBZÉS (alap 10 000, szintenként +10 000, **felső határ nélkül**), ROBBANÁS (a becsapódás
+  környékét is sebzi, legfeljebb 10 szint) és KÖVETÉS (10 szint; 1-5. szinten lazán, a célpont
+  *legutóbbi* helyére tart, 6-10. szinten végig követi az ellenfelet - minden rakéta a saját
+  célpontját üldözi; **alapból kikapcsolva**, külön sorban kapcsolható be-ki).
+  Minden fejlesztésnél **duplázódik az ár** (sebzés 300, robbanás 400, követés 2000 kredittől). Pénz: **minden megölt ellenfél 10 kreditet ad** (a pénznem az űrbéli kredit, KR); a pénz és
   a fejlesztések a böngésző tárolójában maradnak (`zc-galaga-fejlesztes`), tehát a következő
   játszmára is megmaradnak. A hajó lövedéke rakéta (tűz- és füstcsóvával), a fejlesztés
   képernyő tetején pedig egy lassan forgó, kockákból épített (voxeles) rakéta látható. A főellenség 13 hullámonként visszatér, egyre több élettel.

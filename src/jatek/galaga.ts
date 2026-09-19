@@ -530,8 +530,16 @@ interface Lovedek {
   meret: number
   /** ennyi ellenfélen még átmegy */
   atut: number
-  /** követés: ennyire fordul a legközelebbi ellenfél felé (0 = nem) */
+  /** követés: ennyire fordul a célpont felé (0 = nem követ) */
   koveto: number
+  /** a követés szintje (1-5: laza, a legutóbbi ismert helyre; 6-10: teljes) */
+  kovetoSzint?: number
+  /** a lövedék saját célpontja - minden rakéta magának választ */
+  cel?: Ellenfel
+  /** a célpont utolsó ismert helye és az azóta eltelt idő (laza követéshez) */
+  celX?: number
+  celY?: number
+  celIdo?: number
   /** kígyózás: kitérés amplitúdója (0 = egyenes) */
   hullamAmp: number
   /** a falról visszapattan */
@@ -556,25 +564,28 @@ interface Lovedek {
 /** A játék pénzneme: űrbéli kredit (KR). */
 const PENZNEM = 'KR'
 const SEBZES_ALAP = 10_000
-const MAX_SZINT = 10
+const MAX_SZINT = 10 // a robbanás és a követés felső határa (a sebzésnek nincs)
 const PENZ_OLESERT = 10
-const KOVETO_AR = 2000
-const sebzesAr = (szint: number) => 300 * (szint + 1)
-const robbanasAr = (szint: number) => 400 * (szint + 1)
+/** Minden fejlesztésnél duplázódik az ár. */
+const sebzesAr = (szint: number) => 300 * 2 ** szint
+const robbanasAr = (szint: number) => 400 * 2 ** szint
+const kovetoAr = (szint: number) => 2000 * 2 ** szint
 
 interface Fejlesztes {
   penz: number
-  sebzes: number // 0 … MAX_SZINT
+  sebzes: number // korlátlan: szintenként +10 000 sebzés
   robbanas: number // 0 … MAX_SZINT
-  koveto: boolean // megvásárolva
+  koveto: number // 0 … MAX_SZINT (1-5: laza követés, 6-10: teljes követés)
   kovetoBe: boolean // bekapcsolva (alapból ki)
 }
 
-const ALAP_FEJLESZTES: Fejlesztes = { penz: 0, sebzes: 0, robbanas: 0, koveto: false, kovetoBe: false }
+const ALAP_FEJLESZTES: Fejlesztes = { penz: 0, sebzes: 0, robbanas: 0, koveto: 0, kovetoBe: false }
 
 function fejlesztesBetolt(): Fejlesztes {
   try {
     const n = JSON.parse(localStorage.getItem(TAROLO_FEJLESZTES) ?? '{}') as Partial<Fejlesztes>
+    // a régi mentésben a követés még igen/nem volt
+    if (typeof n.koveto === 'boolean') n.koveto = n.koveto ? 1 : 0
     return { ...ALAP_FEJLESZTES, ...n }
   } catch {
     return { ...ALAP_FEJLESZTES }
@@ -1020,7 +1031,7 @@ export class Galaga {
       case 'beallitasok':
         return ['ZENE HANGEREJE', 'HANGHATÁSOK', 'KÉPERNYŐ', 'EGÉR ÉRZÉKENYSÉG', 'AUTOMATIKUS LÖVÉS', 'FELBONTÁS', 'VISSZA']
       case 'bolt':
-        return ['SEBZÉS', 'ROBBANÁS', 'KÖVETŐ MÓD', 'VISSZA']
+        return ['SEBZÉS', 'ROBBANÁS', 'KÖVETÉS', 'KÖVETÉS BE / KI', 'VISSZA']
       default:
         return []
     }
@@ -1050,17 +1061,17 @@ export class Galaga {
   /** A bolt sorainak jobb oldali értéke. */
   private boltErtek(i: number): string {
     const f = this.fejl
+    const ar = (n: number) => `${n.toLocaleString('hu-HU')} ${PENZNEM}`
     switch (i) {
       case 0:
-        return f.sebzes >= MAX_SZINT
-          ? `${this.sebzesErtek().toLocaleString('hu-HU')}  ·  MAX`
-          : `${this.sebzesErtek().toLocaleString('hu-HU')}  ·  ${sebzesAr(f.sebzes)} ${PENZNEM}`
+        // a sebzésnek nincs felső határa: szintenként +10 000
+        return `${this.sebzesErtek().toLocaleString('hu-HU')}  ·  ${ar(sebzesAr(f.sebzes))}`
       case 1:
-        return f.robbanas >= MAX_SZINT
-          ? `${f.robbanas}. szint  ·  MAX`
-          : `${f.robbanas}. szint  ·  ${robbanasAr(f.robbanas)} ${PENZNEM}`
+        return f.robbanas >= MAX_SZINT ? `${f.robbanas}. szint  ·  MAX` : `${f.robbanas}. szint  ·  ${ar(robbanasAr(f.robbanas))}`
       case 2:
-        return !f.koveto ? `${KOVETO_AR} ${PENZNEM}` : f.kovetoBe ? 'BE' : 'KI'
+        return f.koveto >= MAX_SZINT ? `${f.koveto}. szint  ·  MAX` : `${f.koveto}. szint  ·  ${ar(kovetoAr(f.koveto))}`
+      case 3:
+        return f.koveto === 0 ? 'még nincs megvéve' : f.kovetoBe ? 'BE' : 'KI'
       default:
         return ''
     }
@@ -1078,19 +1089,15 @@ export class Galaga {
       this.hang.ujElet()
       return true
     }
-    if (i === 0 && f.sebzes < MAX_SZINT && vesz(sebzesAr(f.sebzes))) f.sebzes++
+    if (i === 0 && vesz(sebzesAr(f.sebzes))) f.sebzes++
     else if (i === 1 && f.robbanas < MAX_SZINT && vesz(robbanasAr(f.robbanas))) f.robbanas++
-    else if (i === 2) {
-      if (!f.koveto) {
-        if (vesz(KOVETO_AR)) {
-          f.koveto = true
-          f.kovetoBe = false // alapból kikapcsolva marad
-        }
-      } else {
-        f.kovetoBe = !f.kovetoBe
-        this.hang.menu()
-      }
+    else if (i === 2 && f.koveto < MAX_SZINT && vesz(kovetoAr(f.koveto))) {
+      f.koveto++
+      if (f.koveto === 1) f.kovetoBe = false // az első szint alapból kikapcsolva marad
     } else if (i === 3) {
+      if (f.koveto > 0) f.kovetoBe = !f.kovetoBe
+      this.hang.menu()
+    } else if (i === 4) {
       this.hang.valaszt()
       this.kepernyoValt(this.elozoKepernyo)
     }
@@ -1166,7 +1173,7 @@ export class Galaga {
     } else if (this.kepernyo === 'beallitasok' && (k === 'ArrowRight' || k === 'd')) {
       if (this.menuIndex < 6) this.beallitasValtoztat(this.menuIndex, 1)
     } else if (this.kepernyo === 'bolt' && (k === 'ArrowRight' || k === 'd' || k === 'ArrowLeft' || k === 'a')) {
-      if (this.menuIndex < 3) this.boltValaszt(this.menuIndex)
+      if (this.menuIndex < 4) this.boltValaszt(this.menuIndex)
     } else if (k === 'Enter' || k === ' ') {
       this.menuValaszt()
     } else if (k === 'Escape') {
@@ -1414,13 +1421,13 @@ export class Galaga {
   }
 
   private kovetoAktiv() {
-    return this.fejl.koveto && this.fejl.kovetoBe
+    return this.fejl.koveto > 0 && this.fejl.kovetoBe
   }
 
   /** A HUD-on megjelenő lőszer-leírás. */
   private loszerNev() {
     const r = this.fejl.robbanas > 0 ? ` · ROBBANÁS ${this.fejl.robbanas}` : ''
-    const k = this.kovetoAktiv() ? ' · KÖVETŐ' : ''
+    const k = this.kovetoAktiv() ? ` · KÖVETŐ ${this.fejl.koveto}` : ''
     return `LŐSZER ${this.sebzesErtek().toLocaleString('hu-HU')}${r}${k}`
   }
 
@@ -1615,7 +1622,8 @@ export class Galaga {
       szin: sugar > 0 ? '#ff8c1a' : '#eef0f5',
       meret: 6 + Math.min(6, this.fejl.robbanas),
       robbanSugar: sugar,
-      koveto: this.kovetoAktiv() ? 4 : 0,
+      koveto: this.kovetoAktiv() ? 1 : 0,
+      kovetoSzint: this.fejl.koveto,
     })
   }
 
@@ -1658,6 +1666,62 @@ export class Galaga {
     this.hang.robbanas(nagy)
     this.hang.pont()
     e.elet = -99
+  }
+
+  /**
+   * Célkövetés. Minden rakéta a saját célpontját üldözi: indításkor kinéz
+   * magának egy ellenfelet, és amíg az él, azt követi.
+   *  - 1-5. szint: lazán fordul, és a célpont *legutóbb ismert* helyére tart
+   *    (a helyet szintfüggő időnként frissíti), így könnyebb kitérni előle.
+   *  - 6-10. szint: végig, folyamatosan követi az ellenfelet.
+   */
+  private kovetesLep(l: Lovedek, dt: number) {
+    const szint = l.kovetoSzint ?? 1
+    const teljes = szint >= 6
+    // a célpont kiválasztása (indításkor, vagy ha az eddigi elpusztult)
+    if (!l.cel || l.cel.elet <= 0 || !this.ellenfelek.includes(l.cel)) {
+      let cel: Ellenfel | undefined
+      let tav = 1e9
+      for (const e of this.ellenfelek) {
+        if (e.elet <= 0 || e.y > l.y || (e.allapot === 'bejon' && e.t < 0)) continue
+        if (e.fajta === 'villam' && e.oszlop < 0 && e.allapot === 'formacio') continue
+        const d = Math.hypot(e.x - l.x, e.y - l.y)
+        if (d < tav) {
+          tav = d
+          cel = e
+        }
+      }
+      if (!cel) return
+      l.cel = cel
+      l.celX = cel.x
+      l.celY = cel.y
+      l.celIdo = 0
+    }
+    if (teljes) {
+      // teljes követés: mindig a pillanatnyi hely
+      l.celX = l.cel.x
+      l.celY = l.cel.y
+    } else {
+      // laza követés: a legutóbbi ismert helyet ritkábban frissíti
+      l.celIdo = (l.celIdo ?? 0) + dt
+      const frissites = 0.5 - (szint - 1) * 0.08 // 1. szint: 0,5 mp … 5. szint: 0,18 mp
+      if (l.celIdo >= frissites) {
+        l.celIdo = 0
+        l.celX = l.cel.x
+        l.celY = l.cel.y
+      }
+    }
+    const dx = (l.celX ?? l.x) - l.x
+    const dy = (l.celY ?? l.y) - l.y
+    const tav = Math.hypot(dx, dy) || 1
+    const seb = Math.hypot(l.vx, l.vy)
+    // a fordulékonyság a szinttel nő; a teljes követés jóval határozottabb
+    const ero = teljes ? 4 + (szint - 6) * 1.5 : 1.2 + (szint - 1) * 0.4
+    l.vx += ((dx / tav) * seb - l.vx) * ero * dt
+    l.vy += ((dy / tav) * seb - l.vy) * ero * dt
+    const uj = Math.hypot(l.vx, l.vy) || 1
+    l.vx = (l.vx / uj) * seb
+    l.vy = (l.vy / uj) * seb
   }
 
   /** A hajó rakétalövedékének csóvája: rövid tűz, mögötte halvány füst. */
@@ -2087,29 +2151,7 @@ export class Galaga {
     // --- lövedékek ---
     for (const l of this.lovedekek) {
       l.ido += dt
-      if (l.koveto && l.sajat) {
-        // a legközelebbi, még előtte lévő ellenfél felé fordul
-        let cel: Ellenfel | null = null
-        let tav = 1e9
-        for (const e of this.ellenfelek) {
-          if (e.elet <= 0 || e.y > l.y || (e.allapot === 'bejon' && e.t < 0)) continue
-          const d = Math.hypot(e.x - l.x, e.y - l.y)
-          if (d < tav) {
-            tav = d
-            cel = e
-          }
-        }
-        if (cel) {
-          const seb = Math.hypot(l.vx, l.vy)
-          const cx = (cel.x - l.x) / tav
-          const cy = (cel.y - l.y) / tav
-          l.vx += (cx * seb - l.vx) * l.koveto * dt
-          l.vy += (cy * seb - l.vy) * l.koveto * dt
-          const uj = Math.hypot(l.vx, l.vy) || 1
-          l.vx = (l.vx / uj) * seb
-          l.vy = (l.vy / uj) * seb
-        }
-      }
+      if (l.koveto && l.sajat) this.kovetesLep(l, dt)
       if (l.orveny) {
         const seb = Math.hypot(l.vx, l.vy)
         const a = -Math.PI / 2 + Math.sin(l.ido * 9) * 0.9
@@ -2434,7 +2476,7 @@ export class Galaga {
         this.ctx.fillStyle = 'rgba(214,31,39,0.85)'
         this.ctx.fillRect(30, y - 20, this.w - 60, 40)
       }
-      if (i < 3) {
+      if (i < 4) {
         this.szoveg(t, 44, y, 15, aktiv ? '#fff' : '#aeb2c4', 'left')
         this.szoveg(this.boltErtek(i), this.w - 44, y, 15, aktiv ? '#fff' : '#eef0f5', 'right', false)
       } else {
@@ -2442,11 +2484,12 @@ export class Galaga {
       }
     })
     const leiras = [
-      'A lövedék sebzése: alap 10 000, szintenként +10 000.',
-      'A becsapódás a környéken lévő ellenfeleket is sebzi.',
-      this.fejl.koveto ? 'A lövedék a legközelebbi ellenfél felé fordul.' : 'Megvásárolható; alapból kikapcsolva marad.',
+      'A lövedék sebzése: alap 10 000, szintenként +10 000 - nincs felső határa.',
+      'A becsapódás a környéken lévő ellenfeleket is sebzi (legfeljebb 10 szint).',
+      '1-5. szint: laza követés a célpont legutóbbi helyére; 6-10. szint: végig követi.',
+      'A követés ki-be kapcsolható; alapból kikapcsolva van.',
       '',
-    ][Math.min(3, this.menuIndex)]
+    ][Math.min(4, this.menuIndex)]
     this.szoveg(leiras, this.w / 2, H - 70, 12, '#8a8a94', 'center', false)
     this.szoveg('ENTER / kattintás: vásárlás vagy kapcsolás  ·  ESC: vissza', this.w / 2, H - 40, 11, '#6b6f80', 'center', false)
   }
