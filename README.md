@@ -624,7 +624,7 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
 - **Egyetlen lőszertípus, pénzből fejleszthető** (FEJLESZTÉS a főmenüben és a szünet menüben):
   SEBZÉS (alap 10 000, szintenként +10 000, 10 szintig), ROBBANÁS (a becsapódás környékét is
   sebzi, a sugár szintenként nő) és KÖVETŐ MÓD (megvásárolható, **alapból kikapcsolva**, a
-  boltban bármikor ki-be kapcsolható). Pénz: **minden megölt ellenfél 10 Ft-ot ad**; a pénz és
+  boltban bármikor ki-be kapcsolható). Pénz: **minden megölt ellenfél 10 kreditet ad** (a pénznem az űrbéli kredit, KR); a pénz és
   a fejlesztések a böngésző tárolójában maradnak (`zc-galaga-fejlesztes`), tehát a következő
   játszmára is megmaradnak. A főellenség 13 hullámonként visszatér, egyre több élettel.
 - **Élet feláldozása**: gépen jobb egérgomb, telefonon dupla koppintás - egy égő hullám

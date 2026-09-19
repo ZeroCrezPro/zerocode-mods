@@ -544,8 +544,10 @@ interface Lovedek {
  *  - ROBBANÁS: a becsapódás környékét is sebzi (mértéke szintenként nő),
  *  - KÖVETŐ MÓD: a lövedék a legközelebbi ellenfél felé fordul - megvásárolható,
  *    de alapból kikapcsolva marad, bármikor ki-be kapcsolható.
- * Pénzt minden megölt ellenfél ad: tízet.
+ * Kreditet minden megölt ellenfél ad: tízet.
  */
+/** A játék pénzneme: űrbéli kredit (KR). */
+const PENZNEM = 'KR'
 const SEBZES_ALAP = 10_000
 const MAX_SZINT = 10
 const PENZ_OLESERT = 10
@@ -1045,13 +1047,13 @@ export class Galaga {
       case 0:
         return f.sebzes >= MAX_SZINT
           ? `${this.sebzesErtek().toLocaleString('hu-HU')}  ·  MAX`
-          : `${this.sebzesErtek().toLocaleString('hu-HU')}  ·  ${sebzesAr(f.sebzes)} Ft`
+          : `${this.sebzesErtek().toLocaleString('hu-HU')}  ·  ${sebzesAr(f.sebzes)} ${PENZNEM}`
       case 1:
         return f.robbanas >= MAX_SZINT
           ? `${f.robbanas}. szint  ·  MAX`
-          : `${f.robbanas}. szint  ·  ${robbanasAr(f.robbanas)} Ft`
+          : `${f.robbanas}. szint  ·  ${robbanasAr(f.robbanas)} ${PENZNEM}`
       case 2:
-        return !f.koveto ? `${KOVETO_AR} Ft` : f.kovetoBe ? 'BE' : 'KI'
+        return !f.koveto ? `${KOVETO_AR} ${PENZNEM}` : f.kovetoBe ? 'BE' : 'KI'
       default:
         return ''
     }
@@ -2326,8 +2328,8 @@ export class Galaga {
   private boltRajz() {
     this.sotetit()
     this.cim('FEJLESZTÉS', 120)
-    this.szoveg(`PÉNZ:  ${this.fejl.penz.toLocaleString('hu-HU')} Ft`, this.w / 2, 190, 18, '#ffd23f')
-    this.szoveg('minden megölt ellenfél 10 Ft-ot ad', this.w / 2, 216, 11, '#6b6f80', 'center', false)
+    this.szoveg(`KREDIT:  ${this.fejl.penz.toLocaleString('hu-HU')} ${PENZNEM}`, this.w / 2, 190, 18, '#ffd23f')
+    this.szoveg('minden megölt ellenfél 10 kreditet ad', this.w / 2, 216, 11, '#6b6f80', 'center', false)
     const tetelek = this.menuTetelek()
     tetelek.forEach((t, i) => {
       const y = this.menuSorY(i)
@@ -2472,7 +2474,7 @@ export class Galaga {
     }
 
     this.szoveg(this.loszerNev(), this.w - 12, H - 16, 11, '#8a8a94', 'right')
-    this.szoveg(`PÉNZ ${this.fejl.penz.toLocaleString('hu-HU')}`, 12, 36, 12, '#ffd23f', 'left')
+    this.szoveg(`${this.fejl.penz.toLocaleString('hu-HU')} ${PENZNEM}`, 12, 36, 12, '#ffd23f', 'left')
 
     // főellenség életcsíkja
     const fo = this.ellenfelek.find((e) => e.fajta === 'foellenseg')
