@@ -2415,48 +2415,49 @@ export class Galaga {
    */
   private raketaVoxelRajz(kx: number, ky: number, meret: number) {
     const g = this.ctx
-    const szog = this.ido * 0.6 // lassú forgás
-    const dolt = 0.42 // enyhe felülnézet
+    const test = this.robbanSugarErtek() > 0 ? '#ff8c1a' : '#eef0f5' // ugyanaz, mint a kilőtt rakétáé
     const kockak: { x: number; y: number; z: number; szin: string }[] = []
-    const test = (y: number, sugar: number, szin: string) => {
-      for (let x = -3; x <= 3; x++)
-        for (let z = -3; z <= 3; z++) if (x * x + z * z <= sugar * sugar) kockak.push({ x, y, z, szin })
+    /*
+     * A rakéta vízszintesen fekszik: az orra jobbra néz (+x), a hajtóműve
+     * balra. A hossztengelye körül forog lassan, ezért végig ugyanúgy néz ki,
+     * mint a kilőtt lövedék: piros orr, világos test, két piros szárny, láng.
+     */
+    const szelet = (x: number, sugar: number, szin: string) => {
+      for (let y = -3; y <= 3; y++)
+        for (let z = -3; z <= 3; z++) if (y * y + z * z <= sugar * sugar) kockak.push({ x, y, z, szin })
     }
-    // orr (piros kúp), test (világos, piros gyűrűvel), szárnyak, hajtómű
-    test(7, 0.9, '#d61f27')
-    test(6, 1.5, '#d61f27')
-    test(5, 2.1, '#d61f27')
-    for (let y = 4; y >= -3; y--) test(y, 2.5, y === 1 ? '#d61f27' : y === 0 ? '#5cc8ff' : '#eef0f5')
-    test(-4, 2.2, '#8b8fa3')
-    for (const [dx, dz] of [
-      [1, 0],
-      [-1, 0],
-      [0, 1],
-      [0, -1],
-    ]) {
-      for (let y = -4; y <= -1; y++) {
-        const hossz = 3 + (y + 4) * 0.4
-        for (let t = 2; t <= hossz; t++) kockak.push({ x: dx * t, y, z: dz * t, szin: '#d61f27' })
-      }
+    // hosszabb, hegyesedő orr - mint a kilőtt rakéta csúcsa
+    szelet(8, 0.6, '#d61f27')
+    szelet(7, 1.1, '#d61f27')
+    szelet(6, 1.6, '#d61f27')
+    szelet(5, 2.0, '#d61f27')
+    for (let x = 4; x >= -4; x--) szelet(x, 2.2, test)
+    // két szárny a faron (mint a kilőtt rakétán)
+    for (const jel of [1, -1]) {
+      for (let x = -4; x <= -1; x++)
+        for (let t = 3; t <= 4; t++)
+          for (const z of [-1, 0, 1]) kockak.push({ x, y: jel * t, z, szin: '#d61f27' })
     }
     // hajtómű lángja: képkockánként újrarajzolva, hogy lobogjon
-    for (let i = 0; i < 26; i++) {
-      const y = -5 - Math.floor(Math.random() * 3)
+    for (let i = 0; i < 40; i++) {
+      const x = -5 - Math.floor(Math.random() * 4)
       kockak.push({
-        x: Math.round(veletlen(-1.6, 1.6)),
-        y,
+        x,
+        y: Math.round(veletlen(-1.6, 1.6)),
         z: Math.round(veletlen(-1.6, 1.6)),
-        szin: y < -6 ? '#ff8c1a' : Math.random() < 0.5 ? '#ffd23f' : '#fff1b8',
+        szin: x < -7 ? '#ff6b1a' : x < -6 ? '#ff8c1a' : Math.random() < 0.5 ? '#ffd23f' : '#fff1b8',
       })
     }
 
+    // forgás a saját hossztengelye (x) körül
+    const szog = this.ido * 0.6
     const sin = Math.sin(szog)
     const cos = Math.cos(szog)
     const k = meret / 9 // egy kocka oldala képpontban
     const pontok = kockak.map((v) => {
-      const x = v.x * cos - v.z * sin
-      const z = v.x * sin + v.z * cos
-      return { sx: kx + x * k, sy: ky - v.y * k + z * k * dolt, z, szin: v.szin }
+      const y = v.y * cos - v.z * sin
+      const z = v.y * sin + v.z * cos
+      return { sx: kx + v.x * k, sy: ky - y * k, z, szin: v.szin }
     })
     pontok.sort((a, b) => a.z - b.z) // hátulról előre
     for (const pt of pontok) {
@@ -2470,7 +2471,7 @@ export class Galaga {
   private boltRajz() {
     this.sotetit()
     this.cim('FEJLESZTÉS', 92)
-    this.raketaVoxelRajz(this.w / 2, 172, 72)
+    this.raketaVoxelRajz(this.w / 2, 180, 86)
     this.szoveg(`KREDIT:  ${this.fejl.penz.toLocaleString('hu-HU')} ${PENZNEM}`, this.w / 2, 262, 18, '#ffd23f')
     this.szoveg('minden megölt ellenfél 10 kreditet ad', this.w / 2, 286, 11, '#6b6f80', 'center', false)
     const tetelek = this.menuTetelek()
