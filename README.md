@@ -621,21 +621,12 @@ A motor lazy modul: csak akkor töltődik be, ha valaki előhívja.
   egyenesen lefelé. Bejövetel görbén,
   formáció, kiválás és támadás (hullám, ív, zuhanás, rajtaütés); hullámról hullámra
   nehezedik. 3 élet, sérthetetlenségi idő, 20 000 pontnál extra élet.
-- Fegyverfejlődés hullámonként: egyes → iker → hármas → erős hármas → dupla (1/2/3
-  oszlop) → robbanó (1/2/3, területi sebzés) → lézer (1/2/3 sugár). A 13. hullám
-  főellenség: életcsíkkal, legyező-lövéssel, kísérőkkel - itt a teljes normál + robbanó
-  hullámon csak **golyók** járnak (3 golyó egymás mellett), mindegyik találat fixen
-  10 000-et sebez; a főellenségnek 100 000 000 élete van (minden visszatérésnél
-  százmillióval több); mellette a formáció is támad, és a főellenség kísérőket hív.
-  A 13. után a lézer elmarad: 120 lövedékcsalád jön (12 anyag × 10 forma: gömb, nyíl,
-  szilánk, gyűrű, csillag, villám, csepp, mag, penge, örvény - mind más viselkedéssel),
-  családonként három hullám: egyes → iker → hármas. A főellenség 13 hullámonként visszatér,
-  egyre több élettel.
-  3 élet, pontért nem jár extra; jutalom-élet minden főellenségért és minden 2. hullám
-  után. Minden tizedik hullám után egy nehézségi fokozat lép életbe (gyorsabb ereszkedés és
-  lövedékek, sűrűbb tűz, több egyszerre támadó, a szívósabb fajtáknak több élet) - a hullám
-  elején kiírja. Az életkorlát normál módban 3, a rejtett kód feloldása után 11 (a végleges halálig);
-  az új élet mindig a megmaradt életekhez adódik. Kerek pontozás: az n. hullám n×10 000 pontot ér.
+- **Egyetlen lőszertípus, pénzből fejleszthető** (FEJLESZTÉS a főmenüben és a szünet menüben):
+  SEBZÉS (alap 10 000, szintenként +10 000, 10 szintig), ROBBANÁS (a becsapódás környékét is
+  sebzi, a sugár szintenként nő) és KÖVETŐ MÓD (megvásárolható, **alapból kikapcsolva**, a
+  boltban bármikor ki-be kapcsolható). Pénz: **minden megölt ellenfél 10 Ft-ot ad**; a pénz és
+  a fejlesztések a böngésző tárolójában maradnak (`zc-galaga-fejlesztes`), tehát a következő
+  játszmára is megmaradnak. A főellenség 13 hullámonként visszatér, egyre több élettel.
 - **Élet feláldozása**: gépen jobb egérgomb, telefonon dupla koppintás - egy égő hullám
   fut végig alulról felfelé, minden útjába eső ellenséget elpusztít, az ellenséges
   lövedékeket elégeti, a főellenség életének 25%-át leviszi. Minden használat egy életbe

@@ -22,6 +22,7 @@ const DT = 1 / 60
 
 const TAROLO_BEALLITAS = 'zc-galaga-beallitasok'
 const TAROLO_REKORD = 'zc-galaga-rekord'
+const TAROLO_FEJLESZTES = 'zc-galaga-fejlesztes'
 
 /** A bejelentkezett játékos (a ranglistához); null, ha vendég. */
 export interface Jatekos {
@@ -535,103 +536,50 @@ interface Lovedek {
   ido: number
   alapX: number
   talalt: Set<Ellenfel>
-  /** főellenség-golyó: fix 10 000 sebzés */
-  sorozat?: boolean
 }
 
 /*
- * Fegyvercsaládok a 13. hullám után: 12 anyag × 10 forma = 120 különböző
- * lövedékfajta, mindegyik három változatban (egyes, iker, hármas) - egy
- * család három hullámot ölel fel. A forma adja a viselkedést, az anyag a
- * színt és a nevet; a sorszámmal a sebzés is nő.
+ * Egyetlen lőszertípus, amit pénzből lehet fejleszteni:
+ *  - SEBZÉS: alapból 10 000, szintenként további 10 000,
+ *  - ROBBANÁS: a becsapódás környékét is sebzi (mértéke szintenként nő),
+ *  - KÖVETŐ MÓD: a lövedék a legközelebbi ellenfél felé fordul - megvásárolható,
+ *    de alapból kikapcsolva marad, bármikor ki-be kapcsolható.
+ * Pénzt minden megölt ellenfél ad: tízet.
  */
-const ANYAGOK = ['PLAZMA', 'FOTON', 'KRISTÁLY', 'ION', 'KVANTUM', 'NEUTRON', 'ANTIANYAG', 'TACHION', 'GRAVITON', 'NOVA', 'PULZÁR', 'KVAZÁR']
-interface Forma {
-  nev: string
-  alak: Alak
-  seb: number
-  sebzes: number
-  meret: number
-  atut?: number
-  robbanSugar?: number
-  koveto?: number
-  hullamAmp?: number
-  pattog?: boolean
-  szetvalik?: boolean
-  orveny?: boolean
-  varakozas: number
+const SEBZES_ALAP = 10_000
+const MAX_SZINT = 10
+const PENZ_OLESERT = 10
+const KOVETO_AR = 2000
+const sebzesAr = (szint: number) => 300 * (szint + 1)
+const robbanasAr = (szint: number) => 400 * (szint + 1)
+
+interface Fejlesztes {
+  penz: number
+  sebzes: number // 0 … MAX_SZINT
+  robbanas: number // 0 … MAX_SZINT
+  koveto: boolean // megvásárolva
+  kovetoBe: boolean // bekapcsolva (alapból ki)
 }
-const FORMAK: Forma[] = [
-  { nev: 'GÖMB', alak: 'gomb', seb: 520, sebzes: 3, meret: 7, varakozas: 0.18 },
-  { nev: 'NYÍL', alak: 'nyil', seb: 760, sebzes: 2, meret: 6, atut: 1, varakozas: 0.14 },
-  { nev: 'SZILÁNK', alak: 'gyemant', seb: 480, sebzes: 3, meret: 6, hullamAmp: 34, varakozas: 0.16 },
-  { nev: 'GYŰRŰ', alak: 'gyuru', seb: 320, sebzes: 5, meret: 13, varakozas: 0.3 },
-  { nev: 'CSILLAG', alak: 'csillag', seb: 500, sebzes: 2, meret: 8, szetvalik: true, varakozas: 0.2 },
-  { nev: 'VILLÁM', alak: 'villam', seb: 460, sebzes: 3, meret: 7, koveto: 4, varakozas: 0.2 },
-  { nev: 'CSEPP', alak: 'csepp', seb: 440, sebzes: 3, meret: 7, pattog: true, varakozas: 0.18 },
-  { nev: 'MAG', alak: 'mag', seb: 380, sebzes: 4, meret: 9, robbanSugar: 64, varakozas: 0.32 },
-  { nev: 'PENGE', alak: 'penge', seb: 600, sebzes: 2, meret: 8, atut: 99, varakozas: 0.24 },
-  { nev: 'ÖRVÉNY', alak: 'orveny', seb: 430, sebzes: 3, meret: 8, orveny: true, varakozas: 0.18 },
-]
-interface Csalad extends Forma {
-  szin: string
-  mag: string
-}
-function csaladAdat(i: number): Csalad {
-  const forma = FORMAK[i % FORMAK.length]
-  const anyag = ANYAGOK[(i * 7) % ANYAGOK.length]
-  const h = (i * 37) % 360
-  const nev = anyag + (/^[AÁEÉIÍOÓÖŐUÚÜŰ]/.test(forma.nev) ? '-' : '') + forma.nev
-  return {
-    ...forma,
-    nev,
-    // a sorszámmal erősödik, hogy a későbbi hullámok nagyobb létszámával lépést tartson
-    sebzes: forma.sebzes + Math.floor(i / 3),
-    szin: `hsl(${h} 90% 60%)`,
-    mag: `hsl(${h} 100% 88%)`,
+
+const ALAP_FEJLESZTES: Fejlesztes = { penz: 0, sebzes: 0, robbanas: 0, koveto: false, kovetoBe: false }
+
+function fejlesztesBetolt(): Fejlesztes {
+  try {
+    const n = JSON.parse(localStorage.getItem(TAROLO_FEJLESZTES) ?? '{}') as Partial<Fejlesztes>
+    return { ...ALAP_FEJLESZTES, ...n }
+  } catch {
+    return { ...ALAP_FEJLESZTES }
   }
 }
 
-/**
- * A fegyver fokozata. Minden hullám végén egy szinttel feljebb lép;
- * a 13. (főellenség) hullámban a normál és a robbanó lövedék együtt jár,
- * lézer nélkül.
- */
-interface Fegyver {
-  nev: string
-  oszlopok: number // egymás melletti normál lövedékek
-  dupla: boolean // a lövedéket egy második követi
-  sebzes: number
-  robbano: number // egymás melletti robbanó lövedékek
-  lezer: number // párhuzamos lézersugarak
-  /** a 13. hullám utáni fegyvercsalád sorszáma és változata (1 = egyes, 2 = iker, 3 = hármas) */
-  csalad?: number
-  valtozat?: 1 | 2 | 3
-  /** főellenség-golyók: minden golyó 10 000-et sebez */
-  golyo?: boolean
+function fejlesztesMent(f: Fejlesztes) {
+  try {
+    localStorage.setItem(TAROLO_FEJLESZTES, JSON.stringify(f))
+  } catch {
+    /* nincs tároló */
+  }
 }
 
-const FEGYVEREK: Fegyver[] = [
-  { nev: 'EGYES LÖVÉS', oszlopok: 1, dupla: false, sebzes: 1, robbano: 0, lezer: 0 },
-  { nev: 'IKERLÖVÉS', oszlopok: 2, dupla: false, sebzes: 1, robbano: 0, lezer: 0 },
-  { nev: 'HÁRMAS LÖVÉS', oszlopok: 3, dupla: false, sebzes: 1, robbano: 0, lezer: 0 },
-  { nev: 'ERŐS HÁRMAS', oszlopok: 3, dupla: false, sebzes: 2, robbano: 0, lezer: 0 },
-  { nev: 'DUPLA LÖVÉS', oszlopok: 1, dupla: true, sebzes: 2, robbano: 0, lezer: 0 },
-  { nev: 'DUPLA IKERLÖVÉS', oszlopok: 2, dupla: true, sebzes: 2, robbano: 0, lezer: 0 },
-  { nev: 'DUPLA HÁRMAS', oszlopok: 3, dupla: true, sebzes: 2, robbano: 0, lezer: 0 },
-  { nev: 'ROBBANÓ LÖVEDÉK', oszlopok: 0, dupla: false, sebzes: 2, robbano: 1, lezer: 0 },
-  { nev: 'IKER ROBBANÓ', oszlopok: 0, dupla: false, sebzes: 2, robbano: 2, lezer: 0 },
-  { nev: 'HÁRMAS ROBBANÓ', oszlopok: 0, dupla: false, sebzes: 2, robbano: 3, lezer: 0 },
-  { nev: 'LÉZER', oszlopok: 0, dupla: false, sebzes: 2, robbano: 0, lezer: 1 },
-  { nev: 'IKERLÉZER', oszlopok: 0, dupla: false, sebzes: 2, robbano: 0, lezer: 2 },
-  { nev: 'HÁRMAS LÉZER', oszlopok: 0, dupla: false, sebzes: 2, robbano: 0, lezer: 3 },
-]
-/*
- * Főellenség-hullámon csak golyók: három egymás mellett, mindegyik találat
- * fixen 10 000-et sebez - nincs sorozat, nincs duplázás.
- */
-const FOELLENSEG_FEGYVER: Fegyver = { nev: 'GOLYÓK', oszlopok: 0, dupla: false, sebzes: 1, robbano: 0, lezer: 0, golyo: true }
-const GOLYO_SEBZES = 10_000
 const FOELLENSEG_HULLAM = 13
 /** A legnagyobb elérhető pontszám (a ranglista is eddig fogad be). */
 const PONT_HATAR = 999_999_999_999_999
@@ -667,7 +615,7 @@ interface Csillag {
   fenyes: number
 }
 
-type Kepernyo = 'fomenu' | 'beallitasok' | 'jatek' | 'szunet' | 'vege' | 'ranglista'
+type Kepernyo = 'fomenu' | 'beallitasok' | 'jatek' | 'szunet' | 'vege' | 'ranglista' | 'bolt'
 
 /* ================================================================== */
 /* A játék                                                             */
@@ -724,10 +672,7 @@ export class Galaga {
   private lovesVarakozas = 0
   private tamadasVarakozas = 0
   private hullamSzoveg = 0
-  private fegyverSzoveg = 0
-  private fegyverNev = ''
-  private lezerAktiv = false
-  private lezerHang = 0
+  private fejl: Fejlesztes = fejlesztesBetolt()
   private foellensegElet = 0
   private razas = 0
   private formacioFazis = 0
@@ -1054,15 +999,19 @@ export class Galaga {
   private menuTetelek(): string[] {
     switch (this.kepernyo) {
       case 'fomenu':
-        return this.ranglistaElfer() ? ['JÁTÉK', 'BEÁLLÍTÁSOK', 'KILÉPÉS'] : ['JÁTÉK', 'RANGLISTA', 'BEÁLLÍTÁSOK', 'KILÉPÉS']
+        return this.ranglistaElfer()
+          ? ['JÁTÉK', 'FEJLESZTÉS', 'BEÁLLÍTÁSOK', 'KILÉPÉS']
+          : ['JÁTÉK', 'FEJLESZTÉS', 'RANGLISTA', 'BEÁLLÍTÁSOK', 'KILÉPÉS']
       case 'ranglista':
         return ['VISSZA']
       case 'szunet':
-        return ['FOLYTATÁS', 'ÚJRAKEZDÉS', 'BEÁLLÍTÁSOK', 'FŐMENÜ', 'KILÉPÉS']
+        return ['FOLYTATÁS', 'FEJLESZTÉS', 'ÚJRAKEZDÉS', 'BEÁLLÍTÁSOK', 'FŐMENÜ', 'KILÉPÉS']
       case 'vege':
         return ['ÚJRAKEZDÉS', 'FŐMENÜ']
       case 'beallitasok':
         return ['ZENE HANGEREJE', 'HANGHATÁSOK', 'KÉPERNYŐ', 'EGÉR ÉRZÉKENYSÉG', 'AUTOMATIKUS LÖVÉS', 'FELBONTÁS', 'VISSZA']
+      case 'bolt':
+        return ['SEBZÉS', 'ROBBANÁS', 'KÖVETŐ MÓD', 'VISSZA']
       default:
         return []
     }
@@ -1087,6 +1036,56 @@ export class Galaga {
       default:
         return ''
     }
+  }
+
+  /** A bolt sorainak jobb oldali értéke. */
+  private boltErtek(i: number): string {
+    const f = this.fejl
+    switch (i) {
+      case 0:
+        return f.sebzes >= MAX_SZINT
+          ? `${this.sebzesErtek().toLocaleString('hu-HU')}  ·  MAX`
+          : `${this.sebzesErtek().toLocaleString('hu-HU')}  ·  ${sebzesAr(f.sebzes)} Ft`
+      case 1:
+        return f.robbanas >= MAX_SZINT
+          ? `${f.robbanas}. szint  ·  MAX`
+          : `${f.robbanas}. szint  ·  ${robbanasAr(f.robbanas)} Ft`
+      case 2:
+        return !f.koveto ? `${KOVETO_AR} Ft` : f.kovetoBe ? 'BE' : 'KI'
+      default:
+        return ''
+    }
+  }
+
+  /** Vásárlás vagy a követő mód kapcsolása. */
+  private boltValaszt(i: number) {
+    const f = this.fejl
+    const vesz = (ar: number) => {
+      if (f.penz < ar) {
+        this.hang.menu()
+        return false
+      }
+      f.penz -= ar
+      this.hang.ujElet()
+      return true
+    }
+    if (i === 0 && f.sebzes < MAX_SZINT && vesz(sebzesAr(f.sebzes))) f.sebzes++
+    else if (i === 1 && f.robbanas < MAX_SZINT && vesz(robbanasAr(f.robbanas))) f.robbanas++
+    else if (i === 2) {
+      if (!f.koveto) {
+        if (vesz(KOVETO_AR)) {
+          f.koveto = true
+          f.kovetoBe = false // alapból kikapcsolva marad
+        }
+      } else {
+        f.kovetoBe = !f.kovetoBe
+        this.hang.menu()
+      }
+    } else if (i === 3) {
+      this.hang.valaszt()
+      this.kepernyoValt(this.elozoKepernyo)
+    }
+    fejlesztesMent(f)
   }
 
   private beallitasValtoztat(i: number, irany: number) {
@@ -1119,8 +1118,9 @@ export class Galaga {
   }
 
   private menuSorY(i: number): number {
-    const kezd = this.kepernyo === 'beallitasok' ? 200 : this.kepernyo === 'vege' ? 430 : this.kepernyo === 'ranglista' ? H - 50 : 330
-    return kezd + i * (this.kepernyo === 'beallitasok' ? 46 : 52)
+    const suru = this.kepernyo === 'beallitasok' || this.kepernyo === 'bolt'
+    const kezd = this.kepernyo === 'beallitasok' ? 200 : this.kepernyo === 'bolt' ? 260 : this.kepernyo === 'vege' ? 430 : this.kepernyo === 'ranglista' ? H - 50 : 330
+    return kezd + i * (suru ? 46 : 52)
   }
 
   /** A főmenü mellett bal oldalt elfér-e a ranglista (asztali szélesség). */
@@ -1156,10 +1156,12 @@ export class Galaga {
       if (this.menuIndex < 6) this.beallitasValtoztat(this.menuIndex, -1)
     } else if (this.kepernyo === 'beallitasok' && (k === 'ArrowRight' || k === 'd')) {
       if (this.menuIndex < 6) this.beallitasValtoztat(this.menuIndex, 1)
+    } else if (this.kepernyo === 'bolt' && (k === 'ArrowRight' || k === 'd' || k === 'ArrowLeft' || k === 'a')) {
+      if (this.menuIndex < 3) this.boltValaszt(this.menuIndex)
     } else if (k === 'Enter' || k === ' ') {
       this.menuValaszt()
     } else if (k === 'Escape') {
-      if (this.kepernyo === 'beallitasok') this.kepernyoValt(this.elozoKepernyo)
+      if (this.kepernyo === 'beallitasok' || this.kepernyo === 'bolt') this.kepernyoValt(this.elozoKepernyo)
       else if (this.kepernyo === 'szunet') this.kepernyoValt('jatek')
       else if (this.kepernyo === 'ranglista') this.kepernyoValt('fomenu')
       else if (this.kepernyo === 'fomenu') this.bezar()
@@ -1169,6 +1171,10 @@ export class Galaga {
   private menuValaszt(x?: number) {
     const i = this.menuIndex
     const s = this.kepernyo
+    if (s === 'bolt') {
+      this.boltValaszt(i)
+      return
+    }
     if (s === 'beallitasok') {
       if (i === 6) {
         this.hang.valaszt()
@@ -1183,6 +1189,7 @@ export class Galaga {
     if (s === 'fomenu') {
       const tetel = this.menuTetelek()[i]
       if (tetel === 'JÁTÉK') this.ujJatek()
+      else if (tetel === 'FEJLESZTÉS') this.boltNyit()
       else if (tetel === 'RANGLISTA') this.kepernyoValt('ranglista')
       else if (tetel === 'BEÁLLÍTÁSOK') this.beallitasokNyit()
       else this.bezar()
@@ -1190,9 +1197,10 @@ export class Galaga {
       this.kepernyoValt('fomenu')
     } else if (s === 'szunet') {
       if (i === 0) this.kepernyoValt('jatek')
-      else if (i === 1) this.ujJatek()
-      else if (i === 2) this.beallitasokNyit()
-      else if (i === 3) this.fomenu()
+      else if (i === 1) this.boltNyit()
+      else if (i === 2) this.ujJatek()
+      else if (i === 3) this.beallitasokNyit()
+      else if (i === 4) this.fomenu()
       else this.bezar()
     } else if (s === 'vege') {
       if (i === 0) this.ujJatek()
@@ -1205,11 +1213,16 @@ export class Galaga {
     this.kepernyoValt('beallitasok')
   }
 
+  private boltNyit() {
+    this.elozoKepernyo = this.kepernyo
+    this.kepernyoValt('bolt')
+  }
+
   private kepernyoValt(k: Kepernyo) {
     this.kepernyo = k
     this.menuIndex = 0
     if (k === 'jatek') this.hang.zeneStart()
-    else if (k !== 'szunet' && k !== 'beallitasok') this.hang.zeneStop()
+    else if (k !== 'szunet' && k !== 'beallitasok' && k !== 'bolt') this.hang.zeneStop()
   }
 
   private szunet() {
@@ -1269,9 +1282,6 @@ export class Galaga {
     this.egerX = this.w / 2
     this.serthetetlen = 2
     this.halott = 0
-    this.fegyverNev = ''
-    this.fegyverSzoveg = 0
-    this.lezerAktiv = false
     this.kepernyoValt('jatek')
     this.ujHullam()
   }
@@ -1301,15 +1311,7 @@ export class Galaga {
       this.hang.ujElet()
     }
 
-    // Fegyverfejlődés: a hullám végén új fokozat jön (a 2. hullámtól).
-    const f = this.fegyver()
-    if (f.nev !== this.fegyverNev) {
-      this.fegyverNev = f.nev
-      if (this.hullam > 1) {
-        this.fegyverSzoveg = 3.2
-        this.hang.ujElet()
-      }
-    }
+    fejlesztesMent(this.fejl) // a hullám alatt szerzett pénz megmarad
 
     // Főellenség-hullámon a főellenség mellett egy (kisebb) formáció is támad.
     const foellenseg = this.foellensegHullam()
@@ -1392,20 +1394,32 @@ export class Galaga {
   }
 
   /** Az aktuális fegyver: a hullámok számából; főellenségnél a teljes arzenál (lézer nélkül). */
-  private fegyver(): Fegyver {
-    if (this.foellensegHullam()) return FOELLENSEG_FEGYVER
-    if (this.hullam < FOELLENSEG_HULLAM) return FEGYVEREK[this.hullam - 1]
-    // A 13. után a lézer elmarad: családok jönnek, minden harmadik hullámnál
-    // egyes → iker → hármas. Főellenség-hullámon az előző fegyver marad.
-    let h = this.hullam
-    if (this.foellensegHullam()) h--
-    const n = h - FOELLENSEG_HULLAM - (Math.floor(h / FOELLENSEG_HULLAM) - 1) - 1 // 0-tól
-    const csalad = Math.floor(n / 3)
-    const valtozat = ((n % 3) + 1) as 1 | 2 | 3
-    const adat = csaladAdat(csalad)
-    const nev = (valtozat === 2 ? 'IKER ' : valtozat === 3 ? 'HÁRMAS ' : '') + adat.nev
-    return { nev, oszlopok: 0, dupla: false, sebzes: adat.sebzes, robbano: 0, lezer: 0, csalad, valtozat }
+  /** A lőszer sebzése a fejlesztés szerint (alap 10 000). */
+  private sebzesErtek() {
+    return SEBZES_ALAP * (1 + this.fejl.sebzes)
   }
+
+  /** A robbanás sugara; nulladik szinten nincs robbanás. */
+  private robbanSugarErtek() {
+    return this.fejl.robbanas > 0 ? 28 + (this.fejl.robbanas - 1) * 11 : 0
+  }
+
+  private kovetoAktiv() {
+    return this.fejl.koveto && this.fejl.kovetoBe
+  }
+
+  /** A HUD-on megjelenő lőszer-leírás. */
+  private loszerNev() {
+    const r = this.fejl.robbanas > 0 ? ` · ROBBANÁS ${this.fejl.robbanas}` : ''
+    const k = this.kovetoAktiv() ? ' · KÖVETŐ' : ''
+    return `LŐSZER ${this.sebzesErtek().toLocaleString('hu-HU')}${r}${k}`
+  }
+
+  /** Pénz jóváírása (minden megölt ellenfél tízet ad). */
+  private penztAd(n: number) {
+    this.fejl.penz = Math.min(999_999_999, this.fejl.penz + n)
+  }
+
 
   /** Főellenség-hullám: egyetlen nagy ellenfél, ami lő, kitér és kísérőket hív. */
   private foellensegHullamIndit() {
@@ -1582,47 +1596,18 @@ export class Galaga {
     })
   }
 
-  /** Egy családbeli lövedék a megadott helyről, a forma viselkedésével. */
-  private csaladLoves(cs: Csalad, x: number, y: number, sebzes: number, szog = 0, szetvalhat = true) {
-    const vx = Math.sin(szog) * cs.seb
-    const vy = -Math.cos(szog) * cs.seb
-    this.lo(x, y, vx, vy, true, sebzes, false, {
-      alak: cs.alak,
-      szin: cs.szin,
-      meret: cs.meret,
-      atut: cs.atut ?? 0,
-      robbanSugar: cs.robbanSugar ?? 0,
-      koveto: cs.koveto ?? 0,
-      hullamAmp: cs.hullamAmp ?? 0,
-      pattog: Boolean(cs.pattog),
-      szetvalik: Boolean(cs.szetvalik) && szetvalhat,
-      orveny: Boolean(cs.orveny),
-    })
-  }
 
   /** A hajó tüzel az aktuális fegyverrel (lézer nélkül - az folyamatos). */
-  private tuzel(f: Fegyver) {
-    const y = this.hajoY - 18
-    const oszlopHely = (db: number, koz: number) => (db === 1 ? [0] : db === 2 ? [-koz, koz] : [-koz * 1.7, 0, koz * 1.7])
-    if (f.golyo) {
-      for (const dx of oszlopHely(3, 11)) {
-        this.lo(this.hajoX + dx, y, 0, -520, true, 1, false, { alak: 'gomb', szin: '#ffd23f', meret: 7, sorozat: true })
-      }
-      return
-    }
-    if (f.csalad !== undefined) {
-      const cs = csaladAdat(f.csalad)
-      for (const dx of oszlopHely(f.valtozat ?? 1, cs.meret + 4)) this.csaladLoves(cs, this.hajoX + dx, y, f.sebzes)
-      return
-    }
-    for (const dx of f.oszlopok ? oszlopHely(f.oszlopok, 7) : []) {
-      this.lo(this.hajoX + dx, y, 0, -520, true, f.sebzes)
-      // dupla: a másodikat 8 egységgel lemaradva indítjuk
-      if (f.dupla) this.lo(this.hajoX + dx, y + 8, 0, -520, true, f.sebzes)
-    }
-    for (const dx of f.robbano ? oszlopHely(f.robbano, 10) : []) {
-      this.lo(this.hajoX + dx, y, 0, -380, true, 3, true)
-    }
+  /** Egyetlen lövedék, a fejlesztések szerinti sebzéssel, robbanással, követéssel. */
+  private tuzel() {
+    const sugar = this.robbanSugarErtek()
+    this.lo(this.hajoX, this.hajoY - 18, 0, -560, true, this.sebzesErtek(), sugar > 0, {
+      alak: sugar > 0 ? 'mag' : 'gomb',
+      szin: sugar > 0 ? '#ff8c1a' : '#ffd23f',
+      meret: 6 + Math.min(6, this.fejl.robbanas),
+      robbanSugar: sugar,
+      koveto: this.kovetoAktiv() ? 4 : 0,
+    })
   }
 
   /** Robbanó lövedék: a környéken lévő ellenfeleket is sebzi. */
@@ -1633,7 +1618,7 @@ export class Galaga {
     for (const e of this.ellenfelek) {
       if (e.elet <= 0 || (e.allapot === 'bejon' && e.t < 0)) continue
       if (Math.hypot(e.x - x, e.y - y) < sugar) {
-        e.elet -= 2
+        e.elet -= this.sebzesErtek() / 2
         e.villan = 0.1
         if (e.elet <= 0) this.ellenfelPusztul(e)
       }
@@ -1660,6 +1645,7 @@ export class Galaga {
       this.felirat(e.x, e.y - 30, 'FŐELLENSÉG LEGYŐZVE!', '#3ddc84')
       this.jutalomElet('főellenség')
     }
+    this.penztAd(PENZ_OLESERT)
     this.hang.robbanas(nagy)
     this.hang.pont()
     e.elet = -99
@@ -1895,6 +1881,7 @@ export class Galaga {
         this.kepernyoValt('vege')
         this.hang.jatekVege()
         this.bekuldes = 'nincs'
+        fejlesztesMent(this.fejl)
         void this.pontBekuld()
       }
     }
@@ -1923,23 +1910,12 @@ export class Galaga {
       this.lovesVarakozas -= dt
       const akarLoni = this.tuzKerelem || this.egerLenyomva || this.gombok.has(' ') || this.b.autoLoves
       this.tuzKerelem = false
-      const f = this.fegyver()
-      this.lezerAktiv = f.lezer > 0 && akarLoni
-      if (!f.lezer && akarLoni && this.lovesVarakozas <= 0 && this.lovedekek.filter((l) => l.sajat).length < 40) {
-        this.tuzel(f)
-        this.lovesVarakozas = f.csalad !== undefined ? csaladAdat(f.csalad).varakozas : f.robbano && !f.oszlopok ? 0.3 : 0.16
+      if (akarLoni && this.lovesVarakozas <= 0 && this.lovedekek.filter((l) => l.sajat).length < 40) {
+        this.tuzel()
+        this.lovesVarakozas = this.fejl.robbanas > 0 ? 0.22 : 0.16
         this.hang.loves()
       }
-      if (this.lezerAktiv) {
-        this.lezerHang -= dt
-        if (this.lezerHang <= 0) {
-          this.lezerHang = 0.11
-          this.hang.lezer()
-        }
-        this.lezerLep(f, dt)
-      }
     }
-    if (this.halott > 0) this.lezerAktiv = false
 
     // --- formáció lélegzése ---
     this.formacioFazis += dt
@@ -2128,7 +2104,6 @@ export class Galaga {
           l.talalt.add(e)
           if (l.atut > 0) l.atut--
           else l.y = -999 // eldobjuk
-          if (l.sorozat) l.sebzes = GOLYO_SEBZES // főellenség-golyó: fix sebzés
           e.elet -= l.sebzes
           e.villan = 0.09
           this.hang.talalat()
@@ -2197,32 +2172,10 @@ export class Galaga {
     if (this.razas > 0) this.razas -= dt
 
     // --- hullám vége ---
-    if (this.fegyverSzoveg > 0) this.fegyverSzoveg -= dt
     if (!this.ellenfelek.length && this.jatekVegeIdo <= 0 && this.halott <= 0) this.ujHullam()
   }
 
   /** A sugarak helyei a hajóhoz képest. */
-  private lezerHelyek(f: Fegyver): number[] {
-    return f.lezer === 1 ? [0] : f.lezer === 2 ? [-12, 12] : [-16, 0, 16]
-  }
-
-  /** Lézer: folyamatos sebzés mindenre, ami a sugár vonalában a hajó fölött van. */
-  private lezerLep(f: Fegyver, dt: number) {
-    for (const dx of this.lezerHelyek(f)) {
-      const x = this.hajoX + dx
-      for (const e of this.ellenfelek) {
-        if (e.elet <= 0 || (e.allapot === 'bejon' && e.t < 0) || (e.oszlop === -1 && e.allapot === 'formacio')) continue
-        const s = this.fajtak[e.fajta].sprite
-        if (e.y < this.hajoY && Math.abs(e.x - x) < s.w / 2 + 2) {
-          e.elet -= 9 * dt
-          e.villan = 0.05
-          if (Math.random() < dt * 20) this.robbanas(x, e.y + s.h / 2, '#5cc8ff', 2)
-          if (e.elet <= 0) this.ellenfelPusztul(e)
-        }
-      }
-    }
-    this.ellenfelek = this.ellenfelek.filter((e) => e.elet > -50)
-  }
 
   private visszater(e: Ellenfel) {
     if (e.oszlop < 0) {
@@ -2267,7 +2220,11 @@ export class Galaga {
     }
     g.globalAlpha = 1
 
-    if (this.kepernyo === 'jatek' || this.kepernyo === 'szunet' || (this.kepernyo === 'beallitasok' && this.elozoKepernyo === 'szunet')) {
+    if (
+      this.kepernyo === 'jatek' ||
+      this.kepernyo === 'szunet' ||
+      ((this.kepernyo === 'beallitasok' || this.kepernyo === 'bolt') && this.elozoKepernyo === 'szunet')
+    ) {
       this.jatekRajz()
     }
     g.restore()
@@ -2283,6 +2240,9 @@ export class Galaga {
         break
       case 'beallitasok':
         this.beallitasokRajz()
+        break
+      case 'bolt':
+        this.boltRajz()
         break
       case 'szunet':
         this.sotetit()
@@ -2363,6 +2323,36 @@ export class Galaga {
     this.szoveg('← →  vagy kattintás a sor bal / jobb felén: érték', this.w / 2, H - 40, 11, '#6b6f80', 'center', false)
   }
 
+  private boltRajz() {
+    this.sotetit()
+    this.cim('FEJLESZTÉS', 120)
+    this.szoveg(`PÉNZ:  ${this.fejl.penz.toLocaleString('hu-HU')} Ft`, this.w / 2, 190, 18, '#ffd23f')
+    this.szoveg('minden megölt ellenfél 10 Ft-ot ad', this.w / 2, 216, 11, '#6b6f80', 'center', false)
+    const tetelek = this.menuTetelek()
+    tetelek.forEach((t, i) => {
+      const y = this.menuSorY(i)
+      const aktiv = i === this.menuIndex
+      if (aktiv) {
+        this.ctx.fillStyle = 'rgba(214,31,39,0.85)'
+        this.ctx.fillRect(30, y - 20, this.w - 60, 40)
+      }
+      if (i < 3) {
+        this.szoveg(t, 44, y, 15, aktiv ? '#fff' : '#aeb2c4', 'left')
+        this.szoveg(this.boltErtek(i), this.w - 44, y, 15, aktiv ? '#fff' : '#eef0f5', 'right', false)
+      } else {
+        this.szoveg(t, this.w / 2, y, 20, aktiv ? '#fff' : '#aeb2c4')
+      }
+    })
+    const leiras = [
+      'A lövedék sebzése: alap 10 000, szintenként +10 000.',
+      'A becsapódás a környéken lévő ellenfeleket is sebzi.',
+      this.fejl.koveto ? 'A lövedék a legközelebbi ellenfél felé fordul.' : 'Megvásárolható; alapból kikapcsolva marad.',
+      '',
+    ][Math.min(3, this.menuIndex)]
+    this.szoveg(leiras, this.w / 2, H - 70, 12, '#8a8a94', 'center', false)
+    this.szoveg('ENTER / kattintás: vásárlás vagy kapcsolás  ·  ESC: vissza', this.w / 2, H - 40, 11, '#6b6f80', 'center', false)
+  }
+
   private vegeRajz() {
     this.sotetit()
     this.cim('GAME OVER', 200)
@@ -2403,20 +2393,6 @@ export class Galaga {
       }
     }
 
-    // lézersugarak
-    if (this.lezerAktiv && this.halott <= 0) {
-      for (const dx of this.lezerHelyek(this.fegyver())) {
-        const x = this.hajoX + dx
-        const v = 0.7 + Math.random() * 0.3
-        g.globalAlpha = 0.35 * v
-        g.fillStyle = '#5cc8ff'
-        g.fillRect(x - 6, 0, 12, this.hajoY - 14)
-        g.globalAlpha = v
-        g.fillStyle = '#ffffff'
-        g.fillRect(x - 2, 0, 4, this.hajoY - 14)
-        g.globalAlpha = 1
-      }
-    }
 
     // ellenfelek (kis "szárnycsapás": váltakozó függőleges nyújtás)
     for (const e of this.ellenfelek) {
@@ -2495,7 +2471,8 @@ export class Galaga {
       g.restore()
     }
 
-    this.szoveg(this.fegyverNev, this.w - 12, H - 16, 11, '#8a8a94', 'right')
+    this.szoveg(this.loszerNev(), this.w - 12, H - 16, 11, '#8a8a94', 'right')
+    this.szoveg(`PÉNZ ${this.fejl.penz.toLocaleString('hu-HU')}`, 12, 36, 12, '#ffd23f', 'left')
 
     // főellenség életcsíkja
     const fo = this.ellenfelek.find((e) => e.fajta === 'foellenseg')
@@ -2519,12 +2496,6 @@ export class Galaga {
     if (this.hullamSzoveg > 0) {
       g.globalAlpha = Math.min(1, this.hullamSzoveg)
       this.cim(this.foellensegHullam() ? 'FŐELLENSÉG!' : `${this.hullam}. HULLÁM`, H / 2 - 40)
-      g.globalAlpha = 1
-    }
-    if (this.fegyverSzoveg > 0) {
-      g.globalAlpha = Math.min(1, this.fegyverSzoveg)
-      this.szoveg('ÚJ FEGYVER', this.w / 2, H / 2 + 10, 14, '#ffd23f')
-      this.szoveg(this.fegyverNev, this.w / 2, H / 2 + 36, 24, '#ffffff')
       g.globalAlpha = 1
     }
   }
