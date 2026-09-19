@@ -1726,12 +1726,17 @@ export class Galaga {
 
   /** A hajó rakétalövedékének csóvája: rövid tűz, mögötte halvány füst. */
   private loszerCsik(l: Lovedek) {
-    const far = l.y + l.meret * 1.1
+    // a far a repüléssel ellentétes irányban van; a csóva is arra száll
+    const seb = Math.hypot(l.vx, l.vy) || 1
+    const hx = -l.vx / seb
+    const hy = -l.vy / seb
+    const farX = l.x + hx * l.meret * 1.1
+    const farY = l.y + hy * l.meret * 1.1
     this.reszecskek.push({
-      x: l.x + veletlen(-1, 1),
-      y: far,
-      vx: veletlen(-8, 8),
-      vy: veletlen(40, 110),
+      x: farX + veletlen(-1, 1),
+      y: farY + veletlen(-1, 1),
+      vx: hx * veletlen(40, 110) + veletlen(-8, 8),
+      vy: hy * veletlen(40, 110) + veletlen(-8, 8),
       elet: veletlen(0.08, 0.16),
       szin: Math.random() < 0.4 ? '#fff1b8' : Math.random() < 0.5 ? '#ffd23f' : '#ff8c1a',
       meret: veletlen(2, 4),
@@ -1739,10 +1744,10 @@ export class Galaga {
     })
     if (Math.random() < 0.35) {
       this.reszecskek.push({
-        x: l.x + veletlen(-2, 2),
-        y: far + 6,
-        vx: veletlen(-10, 10),
-        vy: veletlen(20, 60),
+        x: farX + hx * 6 + veletlen(-2, 2),
+        y: farY + hy * 6 + veletlen(-2, 2),
+        vx: hx * veletlen(20, 60) + veletlen(-10, 10),
+        vy: hy * veletlen(20, 60) + veletlen(-10, 10),
         elet: veletlen(0.3, 0.55),
         szin: Math.random() < 0.5 ? '#6b6f80' : '#9a9eb0',
         meret: veletlen(3, 5),
@@ -2651,6 +2656,8 @@ export class Galaga {
     g.fillStyle = l.szin
     switch (l.alak) {
       case 'raketa': {
+        // az orra arra fordul, amerre repül (a rajz alapállásban fölfelé néz)
+        g.rotate(Math.atan2(l.vy, l.vx) + Math.PI / 2)
         // pixeles kis rakéta: hegyes orr, világos test, két szárny, alul lángcsóva
         const h = m * 2.2 // hossz
         const sz = Math.max(3, m * 0.8) // szélesség
